@@ -75,6 +75,10 @@ def build_model(validation: dict | None = None) -> dict:
     zd, d_mean, d_std = _z([sq_defence[t] for t in names])
     squad_overall = {t: float(za[i] + zd[i]) for i, t in enumerate(names)}
     squad_tilt = {t: float(za[i] - zd[i]) for i, t in enumerate(names)}
+    # the blend standardizes these once more; export their spread so the browser
+    # manage-mode recompute reproduces the engine exactly
+    sq_overall_std = float(np.std(list(squad_overall.values()))) or 1.0
+    sq_tilt_std = float(np.std(list(squad_tilt.values()))) or 1.0
 
     weights = BlendWeights(
         w_mle=1.0 - W_ELO - W_SQUAD,
@@ -150,6 +154,8 @@ def build_model(validation: dict | None = None) -> dict:
                 "squad_attack_std": round(a_std, 5),
                 "squad_def_mean": round(d_mean, 5),
                 "squad_def_std": round(d_std, 5),
+                "squad_overall_std": round(sq_overall_std, 5),
+                "squad_tilt_std": round(sq_tilt_std, 5),
             },
             "format": {"n_teams": 48, "n_groups": 12, "group_size": 4, "matches": 104},
             "sources": SOURCES,

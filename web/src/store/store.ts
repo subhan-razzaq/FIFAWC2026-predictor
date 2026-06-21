@@ -38,6 +38,9 @@ interface StoreState {
   single: TournamentResult | null;
 
   manage: ManageState;
+  manageResult: MonteCarloResult | null;
+  manageRunning: boolean;
+  manageProgress: number;
 
   init: () => Promise<void>;
   setSeed: (label: string) => void;
@@ -45,6 +48,7 @@ interface StoreState {
   setRuns: (n: number) => void;
   runSimulation: (overrides?: Overrides) => Promise<void>;
   runReveal: (overrides?: Overrides) => Promise<void>;
+  runManage: (overrides: Overrides) => Promise<void>;
 }
 
 const DEFAULT_RUNS = 10000;
@@ -64,6 +68,9 @@ export const useStore = create<StoreState>((set, get) => ({
   single: null,
 
   manage: { team: null, eleven: [], formation: "4-3-3", attackBias: 0 },
+  manageResult: null,
+  manageRunning: false,
+  manageProgress: 0,
 
   init: async () => {
     try {
@@ -109,5 +116,25 @@ export const useStore = create<StoreState>((set, get) => ({
     if (!model) return;
     const single = runSingle(model, seed, overrides);
     set({ single });
+  },
+
+  runManage: async (overrides) => {
+    const { model, seed, runs } = get();
+    if (!model) return;
+    set({ manageRunning: true, manageProgress: 0 });
+    try {
+      const runner = getRunner();
+      // ensure a like-for-like default-squad baseline at the same seed and runs
+      if (!get().baseline) {
+        const base = await runner.montecarlo(model, runs, seed, undefined);
+        set({ baseline: base });
+      }
+      const managed = await runner.montecarlo(model, runs, seed, overrides, (d, t) =>
+        set({ manageProgress: d / t }),
+      );
+      set({ manageResult: managed, manageRunning: false, manageProgress: 1 });
+    } catch (err) {
+      set({ manageRunning: false, error: err instanceof Error ? err.message : String(err) });
+    }
   },
 }));

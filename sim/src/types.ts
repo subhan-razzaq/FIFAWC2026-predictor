@@ -88,6 +88,8 @@ export interface BlendConstants {
   squad_attack_std: number;
   squad_def_mean: number;
   squad_def_std: number;
+  squad_overall_std: number;
+  squad_tilt_std: number;
 }
 
 export interface ModelMeta {
