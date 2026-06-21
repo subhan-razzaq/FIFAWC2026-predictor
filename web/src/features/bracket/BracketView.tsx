@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useStore } from "../../store/store";
 import { buildBracket, type KoNode } from "../../lib/bracketLayout";
+import { exportPoster } from "../../lib/posterExport";
 import { BracketMatch } from "./BracketMatch";
 import { Trophy } from "./Trophy";
 import "./bracket.css";
@@ -16,7 +17,18 @@ export function BracketView() {
   const runReveal = useStore((s) => s.runReveal);
 
   const [stage, setStage] = useState(5);
+  const [copied, setCopied] = useState(false);
   const timers = useRef<number[]>([]);
+
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1600);
+    } catch {
+      /* clipboard unavailable */
+    }
+  };
 
   const groupOf = useMemo(() => {
     const m = new Map<string, string>();
@@ -101,6 +113,12 @@ export function BracketView() {
         </div>
         <div className="bracket-controls">
           <span className="mono bracket-seed">seed {seedLabel}</span>
+          <button className="btn btn--ghost" onClick={copyLink}>
+            {copied ? "Copied" : "Copy link"}
+          </button>
+          <button className="btn btn--ghost" onClick={() => single && exportPoster(single, seedLabel)}>
+            Share poster
+          </button>
           <button className="btn btn--ghost" onClick={() => play()}>
             Replay
           </button>

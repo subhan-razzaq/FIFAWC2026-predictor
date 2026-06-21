@@ -1,0 +1,138 @@
+.methodology {
+  background: var(--bg);
+  color: var(--text);
+  min-height: 70vh;
+  padding-bottom: var(--s-9);
+}
+.method-cols {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: var(--s-7);
+  align-items: start;
+}
+.method-prose h3 {
+  font-size: 1.3rem;
+  margin: var(--s-5) 0 var(--s-2);
+  color: var(--ink);
+}
+.method-prose h3:first-child {
+  margin-top: 0;
+}
+.method-prose p {
+  color: var(--text-dim);
+  margin-bottom: var(--s-3);
+  max-width: 60ch;
+}
+.method-sources {
+  display: grid;
+  gap: var(--s-2);
+}
+.method-sources li {
+  padding-left: var(--s-4);
+  position: relative;
+  color: var(--text-dim);
+}
+.method-sources li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 9px;
+  width: 8px;
+  height: 8px;
+  background: var(--gold);
+}
+
+.method-metrics {
+  display: grid;
+  gap: var(--s-4);
+}
+.method-verdict {
+  border-left: var(--keyline);
+  padding-left: var(--s-4);
+}
+.method-verdict .anton {
+  font-size: 2.6rem;
+  color: var(--mex-green-deep);
+  line-height: 1;
+}
+.method-verdict p {
+  color: var(--text-dim);
+  font-size: var(--t-sm);
+  margin-top: var(--s-2);
+}
+.method-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--t-sm);
+}
+.method-table th,
+.method-table td {
+  text-align: right;
+  padding: 7px 10px;
+  border-bottom: var(--border);
+}
+.method-table th:first-child,
+.method-table td:first-child {
+  text-align: left;
+  color: var(--text-dim);
+}
+.method-table thead th {
+  color: var(--text-faint);
+  font-size: var(--t-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.method-table tr.win td,
+.method-table td.win {
+  color: var(--mex-green-deep);
+  font-weight: 700;
+}
+.method-note {
+  font-size: var(--t-xs);
+  color: var(--text-faint);
+}
+
+/* calibration chart */
+.calib svg {
+  width: 100%;
+  max-width: 360px;
+  border: var(--border);
+  background: var(--surface);
+}
+.calib__grid line {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+.calib__tick,
+.calib__axis {
+  fill: var(--text-faint);
+  font-size: 10px;
+  font-family: var(--font-mono);
+}
+.calib__diag {
+  stroke: var(--steel);
+  stroke-dasharray: 4 4;
+  stroke-width: 1;
+}
+.calib__curve {
+  stroke: var(--gold);
+  stroke-width: 2.5;
+}
+.calib__pt {
+  fill: var(--gold);
+  stroke: var(--ink);
+  stroke-width: 1;
+}
+.calib figcaption {
+  font-size: var(--t-xs);
+  color: var(--text-faint);
+  margin-top: var(--s-2);
+  max-width: 360px;
+}
+
+@media (max-width: 880px) {
+  .method-cols {
+    grid-template-columns: 1fr;
+    gap: var(--s-5);
+  }
+}

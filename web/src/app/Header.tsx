@@ -8,6 +8,7 @@ const LINKS = [
   { to: "/scorers", label: "Scorers" },
   { to: "/manage", label: "Manage" },
   { to: "/methodology", label: "Method" },
+  { to: "/about", label: "About" },
 ];
 
 export function Header() {
@@ -17,6 +18,8 @@ export function Header() {
   const setSeed = useStore((s) => s.setSeed);
   const randomizeSeed = useStore((s) => s.randomizeSeed);
   const runSimulation = useStore((s) => s.runSimulation);
+  const theme = useStore((s) => s.theme);
+  const toggleTheme = useStore((s) => s.toggleTheme);
   const running = status === "running";
 
   return (
@@ -36,6 +39,14 @@ export function Header() {
         </nav>
 
         <div className="simctl">
+          <button
+            className="btn btn--ghost theme-toggle"
+            onClick={toggleTheme}
+            aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            title={theme === "dark" ? "Light mode" : "Dark mode"}
+          >
+            {theme === "dark" ? "☀" : "☾"}
+          </button>
           <label className="sr-only" htmlFor="seed">
             Simulation seed
           </label>

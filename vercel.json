@@ -1,0 +1,8 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "pnpm --filter @weltmeister/web build",
+  "outputDirectory": "web/dist",
+  "installCommand": "pnpm install --no-frozen-lockfile",
+  "framework": null,
+  "rewrites": [{ "source": "/((?!data/|assets/).*)", "destination": "/index.html" }]
+}

@@ -14,6 +14,13 @@ import {
 import { getRunner } from "../sim/runner";
 
 export type Status = "boot" | "ready" | "running" | "done" | "error";
+export type Theme = "dark" | "light";
+
+function readTheme(): Theme {
+  if (typeof window === "undefined") return "dark";
+  const t = window.localStorage.getItem("wm-theme");
+  return t === "light" ? "light" : "dark";
+}
 
 export interface ManageState {
   team: string | null;
@@ -42,6 +49,9 @@ interface StoreState {
   manageRunning: boolean;
   manageProgress: number;
 
+  theme: Theme;
+  toggleTheme: () => void;
+
   init: () => Promise<void>;
   setSeed: (label: string) => void;
   randomizeSeed: () => void;
@@ -53,14 +63,28 @@ interface StoreState {
 
 const DEFAULT_RUNS = 10000;
 
+function readSeedFromUrl(): { seed: number; label: string } {
+  if (typeof window === "undefined") return { seed: 2026, label: "2026" };
+  const s = new URLSearchParams(window.location.search).get("seed");
+  if (!s) return { seed: 2026, label: "2026" };
+  return { seed: hashSeed(s), label: s };
+}
+
+function writeSeedToUrl(label: string): void {
+  if (typeof window === "undefined") return;
+  const url = new URL(window.location.href);
+  url.searchParams.set("seed", label);
+  window.history.replaceState(null, "", url.toString());
+}
+
 export const useStore = create<StoreState>((set, get) => ({
   model: null,
   status: "boot",
   error: null,
   progress: 0,
 
-  seed: 2026,
-  seedLabel: "2026",
+  seed: readSeedFromUrl().seed,
+  seedLabel: readSeedFromUrl().label,
   runs: DEFAULT_RUNS,
 
   result: null,
@@ -71,6 +95,13 @@ export const useStore = create<StoreState>((set, get) => ({
   manageResult: null,
   manageRunning: false,
   manageProgress: 0,
+
+  theme: readTheme(),
+  toggleTheme: () => {
+    const next: Theme = get().theme === "dark" ? "light" : "dark";
+    if (typeof window !== "undefined") window.localStorage.setItem("wm-theme", next);
+    set({ theme: next });
+  },
 
   init: async () => {
     try {
@@ -83,10 +114,14 @@ export const useStore = create<StoreState>((set, get) => ({
     }
   },
 
-  setSeed: (label) => set({ seedLabel: label, seed: hashSeed(label.trim() || "2026") }),
+  setSeed: (label) => {
+    writeSeedToUrl(label.trim() || "2026");
+    set({ seedLabel: label, seed: hashSeed(label.trim() || "2026") });
+  },
 
   randomizeSeed: () => {
     const n = Math.floor(Math.random() * 1_000_000);
+    writeSeedToUrl(String(n));
     set({ seedLabel: String(n), seed: n });
   },
 

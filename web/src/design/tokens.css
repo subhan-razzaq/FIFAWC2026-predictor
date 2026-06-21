@@ -84,8 +84,9 @@
   --dur-slow: 600ms;
 }
 
-/* light surfaces for dense data and the methodology page */
-.skin-paper {
+/* light theme: used globally via the theme toggle, and for dense-data surfaces */
+.skin-paper,
+.theme-light {
   --bg: var(--paper);
   --surface: #fffefb;
   --surface-hi: var(--paper-2);
