@@ -148,6 +148,57 @@ def fit_elo_outcome_model(dr: np.ndarray, outcome: np.ndarray) -> tuple[float, f
     return float(beta), float(abs(c))
 
 
+def elo_match_features(df: pd.DataFrame, until: pd.Timestamp | None = None,
+                       since: pd.Timestamp | None = None) -> tuple[np.ndarray, np.ndarray]:
+    """Replay Elo and return per-match (rating_diff, outcome) for fitting the
+    Elo-only baseline outcome model.
+
+    ``rating_diff`` is the pre-match home-minus-away rating including home field
+    for non-neutral games. ``outcome`` is 0 home win, 1 draw, 2 away win. Only
+    matches in ``[since, until)`` are returned, but Elo is built from the full
+    history up to each match so the features are leak-free.
+    """
+    if until is not None:
+        df = df[df["date"] < until]
+    ratings: dict[str, float] = {}
+    drs: list[float] = []
+    outs: list[int] = []
+
+    home = df["home_team"].to_numpy()
+    away = df["away_team"].to_numpy()
+    hs = df["home_score"].to_numpy()
+    as_ = df["away_score"].to_numpy()
+    neutral = df["neutral"].to_numpy()
+    tour = df["tournament"].to_numpy()
+    dates = df["date"].to_numpy()
+
+    for i in range(len(df)):
+        h, a = home[i], away[i]
+        rh = ratings.get(h, INITIAL_RATING)
+        ra = ratings.get(a, INITIAL_RATING)
+        hf = 0.0 if neutral[i] else HOME_FIELD
+        dr = rh - ra + hf
+
+        if hs[i] > as_[i]:
+            w, outcome = 1.0, 0
+        elif hs[i] < as_[i]:
+            w, outcome = 0.0, 2
+        else:
+            w, outcome = 0.5, 1
+
+        if since is None or dates[i] >= np.datetime64(since):
+            drs.append(dr)
+            outs.append(outcome)
+
+        we = 1.0 / (1.0 + 10.0 ** (-dr / 400.0))
+        k = _base_k(str(tour[i])) * _goal_multiplier(abs(int(hs[i]) - int(as_[i])))
+        delta = k * (w - we)
+        ratings[h] = rh + delta
+        ratings[a] = ra - delta
+
+    return np.array(drs), np.array(outs, dtype=int)
+
+
 @dataclass
 class EloBaseline:
     """Fitted Elo-only 1X2 model, used as the baseline in validation."""

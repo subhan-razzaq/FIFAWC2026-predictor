@@ -220,26 +220,32 @@ def _project_eleven(squad: list[dict]) -> list[str]:
     chosen: list[str] = []
     used: set[str] = set()
 
-    def take(role: str, fallbacks: list[str]) -> None:
-        for r in [role, *fallbacks]:
+    def take(allowed: list[str]) -> None:
+        # pick the best available player across the compatible roles, so a real
+        # star is never benched behind generated depth at a neighbouring role
+        best = None
+        for r in allowed:
             for p in by_role.get(r, []):
-                if p["name"] not in used:
-                    used.add(p["name"])
-                    chosen.append(p["name"])
-                    return
+                if p["name"] in used:
+                    continue
+                if best is None or sel(p) > sel(best):
+                    best = p
+        if best is not None:
+            used.add(best["name"])
+            chosen.append(best["name"])
 
-    # fill the formation slots, falling back across compatible roles
-    take("GK", [])
-    take("CB", ["FB"])
-    take("CB", ["FB"])
-    take("FB", ["CB"])
-    take("FB", ["CB"])
-    take("DM", ["CM"])
-    take("CM", ["DM", "AM"])
-    take("AM", ["CM", "W"])
-    take("W", ["AM", "ST"])
-    take("W", ["AM", "ST"])
-    take("ST", ["W", "AM"])
+    # 4-3-3 slots with generous role compatibility
+    take(["GK"])
+    take(["CB", "FB"])
+    take(["CB", "FB"])
+    take(["FB", "CB"])
+    take(["FB", "CB"])
+    take(["DM", "CM"])
+    take(["CM", "DM", "AM"])
+    take(["AM", "CM", "W"])
+    take(["W", "AM", "ST"])
+    take(["W", "AM", "ST"])
+    take(["ST", "W", "AM"])
     return chosen
 
 
