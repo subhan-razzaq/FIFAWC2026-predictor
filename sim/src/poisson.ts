@@ -88,6 +88,26 @@ export function sampleScore(rng: Rng, lamH: number, lamA: number, rho: number): 
   return [Math.floor(i / W), i % W];
 }
 
+/** Normalized Dixon-Coles joint scoreline probabilities P[x][y] (not cumulative). */
+export function scorelineGrid(lamH: number, lamA: number, rho: number, maxGoals = 6): number[][] {
+  const ph = poissonPmf(lamH);
+  const pa = poissonPmf(lamA);
+  const grid: number[][] = [];
+  let total = 0;
+  for (let x = 0; x <= maxGoals; x++) {
+    const row: number[] = [];
+    for (let y = 0; y <= maxGoals; y++) {
+      let p = ph[x]! * pa[y]!;
+      if (x <= 1 && y <= 1) p *= dcTau(x, y, lamH, lamA, rho);
+      row.push(p);
+      total += p;
+    }
+    grid.push(row);
+  }
+  for (const row of grid) for (let y = 0; y < row.length; y++) row[y]! /= total;
+  return grid;
+}
+
 /** Win / draw / loss probabilities from the Dixon-Coles scoreline grid. */
 export function outcomeProbs(lamH: number, lamA: number, rho: number): [number, number, number] {
   const ph = poissonPmf(lamH);

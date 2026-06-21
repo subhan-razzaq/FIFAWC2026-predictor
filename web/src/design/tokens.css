@@ -1,0 +1,101 @@
+/*
+ * WELTMEISTER design tokens.
+ * Built on the real 2026 visual language (Section 8): a near-monochrome
+ * black/white/gold core with the three host nations (Canada red, USA blue,
+ * Mexico green) as the working colour system. Sharp edges, flat colour blocks,
+ * broadcast energy. Border radius is zero by default.
+ */
+
+:root {
+  /* core palette */
+  --pitch: #0a1a12; /* deep stadium-night base */
+  --pitch-2: #0d2117; /* raised stadium surface */
+  --pitch-3: #103021; /* hover / elevated */
+  --paper: #f6f4ef; /* broadcast white */
+  --paper-2: #eae6dc;
+  --ink: #0b0b0c; /* true black */
+  --gold: #c8a24b; /* the prize colour, used sparingly */
+  --gold-bright: #e6c878;
+
+  /* tri-nation working colours: win / draw-or-neutral / loss and chart series */
+  --can-red: #e4002b;
+  --usa-blue: #1f6fd6; /* lifted from #0A4595 for contrast on dark */
+  --usa-blue-deep: #0a4595;
+  --mex-green: #14a85a; /* lifted from #03773B for contrast on dark */
+  --mex-green-deep: #03773b;
+  --steel: #8a8f98;
+  --steel-dim: #5b6068;
+
+  /* semantic surfaces (dark, the default broadcast skin) */
+  --bg: var(--pitch);
+  --surface: var(--pitch-2);
+  --surface-hi: var(--pitch-3);
+  --line: rgba(246, 244, 239, 0.14);
+  --line-strong: rgba(246, 244, 239, 0.28);
+  --text: #f3f1ec;
+  --text-dim: #aab0ac;
+  --text-faint: #767c78;
+
+  /* outcome mapping */
+  --win: var(--mex-green);
+  --draw: var(--gold);
+  --loss: var(--can-red);
+
+  /* type families */
+  --font-display: "Archivo Variable", "Arial Narrow", system-ui, sans-serif;
+  --font-anton: "Anton", "Archivo Variable", system-ui, sans-serif;
+  --font-body: "Noto Sans", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+
+  /* type scale (broadcast: loud display, calm body) */
+  --t-hero: clamp(3rem, 9vw, 8rem);
+  --t-display: clamp(2.2rem, 5vw, 4.5rem);
+  --t-title: clamp(1.5rem, 3vw, 2.4rem);
+  --t-h: 1.35rem;
+  --t-body: 1rem;
+  --t-sm: 0.86rem;
+  --t-xs: 0.74rem;
+
+  /* spacing scale built on an 8px grid (the "26" modular grid) */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 64px;
+  --s-9: 96px;
+
+  /* structure */
+  --radius: 0px; /* sharp by mandate */
+  --border: 1px solid var(--line);
+  --border-strong: 1.5px solid var(--line-strong);
+  --keyline: 2px solid var(--gold);
+
+  --maxw: 1240px;
+  --header-h: 64px;
+
+  /* motion */
+  --ease-broadcast: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-snap: cubic-bezier(0.5, 0, 0.2, 1);
+  --dur-fast: 140ms;
+  --dur: 280ms;
+  --dur-slow: 600ms;
+}
+
+/* light surfaces for dense data and the methodology page */
+.skin-paper {
+  --bg: var(--paper);
+  --surface: #fffefb;
+  --surface-hi: var(--paper-2);
+  --line: rgba(11, 11, 12, 0.14);
+  --line-strong: rgba(11, 11, 12, 0.3);
+  --text: var(--ink);
+  --text-dim: #4a4f52;
+  --text-faint: #8b9095;
+  --usa-blue: var(--usa-blue-deep);
+  --mex-green: var(--mex-green-deep);
+  --win: var(--mex-green-deep);
+  --loss: var(--can-red);
+}

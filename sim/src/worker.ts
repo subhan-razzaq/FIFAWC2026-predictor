@@ -50,12 +50,4 @@ export function handleRequest(
   }
 }
 
-// Wire up the worker handler only when running inside a DedicatedWorker scope.
-declare const self: DedicatedWorkerGlobalScope | undefined;
-if (typeof self !== "undefined" && "postMessage" in self && typeof (self as unknown as { document?: unknown }).document === "undefined") {
-  (self as unknown as DedicatedWorkerGlobalScope).onmessage = (e: MessageEvent<WorkerRequest>) => {
-    handleRequest(e.data, (msg) => (self as unknown as DedicatedWorkerGlobalScope).postMessage(msg));
-  };
-}
-
 export { hashSeed };

@@ -2,9 +2,37 @@
   "name": "@weltmeister/web",
   "version": "0.1.0",
   "private": true,
-  "description": "WELTMEISTER web app (React, Vite). Built in phase P2.",
+  "description": "WELTMEISTER web app: predictions, live bracket, scorers, manage mode, methodology",
   "type": "module",
   "scripts": {
-    "build": "echo \"web app is scaffolded in phase P2\" && exit 0"
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -b --noEmit",
+    "lint": "tsc -b --noEmit"
+  },
+  "dependencies": {
+    "@weltmeister/sim": "workspace:*",
+    "d3-scale": "^4.0.2",
+    "d3-shape": "^3.2.0",
+    "framer-motion": "^11.11.17",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.28.0",
+    "zustand": "^5.0.1"
+  },
+  "devDependencies": {
+    "@fontsource-variable/archivo": "^5.1.0",
+    "@fontsource/anton": "^5.1.0",
+    "@fontsource/jetbrains-mono": "^5.1.1",
+    "@fontsource/noto-sans": "^5.1.0",
+    "@types/d3-scale": "^4.0.8",
+    "@types/d3-shape": "^3.1.6",
+    "@types/node": "^22.10.1",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11"
   }
 }
