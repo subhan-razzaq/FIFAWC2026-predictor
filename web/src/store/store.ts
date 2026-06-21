@@ -3,7 +3,14 @@
 // run is reproducible and shareable.
 
 import { create } from "zustand";
-import { hashSeed, type Model, type MonteCarloResult, type Overrides, type TournamentResult } from "@weltmeister/sim";
+import {
+  hashSeed,
+  runSingle,
+  type Model,
+  type MonteCarloResult,
+  type Overrides,
+  type TournamentResult,
+} from "@weltmeister/sim";
 import { getRunner } from "../sim/runner";
 
 export type Status = "boot" | "ready" | "running" | "done" | "error";
@@ -40,7 +47,7 @@ interface StoreState {
   runReveal: (overrides?: Overrides) => Promise<void>;
 }
 
-const DEFAULT_RUNS = 20000;
+const DEFAULT_RUNS = 10000;
 
 export const useStore = create<StoreState>((set, get) => ({
   model: null,
@@ -95,10 +102,12 @@ export const useStore = create<StoreState>((set, get) => ({
     }
   },
 
+  // A single tournament is ~1ms, so run it on the main thread for an instant
+  // bracket rather than queueing it behind the Monte Carlo on the worker.
   runReveal: async (overrides) => {
     const { model, seed } = get();
     if (!model) return;
-    const single = await getRunner().single(model, seed, overrides);
+    const single = runSingle(model, seed, overrides);
     set({ single });
   },
 }));

@@ -1,6 +1,6 @@
 """Lineup model (Section 3.5) and the squad-quality aggregate (Section 3.3).
 
-The projected eleven for each team comes from ``build_squads`` (best available per
+The projected eleven for each team comes from ``real_squads`` (best available per
 slot in a 4-3-3). Here we turn an eleven into expected minutes shares and roll a
 squad up into an attacking and a defensive strength. The squad-quality aggregate
 is what makes manage mode meaningful: changing the eleven changes these numbers,
