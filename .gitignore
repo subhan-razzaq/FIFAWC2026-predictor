@@ -41,12 +41,10 @@ engine/reports/*.png
 .DS_Store
 Thumbs.db
 .idea/
+.vscode/
 
-# Project-local notes and assistant artifacts (never committed)
-CLAUDE.md
-.claude/
-DECISIONS.local.md
-NOTES.local.md
+# Local notes
+*.local.md
 
 # Vercel
 .vercel/
