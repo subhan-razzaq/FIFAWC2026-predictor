@@ -1,0 +1,1 @@
+# FIFAWC2026-predictor
