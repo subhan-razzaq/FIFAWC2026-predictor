@@ -1,0 +1,63 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  engine:
+    name: engine validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+      - name: Set up Python
+        run: uv venv --python 3.12 engine/.venv
+      - name: Install engine
+        working-directory: engine
+        run: uv pip install --python .venv/bin/python numpy pandas scipy requests matplotlib pytest ruff
+      - name: Engine unit tests
+        working-directory: engine
+        run: .venv/bin/python -m pytest -q
+      - name: Validation backtest (must beat Elo-only on RPS)
+        working-directory: engine
+        run: .venv/bin/python -m validate.backtest --check-baseline
+
+  sim:
+    name: sim tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - name: Install
+        run: pnpm install --frozen-lockfile=false
+      - name: Typecheck sim
+        run: pnpm --filter @weltmeister/sim typecheck
+      - name: Sim unit tests
+        run: pnpm --filter @weltmeister/sim test
+
+  web:
+    name: web build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - name: Install
+        run: pnpm install --frozen-lockfile=false
+      - name: Build web
+        run: pnpm --filter @weltmeister/web build

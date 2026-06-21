@@ -1,0 +1,57 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+web/dist/
+sim/dist/
+
+# Vite / cache
+.vite/
+.cache/
+.turbo/
+.eslintcache
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+engine/.venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Engine data: raw pulls are cached locally, never committed
+engine/data/raw/
+engine/data/processed/
+engine/data/cache/
+engine/reports/*.png
+
+# Local environment
+.env
+.env.*
+!.env.example
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+
+# Project-local notes and assistant artifacts (never committed)
+CLAUDE.md
+.claude/
+DECISIONS.local.md
+NOTES.local.md
+
+# Vercel
+.vercel/
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*

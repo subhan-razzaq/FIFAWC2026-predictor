@@ -1,0 +1,10 @@
+{
+  "name": "@weltmeister/web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "WELTMEISTER web app (React, Vite). Built in phase P2.",
+  "type": "module",
+  "scripts": {
+    "build": "echo \"web app is scaffolded in phase P2\" && exit 0"
+  }
+}
