@@ -1,14 +1,15 @@
 // Expanded match detail: the model's pre-match scoreline odds (with the actual
 // result marked), a two-sided broadcast timeline (goals, bookings, subs with
-// minutes), and both starting elevens grouped by line. The forecast is driven by
-// the same Dixon-Coles maths as the engine; the timeline and lineups come from the
-// deterministic enrichment layer.
+// minutes), and a FotMob-style lineup pitch with per-player match ratings. The
+// forecast is driven by the same Dixon-Coles maths as the engine; the timeline,
+// lineups and ratings come from the deterministic enrichment layer.
 
-import { useMemo } from "react";
-import type { EnrichedMatch, MatchEvent, MatchLineup, Model } from "@weltmeister/sim";
+import { useMemo, useState } from "react";
+import type { EnrichedMatch, MatchEvent, Model } from "@weltmeister/sim";
 import { createPredictor } from "../lib/predict";
 import { ScoreHeatmap } from "./ScoreHeatmap";
-import { TeamBadge } from "./TeamBadge";
+import { LineupPitch } from "./LineupPitch";
+import { BallIcon, CardIcon, SubIcon } from "./icons";
 
 interface Props {
   enriched: EnrichedMatch;
@@ -20,9 +21,9 @@ interface Props {
   model: Model;
 }
 
-const LINES: ("GK" | "DF" | "MF" | "FW")[] = ["GK", "DF", "MF", "FW"];
+export function MatchDetail({ enriched, homeTeam, awayTeam, homeGoals, awayGoals, model }: Props) {
+  const [side, setSide] = useState<"home" | "away">("home");
 
-export function MatchDetail({ enriched, homeTeam, awayTeam, homeGoals, awayGoals, groupOf, model }: Props) {
   const forecast = useMemo(() => {
     const hosts = new Set(model.meta.hosts);
     return createPredictor(model).match(homeTeam, awayTeam, hosts.has(homeTeam), hosts.has(awayTeam));
@@ -63,9 +64,21 @@ export function MatchDetail({ enriched, homeTeam, awayTeam, homeGoals, awayGoals
         </ol>
       )}
 
-      <div className="mdt__lineups">
-        <Lineup lu={enriched.home} team={homeTeam} group={groupOf.get(homeTeam)} align="left" />
-        <Lineup lu={enriched.away} team={awayTeam} group={groupOf.get(awayTeam)} align="right" />
+      <div className="mdt__lineups-section">
+        <div className="mdt__lineup-toggle">
+          <button className={`mdt__lineup-tab ${side === "home" ? "active" : ""}`} onClick={() => setSide("home")} aria-pressed={side === "home"}>
+            {homeTeam}
+          </button>
+          <button className={`mdt__lineup-tab ${side === "away" ? "active" : ""}`} onClick={() => setSide("away")} aria-pressed={side === "away"}>
+            {awayTeam}
+          </button>
+        </div>
+        <LineupPitch
+          lineup={side === "home" ? enriched.home : enriched.away}
+          events={enriched.events}
+          side={side}
+          team={side === "home" ? homeTeam : awayTeam}
+        />
       </div>
     </div>
   );
@@ -114,53 +127,27 @@ function EventBody({ e, side }: { e: MatchEvent; side: "home" | "away" }) {
 }
 
 function EventIcon({ type }: { type: MatchEvent["type"] }) {
-  if (type === "goal") return <span className="mdt__icon mdt__icon--goal" aria-label="goal" />;
-  if (type === "yellow") return <span className="mdt__icon mdt__icon--card mdt__icon--yellow" aria-label="yellow card" />;
-  if (type === "red") return <span className="mdt__icon mdt__icon--card mdt__icon--red" aria-label="red card" />;
+  if (type === "goal")
+    return (
+      <span className="mdt__icon">
+        <BallIcon size={13} />
+      </span>
+    );
+  if (type === "yellow")
+    return (
+      <span className="mdt__icon">
+        <CardIcon kind="yellow" />
+      </span>
+    );
+  if (type === "red")
+    return (
+      <span className="mdt__icon">
+        <CardIcon kind="red" />
+      </span>
+    );
   return (
-    <svg className="mdt__icon mdt__icon--sub" width="12" height="12" viewBox="0 0 12 12" aria-label="substitution">
-      <path d="M3 7 L3 2 L1 2 L3.5 -0.5 L6 2 L4 2 L4 7 Z" transform="translate(0,1)" fill="var(--mex-green)" />
-      <path d="M9 5 L9 10 L11 10 L8.5 12.5 L6 10 L8 10 L8 5 Z" transform="translate(0,-1)" fill="var(--can-red)" />
-    </svg>
-  );
-}
-
-function Lineup({
-  lu,
-  team,
-  group,
-  align,
-}: {
-  lu: MatchLineup;
-  team: string;
-  group?: string;
-  align: "left" | "right";
-}) {
-  return (
-    <div className={`mdt__lineup mdt__lineup--${align}`}>
-      <div className="mdt__lineup-head">
-        <TeamBadge team={team} group={group} size={20} />
-        <span className="mdt__lineup-team">{team}</span>
-        <span className="mono mdt__lineup-form">{lu.formation}</span>
-      </div>
-      {LINES.map((pos) => {
-        const players = lu.starters.filter((s) => s.pos === pos);
-        if (players.length === 0) return null;
-        return (
-          <div key={pos} className="mdt__line">
-            <span className="mdt__line-tag mono">{pos}</span>
-            <span className="mdt__line-names">
-              {players.map((p) => (
-                <span key={p.name} className="mdt__name">
-                  {p.name}
-                  {p.captain && <em className="mdt__badge mdt__badge--c">C</em>}
-                  {p.penalty && <em className="mdt__badge mdt__badge--p">P</em>}
-                </span>
-              ))}
-            </span>
-          </div>
-        );
-      })}
-    </div>
+    <span className="mdt__icon">
+      <SubIcon />
+    </span>
   );
 }

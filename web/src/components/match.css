@@ -72,6 +72,10 @@
   background: var(--gold);
   vertical-align: baseline;
 }
+.mrc__goal-ic {
+  display: inline-flex;
+  vertical-align: -1px;
+}
 .mrc__assist {
   color: var(--text-faint);
   font-style: normal;
@@ -169,6 +173,38 @@
 }
 .mdt__icon--red {
   background: var(--can-red);
+}
+
+.mdt__lineups-section {
+  border-top: var(--border);
+  padding-top: var(--s-3);
+}
+.mdt__lineup-toggle {
+  display: flex;
+  gap: 2px;
+  margin-bottom: var(--s-3);
+}
+.mdt__lineup-tab {
+  flex: 1;
+  padding: 9px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  font-size: var(--t-sm);
+  color: var(--text-dim);
+  border: var(--border);
+  background: var(--surface);
+  transition: color var(--dur-fast), background-color var(--dur-fast), border-color var(--dur-fast);
+}
+.mdt__lineup-tab:hover {
+  color: var(--text);
+  background: var(--surface-hi);
+}
+.mdt__lineup-tab.active {
+  background: var(--gold);
+  color: var(--ink);
+  border-color: var(--gold);
 }
 
 .mdt__lineups {

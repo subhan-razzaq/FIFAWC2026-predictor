@@ -67,6 +67,7 @@ export interface SquadPlayer {
   defense_factor: number;
   caps?: number;
   intl_goals?: number;
+  number?: number;
 }
 
 export interface Squad {

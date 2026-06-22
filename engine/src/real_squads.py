@@ -119,6 +119,7 @@ def parse_squads() -> dict[str, list[dict]]:
                 "name": name,
                 "pos": pos,
                 "club": _clean_link(params.get("club", "")),
+                "number": int(re.sub(r"\D", "", params.get("no", "0") or "0") or 0),
                 "caps": int(re.sub(r"\D", "", params.get("caps", "0") or "0") or 0),
                 "goals": int(re.sub(r"\D", "", params.get("goals", "0") or "0") or 0),
             })
@@ -219,6 +220,7 @@ def _to_player(p: dict) -> dict:
         "role": p["pos"],
         "group": p["pos"],
         "club": p["club"],
+        "number": p.get("number", 0),
         "tier": _tier(ability),
         "real": True,
         "caps": p["caps"],

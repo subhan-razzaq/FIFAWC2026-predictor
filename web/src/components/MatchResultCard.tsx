@@ -7,6 +7,7 @@ import type { EnrichedMatch, GoalEvent, MatchResult, Model } from "@weltmeister/
 import { enrichMatch } from "@weltmeister/sim";
 import { TeamBadge } from "./TeamBadge";
 import { MatchDetail } from "./MatchDetail";
+import { BallIcon } from "./icons";
 import { STAGE_LABEL } from "../lib/format";
 import "./match.css";
 
@@ -112,7 +113,7 @@ export function MatchResultCard({
             {homeGoals.map((g, i) => (
               <li key={i} className="mono">
                 {g.minute !== undefined && <span className="mrc__min">{g.minute}&prime;</span>}
-                <span className="mrc__goal" aria-hidden /> {goalLabel(g)}
+                <span className="mrc__goal-ic"><BallIcon size={10} /></span> {goalLabel(g)}
                 {g.assist && <em className="mrc__assist"> {g.assist}</em>}
               </li>
             ))}
@@ -121,7 +122,7 @@ export function MatchResultCard({
             {awayGoals.map((g, i) => (
               <li key={i} className="mono">
                 {g.assist && <em className="mrc__assist">{g.assist} </em>}
-                {goalLabel(g)} <span className="mrc__goal" aria-hidden />
+                {goalLabel(g)} <span className="mrc__goal-ic"><BallIcon size={10} /></span>
                 {g.minute !== undefined && <span className="mrc__min">{g.minute}&prime;</span>}
               </li>
             ))}

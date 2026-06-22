@@ -28,8 +28,13 @@ export interface MatchEvent {
 export interface LineupSlot {
   name: string;
   pos: "GK" | "DF" | "MF" | "FW";
+  number: number;
   captain: boolean;
   penalty: boolean;
+  /** FotMob-style match rating for this game, derived from the events. */
+  rating: number;
+  /** the single best-rated player across both teams. */
+  motm: boolean;
 }
 
 export interface MatchLineup {
@@ -61,10 +66,17 @@ const POS_ORDER: Record<string, number> = { GK: 0, DF: 1, MF: 2, FW: 3 };
 // relative likelihood of picking up a booking, by position
 const CARD_WEIGHT: Record<string, number> = { GK: 0.3, DF: 1.4, MF: 1.2, FW: 0.8 };
 
+interface Starter {
+  name: string;
+  pos: "GK" | "DF" | "MF" | "FW";
+  ability: number;
+  number: number;
+}
+
 interface InternalLineup {
   team: string;
   formation: string;
-  starters: { name: string; pos: "GK" | "DF" | "MF" | "FW"; ability: number }[];
+  starters: Starter[];
   bench: { name: string; pos: "GK" | "DF" | "MF" | "FW"; ability: number }[];
   captain: string;
   penalty: string;
@@ -90,8 +102,14 @@ function buildLineup(
   const xi = eleven && eleven.length === 11 ? eleven : squad.projected_eleven;
   const startSet = new Set(xi);
   const ability = new Map(squad.players.map((p) => [p.name, p.ability]));
+  const numbers = new Map(squad.players.map((p) => [p.name, p.number ?? 0]));
   const starters = xi
-    .map((name) => ({ name, pos: posOf(squad, name), ability: ability.get(name) ?? 0.5 }))
+    .map((name) => ({
+      name,
+      pos: posOf(squad, name),
+      ability: ability.get(name) ?? 0.5,
+      number: numbers.get(name) ?? 0,
+    }))
     .sort((a, b) => POS_ORDER[a.pos]! - POS_ORDER[b.pos]!);
   const bench = squad.players
     .filter((p) => !startSet.has(p.name))
@@ -168,15 +186,84 @@ function addSubs(rng: Rng, events: MatchEvent[], side: "home" | "away", lu: Inte
   return subbedOn;
 }
 
-function publicLineup(lu: InternalLineup): MatchLineup {
+/**
+ * FotMob-style per-player match rating, derived only from the match events and
+ * the result, so it is consistent with what the timeline shows. Goals and assists
+ * lift a rating, clean sheets reward the back line and keeper, conceding and
+ * bookings pull it down, and the team result nudges everyone.
+ */
+function rateLineup(
+  rng: Rng,
+  match: MatchResult,
+  lu: InternalLineup,
+  side: "home" | "away",
+  events: MatchEvent[],
+): Map<string, number> {
+  const teamGoals = side === "home" ? match.homeGoals : match.awayGoals;
+  const oppGoals = side === "home" ? match.awayGoals : match.homeGoals;
+  const outcome = match.winner
+    ? match.winner === lu.team
+      ? "w"
+      : "l"
+    : teamGoals > oppGoals
+      ? "w"
+      : teamGoals < oppGoals
+        ? "l"
+        : "d";
+  const resultDelta = outcome === "w" ? 0.2 : outcome === "l" ? -0.22 : 0;
+  const cleanSheet = oppGoals === 0;
+
+  const goals = new Map<string, number>();
+  const assists = new Map<string, number>();
+  const yellow = new Set<string>();
+  const red = new Set<string>();
+  const subOff = new Set<string>();
+  for (const e of events) {
+    if (e.side !== side) continue;
+    if (e.type === "goal") {
+      goals.set(e.player, (goals.get(e.player) ?? 0) + 1);
+      if (e.assist) assists.set(e.assist, (assists.get(e.assist) ?? 0) + 1);
+    } else if (e.type === "yellow") yellow.add(e.player);
+    else if (e.type === "red") red.add(e.player);
+    else if (e.type === "sub") subOff.add(e.player);
+  }
+
+  const out = new Map<string, number>();
+  for (const s of lu.starters) {
+    let r = 6.15 + (s.ability - 0.5) * 1.1 + resultDelta;
+    const g = goals.get(s.name) ?? 0;
+    const a = assists.get(s.name) ?? 0;
+    r += g * 1.05 + a * 0.62;
+    if (s.pos === "GK" || s.pos === "DF") {
+      if (cleanSheet) r += s.pos === "GK" ? 0.7 : 0.5;
+      else r -= Math.min(0.9, oppGoals * (s.pos === "GK" ? 0.22 : 0.16));
+    }
+    if (yellow.has(s.name)) r -= 0.3;
+    if (red.has(s.name)) r -= 1.6;
+    if (subOff.has(s.name) && g === 0 && a === 0) r -= 0.1;
+    r += (rng.next() - 0.5) * 0.4;
+    out.set(s.name, Math.max(4.2, Math.min(9.8, Math.round(r * 10) / 10)));
+  }
+  return out;
+}
+
+function publicLineup(
+  lu: InternalLineup,
+  ratings: Map<string, number>,
+  motmKey: string,
+  side: "home" | "away",
+): MatchLineup {
   return {
     team: lu.team,
     formation: lu.formation,
     starters: lu.starters.map((s) => ({
       name: s.name,
       pos: s.pos,
+      number: s.number,
       captain: s.name === lu.captain,
       penalty: s.name === lu.penalty,
+      rating: ratings.get(s.name) ?? 6.0,
+      motm: `${side}|${s.name}` === motmKey,
     })),
   };
 }
@@ -233,5 +320,23 @@ export function enrichMatch(opts: EnrichOptions): EnrichedMatch {
 
   events.sort((a, b) => a.minute - b.minute || eventRank(a) - eventRank(b));
 
-  return { events, home: publicLineup(homeLU), away: publicLineup(awayLU) };
+  // ratings and man of the match, after the timeline is settled
+  const homeRatings = rateLineup(rng, match, homeLU, "home", events);
+  const awayRatings = rateLineup(rng, match, awayLU, "away", events);
+  let motmKey = "";
+  let best = -1;
+  for (const [s, ratings] of [["home", homeRatings], ["away", awayRatings]] as const) {
+    for (const [name, r] of ratings) {
+      if (r > best) {
+        best = r;
+        motmKey = `${s}|${name}`;
+      }
+    }
+  }
+
+  return {
+    events,
+    home: publicLineup(homeLU, homeRatings, motmKey, "home"),
+    away: publicLineup(awayLU, awayRatings, motmKey, "away"),
+  };
 }
