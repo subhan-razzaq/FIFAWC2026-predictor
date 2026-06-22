@@ -60,12 +60,27 @@ export function simulateTournament(ctx: SimContext, rng: Rng, input: TournamentI
   for (const t of ctx.teams.keys()) reached[t] = "group";
   for (const [team, stage] of ko.reached) reached[team] = stage;
 
-  // 6) Golden Boot: tally open-play and penalty goals (own goals do not count)
+  // 6) Golden Boot, assists, and clean sheets
   const goals: Record<string, number> = {};
+  const assists: Record<string, number> = {};
   for (const m of matches) {
     for (const g of m.scorers) {
-      if (g.kind === "own" || g.player === "Unattributed") continue;
-      goals[g.player] = (goals[g.player] ?? 0) + 1;
+      if (g.kind !== "own" && g.player !== "Unattributed") {
+        goals[g.player] = (goals[g.player] ?? 0) + 1;
+      }
+      if (g.assist) assists[g.assist] = (assists[g.assist] ?? 0) + 1;
+    }
+  }
+  // a clean sheet is credited to the goalkeeper of a side that conceded nothing
+  const cleanSheets: Record<string, number> = {};
+  for (const m of matches) {
+    if (m.awayGoals === 0) {
+      const k = ctx.keeper(m.home);
+      cleanSheets[k] = (cleanSheets[k] ?? 0) + 1;
+    }
+    if (m.homeGoals === 0) {
+      const k = ctx.keeper(m.away);
+      cleanSheets[k] = (cleanSheets[k] ?? 0) + 1;
     }
   }
 
@@ -77,6 +92,8 @@ export function simulateTournament(ctx: SimContext, rng: Rng, input: TournamentI
     bestThirds: thirds.qualified.map((t) => t.team),
     reached,
     goals,
+    assists,
+    cleanSheets,
     matches,
   };
 }

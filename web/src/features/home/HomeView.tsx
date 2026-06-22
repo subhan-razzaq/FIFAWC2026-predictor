@@ -8,10 +8,11 @@ import "./home.css";
 export function HomeView() {
   const model = useStore((s) => s.model);
   const result = useStore((s) => s.result);
+  const single = useStore((s) => s.single);
   const status = useStore((s) => s.status);
   const runs = useStore((s) => s.runs);
   const seedLabel = useStore((s) => s.seedLabel);
-  const runSimulation = useStore((s) => s.runSimulation);
+  const run = useStore((s) => s.run);
 
   const validation = model?.validation as
     | { combined?: { model?: { rps: number }; elo_only?: { rps: number } }; calibration?: { ece: number } }
@@ -41,14 +42,23 @@ export function HomeView() {
               tens of thousands of times, and lets you take over a squad and change the outcome.
             </p>
             <div className="hero__cta">
-              <button className="btn" onClick={() => void runSimulation()}>
-                {status === "running" ? "Running simulation" : "Run simulation"}
+              <button className="btn" onClick={() => void run(true)} disabled={status === "running"}>
+                {status === "running" ? "Running simulation" : result ? "Run it again" : "Run simulation"}
               </button>
               <Link to="/bracket" className="btn btn--ghost">
                 Watch the bracket
               </Link>
               <span className="mono hero__seed">seed {seedLabel}</span>
             </div>
+            {single && (
+              <div className="hero__thisrun">
+                <span className="eyebrow">This run</span>
+                <span className="anton hero__thisrun-champ">{single.champion} win it</span>
+                <span className="mono hero__thisrun-sub">
+                  beating {single.runnerUp} in the final · run again for a different bracket
+                </span>
+              </div>
+            )}
           </div>
 
           <aside className="hero__odds flat-card">
@@ -59,7 +69,9 @@ export function HomeView() {
               </span>
             </div>
             {top.length === 0 ? (
-              <div className="hero__loading mono">simulating the tournament…</div>
+              <div className="hero__loading mono">
+                {status === "running" ? "simulating the tournament…" : "hit run to simulate the tournament"}
+              </div>
             ) : (
               <div className="odds-list">
                 {top.map((t, i) => (

@@ -16,8 +16,7 @@ export function Header() {
   const progress = useStore((s) => s.progress);
   const seedLabel = useStore((s) => s.seedLabel);
   const setSeed = useStore((s) => s.setSeed);
-  const randomizeSeed = useStore((s) => s.randomizeSeed);
-  const runSimulation = useStore((s) => s.runSimulation);
+  const run = useStore((s) => s.run);
   const theme = useStore((s) => s.theme);
   const toggleTheme = useStore((s) => s.toggleTheme);
   const running = status === "running";
@@ -54,13 +53,14 @@ export function Header() {
             id="seed"
             value={seedLabel}
             onChange={(e) => setSeed(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") void run(false);
+            }}
             spellCheck={false}
-            aria-label="Simulation seed"
+            aria-label="Simulation seed (press Enter to run this seed)"
+            title="Press Enter to run this exact seed"
           />
-          <button className="btn btn--ghost" onClick={randomizeSeed} title="Random seed" aria-label="Random seed">
-            ⟳
-          </button>
-          <button className="btn" onClick={() => void runSimulation()} disabled={running}>
+          <button className="btn" onClick={() => void run(true)} disabled={running} title="Run a fresh simulation">
             {running ? "Running" : "Run"}
           </button>
         </div>

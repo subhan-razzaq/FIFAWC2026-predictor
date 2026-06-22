@@ -74,6 +74,10 @@ export function AboutView() {
       </div>
 
       <div className="wrap about-foot">
+        <div className="about-built">
+          <span className="eyebrow">Built by</span>
+          <span className="anton about-built__names">Subhan Razzaq &amp; Youssef Khafagy</span>
+        </div>
         <p className="mono">
           An independent portfolio project. Not affiliated with or endorsed by FIFA.
           {model ? ` Model snapshot ${model.meta.snapshot_date}, fit on ${model.meta.n_fit_matches.toLocaleString()} matches.` : ""}

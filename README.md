@@ -1,6 +1,6 @@
 <div align="center">
 
-# WELTMEISTER
+<img src="assets/weltmeister.svg" alt="WELTMEISTER" width="620" />
 
 ### A calibrated prediction engine and tournament simulator for the 2026 World Cup
 
@@ -13,6 +13,8 @@ Predict every match. Simulate the whole tournament tens of thousands of times. T
 ![React](https://img.shields.io/badge/React-18-149ECA?logo=react&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white)
 ![Vercel](https://img.shields.io/badge/Deployed-Vercel-000000?logo=vercel&logoColor=white)
+
+**Built by Subhan Razzaq and Youssef Khafagy**
 
 </div>
 

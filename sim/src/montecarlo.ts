@@ -32,11 +32,25 @@ export interface ScorerOdds {
   goldenBootProb: number;
 }
 
+export interface AssistOdds {
+  player: string;
+  team: string;
+  expectedAssists: number;
+}
+
+export interface CleanSheetOdds {
+  player: string;
+  team: string;
+  expectedCleanSheets: number;
+}
+
 export interface MonteCarloResult {
   runs: number;
   seed: number;
   teams: TeamOdds[];
   scorers: ScorerOdds[];
+  assisters: AssistOdds[];
+  cleanSheets: CleanSheetOdds[];
   generatedFromSnapshot: string;
 }
 
@@ -78,6 +92,8 @@ export function runMonteCarlo(model: Model, opts: MonteCarloOptions): MonteCarlo
   }
   const scorerGoals = new Map<string, number>();
   const goldenBoot = new Map<string, number>();
+  const assistTotals = new Map<string, number>();
+  const cleanSheetTotals = new Map<string, number>();
 
   const every = opts.progressEvery ?? Math.max(1, Math.floor(opts.runs / 50));
 
@@ -127,6 +143,13 @@ export function runMonteCarlo(model: Model, opts: MonteCarloOptions): MonteCarlo
       for (const p of leaders) goldenBoot.set(p, (goldenBoot.get(p) ?? 0) + share);
     }
 
+    for (const [player, a] of Object.entries(res.assists)) {
+      assistTotals.set(player, (assistTotals.get(player) ?? 0) + a);
+    }
+    for (const [keeper, cs] of Object.entries(res.cleanSheets)) {
+      cleanSheetTotals.set(keeper, (cleanSheetTotals.get(keeper) ?? 0) + cs);
+    }
+
     if (opts.onProgress && (i + 1) % every === 0) opts.onProgress(i + 1, opts.runs);
   }
 
@@ -159,9 +182,27 @@ export function runMonteCarlo(model: Model, opts: MonteCarloOptions): MonteCarlo
     .sort((a, b) => b.expectedGoals - a.expectedGoals)
     .slice(0, 60);
 
+  const assisters: AssistOdds[] = [...assistTotals.entries()]
+    .map(([player, a]) => ({ player, team: playerTeam.get(player) ?? "", expectedAssists: a / N }))
+    .sort((x, y) => y.expectedAssists - x.expectedAssists)
+    .slice(0, 60);
+
+  const cleanSheets: CleanSheetOdds[] = [...cleanSheetTotals.entries()]
+    .map(([player, cs]) => ({ player, team: playerTeam.get(player) ?? "", expectedCleanSheets: cs / N }))
+    .sort((x, y) => y.expectedCleanSheets - x.expectedCleanSheets)
+    .slice(0, 40);
+
   if (opts.onProgress) opts.onProgress(N, N);
 
-  return { runs: N, seed: opts.seed, teams, scorers, generatedFromSnapshot: model.meta.snapshot_date };
+  return {
+    runs: N,
+    seed: opts.seed,
+    teams,
+    scorers,
+    assisters,
+    cleanSheets,
+    generatedFromSnapshot: model.meta.snapshot_date,
+  };
 }
 
 function buildPlayerTeamMap(model: Model): Map<string, string> {

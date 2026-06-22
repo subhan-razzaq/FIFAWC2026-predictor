@@ -54,7 +54,19 @@
 }
 
 .about-foot {
-  margin-top: var(--s-6);
+  margin-top: var(--s-7);
+  display: grid;
+  gap: var(--s-3);
+}
+.about-built {
+  border-left: var(--keyline);
+  padding-left: var(--s-4);
+  display: grid;
+  gap: 2px;
+}
+.about-built__names {
+  font-size: clamp(1.4rem, 3vw, 2.2rem);
+  color: var(--gold);
 }
 .about-foot .mono {
   color: var(--text-faint);

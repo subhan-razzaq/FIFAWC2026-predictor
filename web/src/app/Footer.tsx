@@ -5,7 +5,11 @@ export function Footer() {
   return (
     <footer className="site-footer">
       <div className="wrap" style={{ display: "grid", gap: "var(--s-3)" }}>
-        <div className="eyebrow">WELTMEISTER — World Cup 2026 prediction engine</div>
+        <div className="eyebrow">WELTMEISTER · World Cup 2026 prediction engine</div>
+        <p style={{ maxWidth: "62ch" }}>
+          Built by <strong style={{ color: "var(--text)" }}>Subhan Razzaq</strong> and{" "}
+          <strong style={{ color: "var(--text)" }}>Youssef Khafagy</strong>.
+        </p>
         <p style={{ maxWidth: "62ch" }}>
           An independent portfolio project. Not affiliated with or endorsed by FIFA. The badges and
           motifs are original work in the spirit of the 2026 identity, not official marks.

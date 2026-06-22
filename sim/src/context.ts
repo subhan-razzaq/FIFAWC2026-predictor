@@ -6,7 +6,10 @@
 // re-sim cheap.
 
 import type { Rng } from "./rng";
-import type { GoalEvent, Model, ScorerModel, TeamRating } from "./types";
+import type { GoalEvent, Model, ScorerModel, Squad, TeamRating } from "./types";
+
+// fraction of open-play goals credited with an assist
+const ASSIST_RATE = 0.74;
 
 export interface TeamState {
   name: string;
@@ -26,9 +29,38 @@ interface ScorerTable {
   ownGoalShare: number;
 }
 
+interface AssistTable {
+  players: string[];
+  cdf: Float64Array;
+}
+
 export interface Overrides {
   ratings?: Record<string, { atk: number; def: number }>;
   scorers?: Record<string, ScorerModel>;
+}
+
+// starters dominate assists; weight the projected eleven by expected assists.
+function buildAssistTable(squad: Squad): AssistTable {
+  const starters = new Set(squad.projected_eleven);
+  const entries = squad.players
+    .filter((p) => starters.has(p.name))
+    .map((p) => ({ name: p.name, w: p.xa90 + 0.02 }));
+  const total = entries.reduce((s, e) => s + e.w, 0) || 1;
+  const players: string[] = [];
+  const cdf = new Float64Array(entries.length);
+  let acc = 0;
+  for (let i = 0; i < entries.length; i++) {
+    acc += entries[i]!.w / total;
+    players.push(entries[i]!.name);
+    cdf[i] = acc;
+  }
+  if (cdf.length > 0) cdf[cdf.length - 1] = 1;
+  return { players, cdf };
+}
+
+function keeperOf(squad: Squad): string {
+  const gk = squad.players.find((p) => p.group === "GK" && squad.projected_eleven.includes(p.name));
+  return gk?.name ?? squad.projected_eleven[0] ?? "Goalkeeper";
 }
 
 function buildScorerTable(s: ScorerModel): ScorerTable {
@@ -59,6 +91,8 @@ export class SimContext {
   readonly rho: number;
   readonly teams = new Map<string, TeamState>();
   private readonly scorers = new Map<string, ScorerTable>();
+  private readonly assists = new Map<string, AssistTable>();
+  private readonly keepers = new Map<string, string>();
 
   constructor(model: Model, overrides: Overrides = {}) {
     this.mu = model.meta.global.mu;
@@ -80,6 +114,14 @@ export class SimContext {
     for (const [name, s] of Object.entries(model.scorers)) {
       this.scorers.set(name, buildScorerTable(overrides.scorers?.[name] ?? s));
     }
+    for (const [name, squad] of Object.entries(model.squads)) {
+      this.assists.set(name, buildAssistTable(squad));
+      this.keepers.set(name, keeperOf(squad));
+    }
+  }
+
+  keeper(team: string): string {
+    return this.keepers.get(team) ?? "Goalkeeper";
   }
 
   team(name: string): TeamState {
@@ -126,9 +168,29 @@ export class SimContext {
         const u = rng.next();
         let i = 0;
         while (i < tbl.cdf.length - 1 && tbl.cdf[i]! < u) i++;
-        out.push({ team, player: tbl.players[i]!, kind: "open" });
+        const scorer = tbl.players[i]!;
+        const ev: GoalEvent = { team, player: scorer, kind: "open" };
+        const assister = this.pickAssister(rng, team, scorer);
+        if (assister) ev.assist = assister;
+        out.push(ev);
       }
     }
+  }
+
+  /** Most open-play goals are assisted by a teammate, weighted by expected
+   * assists. Returns undefined for unassisted goals or when no teammate is found. */
+  private pickAssister(rng: Rng, team: string, scorer: string): string | undefined {
+    if (rng.next() >= ASSIST_RATE) return undefined;
+    const at = this.assists.get(team);
+    if (!at || at.players.length < 2) return undefined;
+    for (let attempt = 0; attempt < 4; attempt++) {
+      const u = rng.next();
+      let i = 0;
+      while (i < at.cdf.length - 1 && at.cdf[i]! < u) i++;
+      const a = at.players[i]!;
+      if (a !== scorer) return a;
+    }
+    return undefined;
   }
 }
 

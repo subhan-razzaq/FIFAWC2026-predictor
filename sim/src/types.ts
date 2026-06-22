@@ -135,6 +135,7 @@ export interface GoalEvent {
   team: string;
   player: string;
   kind: "open" | "penalty" | "own";
+  assist?: string;
 }
 
 export interface GroupStanding {
@@ -159,5 +160,7 @@ export interface TournamentResult {
   // furthest stage reached by each team
   reached: Record<string, Stage>;
   goals: Record<string, number>; // player -> goals (Golden Boot)
+  assists: Record<string, number>; // player -> assists
+  cleanSheets: Record<string, number>; // goalkeeper -> clean sheets
   matches: MatchResult[];
 }

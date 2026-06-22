@@ -17,7 +17,7 @@ export function App() {
   const status = useStore((s) => s.status);
   const result = useStore((s) => s.result);
   const init = useStore((s) => s.init);
-  const runSimulation = useStore((s) => s.runSimulation);
+  const run = useStore((s) => s.run);
   const theme = useStore((s) => s.theme);
 
   useEffect(() => {
@@ -29,10 +29,13 @@ export function App() {
     document.documentElement.classList.toggle("theme-light", theme === "light");
   }, [theme]);
 
-  // run the headline simulation once the model is ready
+  // do not auto-run: a prediction runs only when the user clicks. The one
+  // exception is a shared ?seed link, which reproduces that exact tournament.
   useEffect(() => {
-    if (status === "ready" && !result) void runSimulation();
-  }, [status, result, runSimulation]);
+    if (status === "ready" && !result && new URLSearchParams(window.location.search).has("seed")) {
+      void run(false);
+    }
+  }, [status, result, run]);
 
   if (status === "error") {
     return (

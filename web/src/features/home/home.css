@@ -37,6 +37,22 @@
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
+.hero__thisrun {
+  margin-top: var(--s-5);
+  display: grid;
+  gap: 2px;
+  border-left: var(--keyline);
+  padding-left: var(--s-4);
+}
+.hero__thisrun-champ {
+  font-size: clamp(1.4rem, 3vw, 2.2rem);
+  color: var(--gold);
+  line-height: 1.05;
+}
+.hero__thisrun-sub {
+  color: var(--text-faint);
+  font-size: var(--t-xs);
+}
 .hero__odds {
   padding: var(--s-4);
   min-height: 280px;

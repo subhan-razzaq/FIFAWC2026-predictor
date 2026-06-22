@@ -56,6 +56,9 @@ interface StoreState {
   setSeed: (label: string) => void;
   randomizeSeed: () => void;
   setRuns: (n: number) => void;
+  /** Run a full prediction: the single-tournament bracket plus the Monte Carlo.
+   * Pass true to draw a fresh random seed (a different tournament each time). */
+  run: (newSeed: boolean) => Promise<void>;
   runSimulation: (overrides?: Overrides) => Promise<void>;
   runReveal: (overrides?: Overrides) => Promise<void>;
   runManage: (overrides: Overrides) => Promise<void>;
@@ -126,6 +129,18 @@ export const useStore = create<StoreState>((set, get) => ({
   },
 
   setRuns: (n) => set({ runs: n }),
+
+  run: async (newSeed) => {
+    if (newSeed) {
+      const n = Math.floor(Math.random() * 1_000_000);
+      writeSeedToUrl(String(n));
+      set({ seed: n, seedLabel: String(n) });
+    }
+    // the single-tournament bracket is instant on the main thread; the Monte
+    // Carlo aggregate runs on the worker. Both use the current seed.
+    await get().runReveal();
+    await get().runSimulation();
+  },
 
   runSimulation: async (overrides) => {
     const { model, seed, runs } = get();

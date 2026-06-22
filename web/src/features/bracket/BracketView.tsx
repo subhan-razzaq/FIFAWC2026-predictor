@@ -15,6 +15,7 @@ export function BracketView() {
   const single = useStore((s) => s.single);
   const seedLabel = useStore((s) => s.seedLabel);
   const runReveal = useStore((s) => s.runReveal);
+  const run = useStore((s) => s.run);
 
   const [stage, setStage] = useState(5);
   const [copied, setCopied] = useState(false);
@@ -68,7 +69,7 @@ export function BracketView() {
   }, [layout]);
 
   const reveal = async () => {
-    await runReveal();
+    await run(true);
   };
 
   if (!layout) {
