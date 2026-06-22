@@ -71,7 +71,7 @@ export function LineupPitch({ lineup, events, side, team }: Props) {
   const avg =
     lineup.starters.length > 0
       ? (lineup.starters.reduce((s, p) => s + p.rating, 0) / lineup.starters.length).toFixed(1)
-      : "—";
+      : "-";
   const flag = flagUrl(team);
 
   return (

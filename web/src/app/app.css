@@ -38,9 +38,19 @@ main#main {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  background: color-mix(in srgb, var(--bg) 90%, transparent);
   backdrop-filter: blur(10px);
-  border-bottom: var(--border);
+  border-bottom: none;
+}
+/* FIFA 2026 colourblock band along the header edge */
+.site-header::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--fifa-band);
 }
 .site-header__row {
   height: var(--header-h);
@@ -58,11 +68,11 @@ main#main {
   gap: var(--s-2);
   white-space: nowrap;
 }
-.brand .spark {
-  width: 14px;
-  height: 14px;
-  background: var(--gold);
-  display: inline-block;
+.brand .brand-logo {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  flex: 0 0 auto;
 }
 .nav {
   display: flex;

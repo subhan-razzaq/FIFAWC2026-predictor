@@ -87,17 +87,17 @@ export function HomeView() {
       <section className="wrap">
         <div className="cred">
           <CredStat
-            big={edge !== null ? `+${edge.toFixed(1)}%` : "—"}
+            big={edge !== null ? `+${edge.toFixed(1)}%` : "-"}
             label="better than Elo-only on RPS"
             sub="backtested on the 2018 and 2022 World Cups"
           />
           <CredStat
-            big={validation?.calibration ? validation.calibration.ece.toFixed(3) : "—"}
+            big={validation?.calibration ? validation.calibration.ece.toFixed(3) : "-"}
             label="calibration error (ECE)"
             sub="when it says 30%, it happens about 30% of the time"
           />
           <CredStat
-            big={model ? model.meta.n_fit_matches.toLocaleString() : "—"}
+            big={model ? model.meta.n_fit_matches.toLocaleString() : "-"}
             label="real matches fit"
             sub="international results since 1872, time-weighted"
           />
@@ -111,7 +111,7 @@ export function HomeView() {
             <h2 className="anton">Take charge of a nation</h2>
             <p>
               Pick your XI on a drag-and-drop pitch, set the tactics, scout every opponent, and juggle
-              stamina and suspensions across the whole tournament — then get graded against what the
+              stamina and suspensions across the whole tournament, then get graded against what the
               model expected of your squad.
             </p>
           </div>

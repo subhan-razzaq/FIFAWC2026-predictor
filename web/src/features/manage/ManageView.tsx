@@ -10,6 +10,7 @@ import { DragPitch } from "./DragPitch";
 import { TacticsPanel } from "./TacticsPanel";
 import { ScoutCard } from "./ScoutCard";
 import { GradeScreen } from "./GradeScreen";
+import { TournamentPanel } from "./TournamentPanel";
 import { MatchResultCard } from "../../components/MatchResultCard";
 import { TeamBadge } from "../../components/TeamBadge";
 import { oddsPct } from "../../lib/format";
@@ -98,7 +99,7 @@ function Intro() {
       <p>
         Pick a nation and you take charge for the whole tournament. Pick the shape, drag your XI onto the
         pitch, set the tactics, and scout every opponent. Stamina drains and bookings stack across the
-        month, so you'll have to rotate and adapt — then we'll grade your run against what the model expected.
+        month, so you'll have to rotate and adapt, then we'll grade your run against what the model expected.
       </p>
     </div>
   );
@@ -158,6 +159,7 @@ function Active({
           Continue
         </button>
         <Journey career={career} team={team} />
+        <TournamentPanel model={model} seed={seed} career={career} groupOf={groupOf} />
       </div>
     );
   }
@@ -216,6 +218,7 @@ function Active({
       </div>
 
       <Journey career={career} team={team} />
+      <TournamentPanel model={model} seed={seed} career={career} groupOf={groupOf} />
     </div>
   );
 }

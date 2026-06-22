@@ -127,19 +127,19 @@ export function resolveGroupStage(
 
   const byGroup = new Map<string, MatchResult[]>();
   model.fixtures.forEach((fx, idx) => {
-    let r: MatchResult;
-    if (fx.home === team || fx.away === team) {
-      r = managedResults.find((m) => m.home === fx.home && m.away === fx.away)!;
-    } else {
-      const rng = new Rng(deriveSeed(seed, idx));
-      r = simulateGroupMatch(baseCtx, rng, {
+    const managed = managedResults.find((m) => m.home === fx.home && m.away === fx.away);
+    // managed games the user has played are taken as given; everything else
+    // (including the managed team's not-yet-played games) is projected with
+    // default ratings, so the table is well-formed and updates live as you play
+    const r =
+      managed ??
+      simulateGroupMatch(baseCtx, new Rng(deriveSeed(seed, idx)), {
         home: fx.home,
         away: fx.away,
         stage: "group",
         hostHome: fx.host_home,
         hostAway: fx.host_away,
       });
-    }
     const arr = byGroup.get(fx.group) ?? [];
     arr.push(r);
     byGroup.set(fx.group, arr);
@@ -335,7 +335,7 @@ export function extractManagedCards(
 }
 
 /** Goals scored by managed-team players who had been substituted on before the
- * goal — the "impact sub" stat. Reads the same events as the timeline. */
+ * goal, the "impact sub" stat. Reads the same events as the timeline. */
 export function impactSubGoals(enriched: EnrichedMatch, team: string): MatchEvent[] {
   const side = managedSide(enriched, team);
   if (!side) return [];

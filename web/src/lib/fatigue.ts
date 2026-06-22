@@ -4,7 +4,7 @@
 // (forwards and midfielders harder than defenders, keepers least); rest between
 // matches recovers some. A tired player is worth less: their effective output is
 // scaled by `fatigueMult`, capped at a 20% drop so a knackered star is poor but
-// not useless — exactly the 15–20% the brief asks for. This is what forces the
+// not useless, exactly the 15-20% the brief asks for. This is what forces the
 // user to rotate across the three group games instead of riding their best XI.
 
 const ROLE_DEPLETE: Record<string, number> = { GK: 0.4, DF: 0.9, MF: 1.1, FW: 1.0 };

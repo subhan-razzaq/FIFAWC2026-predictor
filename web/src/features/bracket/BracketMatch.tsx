@@ -30,7 +30,7 @@ function Slot({
   return (
     <div className={`ko-slot ${decided && isWinner ? "win" : ""} ${decided && !isWinner ? "out" : ""}`}>
       <span className="ko-slot__tick" style={{ background: filled ? accent : "transparent" }} />
-      <span className="ko-slot__code mono">{filled ? teamCode(team) : "—"}</span>
+      <span className="ko-slot__code mono">{filled ? teamCode(team) : "-"}</span>
       <span className="ko-slot__goals mono">{decided ? goals : ""}</span>
     </div>
   );

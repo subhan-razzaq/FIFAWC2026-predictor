@@ -1,7 +1,7 @@
 // Pre-match scouting report on the AI opponent.
 //
-// Built only from data the model actually carries — the opponent's fitted
-// attack/defence ratings and their projected XI's real per-90 numbers — so every
+// Built only from data the model actually carries, the opponent's fitted
+// attack/defence ratings and their projected XI's real per-90 numbers, so every
 // claim is honest. Player roles are coarse (GK/DF/MF/FW), so we do NOT invent
 // "they attack down the left"; instead we surface the genuine danger man by share
 // of attacking output, how the side is balanced, and a counter-tactic the user
@@ -61,7 +61,7 @@ export function scoutTeam(model: Model, opponent: string): ScoutReport {
   // counter-tactic: react to whichever way the opponent leans
   let counter: string;
   if (t.atk - t.def > 0.25) {
-    counter = "They overload the attack and can be got at — sit a touch deeper and hit them on the counter.";
+    counter = "They overload the attack and can be got at, sit a touch deeper and hit them on the counter.";
   } else if (t.def - t.atk > 0.25) {
     counter = "Hard to break down. Be patient, keep your press high, and don't gift them a counter.";
   } else {

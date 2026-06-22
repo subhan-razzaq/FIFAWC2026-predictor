@@ -55,7 +55,7 @@ export function Header() {
     <header className="site-header">
       <div className="wrap site-header__row">
         <NavLink to="/" className="brand" aria-label="WELTMEISTER home">
-          <span className="spark chevron" aria-hidden />
+          <img src={`${import.meta.env.BASE_URL}26.png`} className="brand-logo" alt="" width={30} height={30} />
           WELTMEISTER
         </NavLink>
 

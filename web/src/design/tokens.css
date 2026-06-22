@@ -1,45 +1,74 @@
 /*
  * WELTMEISTER design tokens.
- * Built on the real 2026 visual language (Section 8): a near-monochrome
- * black/white/gold core with the three host nations (Canada red, USA blue,
- * Mexico green) as the working colour system. Sharp edges, flat colour blocks,
- * broadcast energy. Border radius is zero by default.
+ * Built on the FIFA World Cup 2026 visual language: a deep-blue base with bold,
+ * saturated colourblocking across the full tournament spectrum (red, orange,
+ * yellow, green, teal, blue, purple, magenta) plus the prize gold. Sharp edges,
+ * flat colour blocks, broadcast energy. Border radius is zero by default.
  */
 
 :root {
-  /* core palette */
-  --pitch: #0a1a12; /* deep stadium-night base */
-  --pitch-2: #0d2117; /* raised stadium surface */
-  --pitch-3: #103021; /* hover / elevated */
-  --paper: #f6f4ef; /* broadcast white */
-  --paper-2: #eae6dc;
-  --ink: #0b0b0c; /* true black */
-  --gold: #c8a24b; /* the prize colour, used sparingly */
-  --gold-bright: #e6c878;
+  /* FIFA 2026 spectrum, the working colourblock palette */
+  --fifa-red: #e8202d;
+  --fifa-orange: #ff7a1a;
+  --fifa-yellow: #f7c43a;
+  --fifa-green: #16b85c;
+  --fifa-teal: #00bcd4;
+  --fifa-blue: #2f6bff;
+  --fifa-purple: #8b3cff;
+  --fifa-magenta: #ff2d8e;
 
-  /* tri-nation working colours: win / draw-or-neutral / loss and chart series */
-  --can-red: #e4002b;
-  --usa-blue: #1f6fd6; /* lifted from #0A4595 for contrast on dark */
-  --usa-blue-deep: #0a4595;
-  --mex-green: #14a85a; /* lifted from #03773B for contrast on dark */
-  --mex-green-deep: #03773b;
-  --steel: #8a8f98;
-  --steel-dim: #5b6068;
+  /* deep-blue tournament base */
+  --navy: #080f28; /* page base */
+  --navy-2: #0f1838; /* raised surface */
+  --navy-3: #18234e; /* hover / elevated */
+
+  /* football pitch greens (kept for the lineup and formation pitches) */
+  --pitch: #0e2e1e;
+  --pitch-2: #103221;
+  --pitch-3: #14502f;
+
+  --paper: #f5f6fb; /* broadcast white */
+  --paper-2: #e7eaf4;
+  --ink: #0a1024; /* deep navy-black for structure and type */
+  --gold: #d8a93f; /* the prize colour, used sparingly */
+  --gold-bright: #f2cf6e;
+
+  /* host-nation accents, aligned to the vibrant spectrum */
+  --can-red: var(--fifa-red);
+  --usa-blue: var(--fifa-blue);
+  --usa-blue-deep: #0a45c0;
+  --mex-green: var(--fifa-green);
+  --mex-green-deep: #06853f;
+  --steel: #8a90a8;
+  --steel-dim: #565d78;
 
   /* semantic surfaces (dark, the default broadcast skin) */
-  --bg: var(--pitch);
-  --surface: var(--pitch-2);
-  --surface-hi: var(--pitch-3);
-  --line: rgba(246, 244, 239, 0.14);
-  --line-strong: rgba(246, 244, 239, 0.28);
-  --text: #f3f1ec;
-  --text-dim: #aab0ac;
-  --text-faint: #868c88; /* lifted to clear WCAG AA for small meta text on dark */
+  --bg: var(--navy);
+  --surface: var(--navy-2);
+  --surface-hi: var(--navy-3);
+  --line: rgba(246, 248, 255, 0.14);
+  --line-strong: rgba(246, 248, 255, 0.3);
+  --text: #f3f5fd;
+  --text-dim: #aab0c8;
+  --text-faint: #888fac;
 
   /* outcome mapping */
-  --win: var(--mex-green);
+  --win: var(--fifa-green);
   --draw: var(--gold);
-  --loss: var(--can-red);
+  --loss: var(--fifa-red);
+
+  /* the FIFA colourblock band, used as a header accent and section divider */
+  --fifa-band: linear-gradient(
+    90deg,
+    var(--fifa-red) 0 12.5%,
+    var(--fifa-orange) 12.5% 25%,
+    var(--fifa-yellow) 25% 37.5%,
+    var(--fifa-green) 37.5% 50%,
+    var(--fifa-teal) 50% 62.5%,
+    var(--fifa-blue) 62.5% 75%,
+    var(--fifa-purple) 75% 87.5%,
+    var(--fifa-magenta) 87.5% 100%
+  );
 
   /* type families */
   --font-display: "Archivo Variable", "Arial Narrow", system-ui, sans-serif;
@@ -88,15 +117,15 @@
 .skin-paper,
 .theme-light {
   --bg: var(--paper);
-  --surface: #fffefb;
+  --surface: #ffffff;
   --surface-hi: var(--paper-2);
-  --line: rgba(11, 11, 12, 0.14);
-  --line-strong: rgba(11, 11, 12, 0.3);
+  --line: rgba(10, 16, 36, 0.14);
+  --line-strong: rgba(10, 16, 36, 0.3);
   --text: var(--ink);
-  --text-dim: #4a4f52;
-  --text-faint: #6d736f; /* darkened to clear WCAG AA for small meta text on paper */
+  --text-dim: #3f465f;
+  --text-faint: #646b85;
   --usa-blue: var(--usa-blue-deep);
   --mex-green: var(--mex-green-deep);
   --win: var(--mex-green-deep);
-  --loss: var(--can-red);
+  --loss: #d11020;
 }

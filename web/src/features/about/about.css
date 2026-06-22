@@ -1,8 +1,8 @@
 .about-hero {
   border-bottom: var(--border);
   background:
-    radial-gradient(110% 80% at 90% -20%, rgba(200, 162, 75, 0.16), transparent 60%),
-    radial-gradient(80% 70% at -10% 120%, rgba(20, 168, 90, 0.12), transparent 55%);
+    radial-gradient(100% 80% at 90% -20%, rgba(139, 60, 255, 0.18), transparent 58%),
+    radial-gradient(90% 70% at -10% 120%, rgba(47, 107, 255, 0.16), transparent 55%);
   padding: var(--s-8) 0 var(--s-7);
 }
 .about-title {

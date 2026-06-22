@@ -6,7 +6,7 @@
 // in model.json, then apply a formation lean and a tactical attack/defence
 // tradeoff. The scorer model is rebuilt from the chosen eleven too.
 
-import type { Model, ScorerModel, Squad, SquadPlayer } from "@weltmeister/sim";
+import { arrangeEleven, type Model, type ScorerModel, type Squad, type SquadPlayer } from "@weltmeister/sim";
 import { type Tactics, tacticalShift } from "./tactics";
 import { outOfPositionPenalty } from "./lineup";
 import { fatigueMult } from "./fatigue";
@@ -250,7 +250,9 @@ export function buildEleven(
   (["DF", "MF", "FW"] as const).forEach((pos) => {
     for (const p of byPos[pos]!.slice(0, f.quota[pos])) out.push(p.name);
   });
-  return out;
+  // arrange the chosen eleven into the formation's slots by role, so a striker
+  // lines up centrally and full-backs stay wide rather than being placed by rating
+  return arrangeEleven(squad, out, formationName);
 }
 
 /** Pick a default eleven for a formation: best available by ability per quota. */

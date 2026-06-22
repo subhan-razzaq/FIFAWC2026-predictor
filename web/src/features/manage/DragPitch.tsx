@@ -1,7 +1,7 @@
 // Drag-and-drop team sheet. Players are dragged between pitch slots and the bench
 // with pointer events (works with mouse and touch, no library). Each slot's line
 // comes from the formation, so dropping a striker into a defensive slot is allowed
-// but flagged — the rating engine docks it. Dots also show stamina, bookings and
+// but flagged, the rating engine docks it. Dots also show stamina, bookings and
 // suspensions so the manager can see who needs resting or is out of position.
 
 import { useRef, useState } from "react";
@@ -122,7 +122,7 @@ export function DragPitch({ squad, eleven, formation, captain, penaltyTaker, sta
               onPointerDown={(e) => startDrag({ kind: "slot", i, name }, e)}
               onPointerMove={moveDrag}
               onPointerUp={endDrag}
-              title={p ? `${name} — ${p.club}${oop ? ` · out of position (${slot.pos})` : ""}` : name}
+              title={p ? `${name}, ${p.club}${oop ? ` · out of position (${slot.pos})` : ""}` : name}
             >
               <span className="pitch__avatar-wrap">
                 <span className="pitch__dot" style={{ borderColor: RING[p?.group ?? "MF"] ?? "var(--steel)" }}>
@@ -146,7 +146,7 @@ export function DragPitch({ squad, eleven, formation, captain, penaltyTaker, sta
       </div>
 
       <div className="dpitch-bench">
-        <div className="eyebrow">Bench — drag onto the pitch</div>
+        <div className="eyebrow">Bench, drag onto the pitch</div>
         {(["GK", "DF", "MF", "FW"] as const).map((pos) => (
           <div key={pos} className="dpitch-bench__group">
             <span className="dpitch-bench__pos mono">{pos}</span>
@@ -164,7 +164,7 @@ export function DragPitch({ squad, eleven, formation, captain, penaltyTaker, sta
                     onPointerDown={(e) => startDrag({ kind: "bench", name: p.name }, e)}
                     onPointerMove={moveDrag}
                     onPointerUp={endDrag}
-                    title={`${p.name} — ${p.club}`}
+                    title={`${p.name}, ${p.club}`}
                   >
                     <span className={`dpitch-chip__dot tier-${tier}`} />
                     {lastName(p.name)}
@@ -179,7 +179,7 @@ export function DragPitch({ squad, eleven, formation, captain, penaltyTaker, sta
             <span className="dpitch-bench__pos mono">OUT</span>
             <div className="dpitch-bench__list">
               {suspended.map((p) => (
-                <span key={p.name} className="dpitch-chip suspended" title={`${p.name} — suspended`}>
+                <span key={p.name} className="dpitch-chip suspended" title={`${p.name}, suspended`}>
                   {lastName(p.name)} <em>susp.</em>
                 </span>
               ))}

@@ -1,41 +1,45 @@
-// Colour mapping for teams, groups, and outcomes. Anchored on the tri-nation
-// working palette (red / blue / green) plus gold, so every team marker ties back
-// to the brand rather than using arbitrary chips.
+// Colour mapping for teams, groups, and outcomes. Anchored on the FIFA 2026
+// colourblock spectrum, so every team marker reads as part of the tournament
+// identity rather than an arbitrary chip.
 
-export const TRIAD = {
-  red: "#e4002b",
-  blue: "#1f6fd6",
-  green: "#14a85a",
-  gold: "#c8a24b",
-};
+export const SPECTRUM = [
+  "#e8202d", // red
+  "#ff7a1a", // orange
+  "#f7c43a", // yellow
+  "#16b85c", // green
+  "#00bcd4", // teal
+  "#2f6bff", // blue
+  "#8b3cff", // purple
+  "#ff2d8e", // magenta
+];
 
-// 12 group accents, a disciplined spread across the brand triad and gold.
+// 12 group accents spread across the full FIFA 2026 spectrum.
 const GROUP_COLORS: Record<string, string> = {
-  A: "#e4002b",
-  B: "#1f6fd6",
-  C: "#14a85a",
-  D: "#c8a24b",
-  E: "#ec5a73",
-  F: "#5a93e0",
-  G: "#54c489",
-  H: "#d8b87a",
-  I: "#b3001f",
-  J: "#134f9c",
-  K: "#0f7d43",
-  L: "#9c7a2f",
+  A: "#e8202d",
+  B: "#ff7a1a",
+  C: "#f7c43a",
+  D: "#16b85c",
+  E: "#00bcd4",
+  F: "#2f6bff",
+  G: "#8b3cff",
+  H: "#ff2d8e",
+  I: "#ff5a3c",
+  J: "#0bd1a0",
+  K: "#5a86ff",
+  L: "#c44bff",
 };
 
 export function groupColor(group: string): string {
-  return GROUP_COLORS[group] ?? "#8a8f98";
+  return GROUP_COLORS[group] ?? "#8a90a8";
 }
 
 const CONF_COLORS: Record<string, string> = {
-  UEFA: "#1f6fd6",
-  CONMEBOL: "#c8a24b",
-  CONCACAF: "#e4002b",
-  CAF: "#14a85a",
-  AFC: "#ec5a73",
-  OFC: "#5a93e0",
+  UEFA: "#2f6bff",
+  CONMEBOL: "#f7c43a",
+  CONCACAF: "#e8202d",
+  CAF: "#16b85c",
+  AFC: "#ff2d8e",
+  OFC: "#00bcd4",
 };
 
 export function confederationColor(conf: string): string {

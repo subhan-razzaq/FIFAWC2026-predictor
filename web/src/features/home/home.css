@@ -3,8 +3,9 @@
   overflow: hidden;
   border-bottom: var(--border);
   background:
-    radial-gradient(120% 80% at 80% -10%, rgba(200, 162, 75, 0.16), transparent 60%),
-    radial-gradient(90% 70% at -10% 110%, rgba(31, 111, 214, 0.14), transparent 55%);
+    radial-gradient(90% 70% at 88% -10%, rgba(255, 45, 142, 0.18), transparent 55%),
+    radial-gradient(80% 70% at 60% -20%, rgba(47, 107, 255, 0.2), transparent 55%),
+    radial-gradient(90% 80% at -10% 120%, rgba(22, 184, 92, 0.16), transparent 55%);
 }
 .hero__inner {
   display: grid;

@@ -10,6 +10,7 @@
 
 import { samplePoisson } from "./poisson";
 import { Rng, hashSeed } from "./rng";
+import { arrangeEleven, chooseFormation } from "./formations";
 import type { GoalEvent, MatchResult, Model, Squad } from "./types";
 
 export type MatchEventType = "goal" | "yellow" | "red" | "sub";
@@ -62,7 +63,6 @@ export interface EnrichOptions {
   penaltyOverride?: Record<string, string>;
 }
 
-const POS_ORDER: Record<string, number> = { GK: 0, DF: 1, MF: 2, FW: 3 };
 // relative likelihood of picking up a booking, by position
 const CARD_WEIGHT: Record<string, number> = { GK: 0.3, DF: 1.4, MF: 1.2, FW: 0.8 };
 
@@ -99,30 +99,30 @@ function buildLineup(
   if (!squad) {
     return { team, formation: formation ?? "4-3-3", starters: [], bench: [], captain: "", penalty: "" };
   }
-  const xi = eleven && eleven.length === 11 ? eleven : squad.projected_eleven;
-  const startSet = new Set(xi);
+  const xi0 = eleven && eleven.length === 11 ? eleven : squad.projected_eleven;
+  const form = formation ?? squad.formation;
+  const startSet = new Set(xi0);
   const ability = new Map(squad.players.map((p) => [p.name, p.ability]));
   const numbers = new Map(squad.players.map((p) => [p.name, p.number ?? 0]));
-  const starters = xi
-    .map((name) => ({
-      name,
-      pos: posOf(squad, name),
-      ability: ability.get(name) ?? 0.5,
-      number: numbers.get(name) ?? 0,
-    }))
-    .sort((a, b) => POS_ORDER[a.pos]! - POS_ORDER[b.pos]!);
+  // arrange the eleven into the formation's slots by role (striker central, etc.)
+  const starters = arrangeEleven(squad, xi0, form).map((name) => ({
+    name,
+    pos: posOf(squad, name),
+    ability: ability.get(name) ?? 0.5,
+    number: numbers.get(name) ?? 0,
+  }));
   const bench = squad.players
     .filter((p) => !startSet.has(p.name))
     .map((p) => ({ name: p.name, pos: posOf(squad, p.name), ability: p.ability }))
     .sort((a, b) => b.ability - a.ability);
-  const cap = captain && startSet.has(captain) ? captain : startSet.has(squad.captain) ? squad.captain : xi[0] ?? "";
+  const cap = captain && startSet.has(captain) ? captain : startSet.has(squad.captain) ? squad.captain : xi0[0] ?? "";
   const pk =
     penalty && startSet.has(penalty)
       ? penalty
       : startSet.has(squad.penalty_taker)
         ? squad.penalty_taker
-        : xi[10] ?? xi[0] ?? "";
-  return { team, formation: formation ?? squad.formation, starters, bench, captain: cap, penalty: pk };
+        : xi0[10] ?? xi0[0] ?? "";
+  return { team, formation: form, starters, bench, captain: cap, penalty: pk };
 }
 
 /** Pick a starter weighted by how card-prone the position is. */
@@ -297,11 +297,18 @@ export function enrichMatch(opts: EnrichOptions): EnrichedMatch {
     hashSeed(`${seed}|${match.home}|${match.away}|${match.stage}|${match.homeGoals}-${match.awayGoals}`),
   );
 
+  // formation: the manager's choice in manage mode, otherwise the team's real
+  // shape for this game, picked from its weighted formations so it varies between
+  // matches. The key excludes the scoreline so a team keeps one shape per fixture.
+  const formKey = (team: string) => `${seed}|${team}|${match.stage}|${match.home}-${match.away}`;
+  const homeFormation = opts.formationOverride?.[match.home] ?? chooseFormation(match.home, formKey(match.home));
+  const awayFormation = opts.formationOverride?.[match.away] ?? chooseFormation(match.away, formKey(match.away));
+
   const homeLU = buildLineup(
     model.squads[match.home],
     match.home,
     opts.elevenOverride?.[match.home],
-    opts.formationOverride?.[match.home],
+    homeFormation,
     opts.captainOverride?.[match.home],
     opts.penaltyOverride?.[match.home],
   );
@@ -309,7 +316,7 @@ export function enrichMatch(opts: EnrichOptions): EnrichedMatch {
     model.squads[match.away],
     match.away,
     opts.elevenOverride?.[match.away],
-    opts.formationOverride?.[match.away],
+    awayFormation,
     opts.captainOverride?.[match.away],
     opts.penaltyOverride?.[match.away],
   );

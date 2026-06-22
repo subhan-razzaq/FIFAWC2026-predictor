@@ -1,7 +1,7 @@
 // End-of-run manager grade and analytics.
 //
 // The grade is relative to the team's OWN expectations, taken from the model's
-// baseline Monte Carlo odds — so dragging Canada to the quarter-finals is an A+
+// baseline Monte Carlo odds, so dragging Canada to the quarter-finals is an A+
 // while the same run with Brazil is a C. We measure expectation as the expected
 // number of knockout rounds survived (sum of the per-round advance probabilities)
 // and compare it to what the user actually achieved.
@@ -70,11 +70,11 @@ export function gradeRun(reached: Stage, isChampion: boolean, odds?: TeamOdds): 
   const grade = letter(diff, isChampion);
   const reachedLabel = isChampion ? "champions" : `out in the ${STAGE_NAME[reached]}`;
   let summary: string;
-  if (isChampion) summary = "World champions — nothing beats lifting the trophy.";
+  if (isChampion) summary = "World champions, nothing beats lifting the trophy.";
   else if (diff >= 1.1) summary = "Wildly overachieved against the model's expectations.";
-  else if (diff >= 0.1) summary = "Beat expectations — a tournament to be proud of.";
+  else if (diff >= 0.1) summary = "Beat expectations, a tournament to be proud of.";
   else if (diff >= -0.5) summary = "Right about where the squad was projected to finish.";
-  else if (diff >= -1.1) summary = "Underwhelming — this group should have gone further.";
+  else if (diff >= -1.1) summary = "Underwhelming, this group should have gone further.";
   else summary = "A major underachievement for a side of this quality.";
   return { grade, expected, achieved, reached, reachedLabel, isChampion, summary };
 }
