@@ -8,6 +8,7 @@ export * from "./rng";
 export * from "./poisson";
 export * from "./context";
 export * from "./match";
+export * from "./enrich";
 export * from "./group";
 export * from "./thirds";
 export * from "./bracket";
