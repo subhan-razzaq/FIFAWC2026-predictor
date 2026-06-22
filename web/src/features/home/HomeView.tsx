@@ -47,6 +47,9 @@ export function HomeView() {
               <Link to="/bracket" className="btn btn--ghost">
                 Watch the bracket
               </Link>
+              <Link to="/manage" className="btn btn--ghost">
+                Manage a nation
+              </Link>
             </div>
             {single && (
               <div className="hero__thisrun">
@@ -99,6 +102,21 @@ export function HomeView() {
             sub="international results since 1872, time-weighted"
           />
         </div>
+      </section>
+
+      <section className="wrap">
+        <Link to="/manage" className="manage-cta keyline-gold">
+          <div className="manage-cta__copy">
+            <div className="eyebrow">Manager mode</div>
+            <h2 className="anton">Take charge of a nation</h2>
+            <p>
+              Pick your XI on a drag-and-drop pitch, set the tactics, scout every opponent, and juggle
+              stamina and suspensions across the whole tournament — then get graded against what the
+              model expected of your squad.
+            </p>
+          </div>
+          <span className="manage-cta__go btn">Play the World Cup →</span>
+        </Link>
       </section>
 
       {result && (

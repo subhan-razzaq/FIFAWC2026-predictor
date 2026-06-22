@@ -18,12 +18,12 @@ import type { Rng } from "./rng";
 import type { GroupStanding, MatchResult, Stage } from "./types";
 import type { ThirdsResult } from "./thirds";
 
-type Source =
+export type Source =
   | { kind: "winner"; group: string }
   | { kind: "runnerup"; group: string }
   | { kind: "third"; slot: number };
 
-interface R32Slot {
+export interface R32Slot {
   match: number;
   home: Source;
   away: Source;
@@ -42,7 +42,7 @@ const THIRD_SLOTS: { match: number; winner: string; eligible: string[] }[] = [
   { match: 87, winner: "K", eligible: ["D", "E", "I", "J", "L"] },
 ];
 
-const R32: R32Slot[] = [
+export const R32: R32Slot[] = [
   { match: 73, home: { kind: "runnerup", group: "A" }, away: { kind: "runnerup", group: "B" } },
   { match: 74, home: { kind: "winner", group: "E" }, away: { kind: "third", slot: 74 } },
   { match: 75, home: { kind: "winner", group: "F" }, away: { kind: "runnerup", group: "C" } },
@@ -62,7 +62,7 @@ const R32: R32Slot[] = [
 ];
 
 // Later rounds: each match takes the winners of two earlier matches.
-const R16: { match: number; from: [number, number] }[] = [
+export const R16: { match: number; from: [number, number] }[] = [
   { match: 89, from: [74, 77] },
   { match: 90, from: [73, 75] },
   { match: 91, from: [76, 78] },
@@ -72,18 +72,18 @@ const R16: { match: number; from: [number, number] }[] = [
   { match: 95, from: [86, 88] },
   { match: 96, from: [85, 87] },
 ];
-const QF: { match: number; from: [number, number] }[] = [
+export const QF: { match: number; from: [number, number] }[] = [
   { match: 97, from: [89, 90] },
   { match: 98, from: [93, 94] },
   { match: 99, from: [91, 92] },
   { match: 100, from: [95, 96] },
 ];
-const SF: { match: number; from: [number, number] }[] = [
+export const SF: { match: number; from: [number, number] }[] = [
   { match: 101, from: [97, 98] },
   { match: 102, from: [99, 100] },
 ];
-const FINAL = { match: 104, from: [101, 102] as [number, number] };
-const THIRD_PLACE = { match: 103, from: [101, 102] as [number, number] };
+export const FINAL = { match: 104, from: [101, 102] as [number, number] };
+export const THIRD_PLACE = { match: 103, from: [101, 102] as [number, number] };
 
 /**
  * Assign the eight qualifying groups to the eight winner slots, respecting each
@@ -115,7 +115,7 @@ export function allocateThirds(qualifiedGroups: string[]): Record<number, string
   return assignment;
 }
 
-function resolveSource(
+export function resolveSource(
   src: Source,
   standings: Record<string, GroupStanding[]>,
   thirdByMatch: Record<number, string>,

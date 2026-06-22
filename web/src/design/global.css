@@ -170,3 +170,19 @@ svg {
   color: var(--ink);
   border-color: var(--gold);
 }
+
+/* celebratory confetti burst */
+.confetti {
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+.confetti__pc {
+  position: absolute;
+  display: block;
+  border-radius: 1px;
+}

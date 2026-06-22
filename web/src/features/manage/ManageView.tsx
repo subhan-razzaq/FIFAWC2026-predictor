@@ -1,425 +1,267 @@
-import { useMemo, useState } from "react";
-import type { Model, SquadPlayer, TeamOdds, TournamentResult } from "@weltmeister/sim";
+// Manager Mode: take one nation through the World Cup a match at a time. Set the
+// shape and tactics, scout the opponent, play the game, manage stamina and
+// suspensions across the run, and finish with a manager grade.
+
+import { useMemo } from "react";
+import { motion } from "framer-motion";
 import { useStore } from "../../store/store";
-import { FORMATIONS, defaultElevenFor, managedRatings, managedScorers } from "../../lib/manage";
-import { FormationPitch } from "./FormationPitch";
-import { CountUp } from "../../components/CountUp";
-import { TeamBadge } from "../../components/TeamBadge";
+import { Confetti } from "../../components/Confetti";
+import { DragPitch } from "./DragPitch";
+import { TacticsPanel } from "./TacticsPanel";
+import { ScoutCard } from "./ScoutCard";
+import { GradeScreen } from "./GradeScreen";
 import { MatchResultCard } from "../../components/MatchResultCard";
-import { oddsPct, pct, STAGE_LABEL } from "../../lib/format";
+import { TeamBadge } from "../../components/TeamBadge";
+import { oddsPct } from "../../lib/format";
+import type { CareerState } from "../../store/store";
+import type { Model, TeamOdds } from "@weltmeister/sim";
 import "./manage.css";
 
-const FORMATION_NAMES = Object.keys(FORMATIONS);
-
-const MENTALITIES: { key: string; label: string; value: number }[] = [
-  { key: "def", label: "Defensive", value: -0.6 },
-  { key: "bal", label: "Balanced", value: 0 },
-  { key: "att", label: "Attacking", value: 0.6 },
-];
+const STAGE_HEAD: Record<string, string> = {
+  group: "Group stage",
+  R32: "Round of 32",
+  R16: "Round of 16",
+  QF: "Quarter-final",
+  SF: "Semi-final",
+  third_place: "Third place",
+  final: "Final",
+};
 
 export function ManageView() {
   const model = useStore((s) => s.model);
-  const baseline = useStore((s) => s.baseline);
-  const manageResult = useStore((s) => s.manageResult);
-  const manageSingle = useStore((s) => s.manageSingle);
-  const manageRunning = useStore((s) => s.manageRunning);
-  const manageProgress = useStore((s) => s.manageProgress);
-  const runManage = useStore((s) => s.runManage);
   const seed = useStore((s) => s.seed);
+  const career = useStore((s) => s.career);
+  const startCareer = useStore((s) => s.startCareer);
+  const resetCareer = useStore((s) => s.resetCareer);
 
   const teamsSorted = useMemo(
     () => [...(model?.teams ?? [])].sort((a, b) => b.rating - a.rating),
     [model],
   );
-
   const groupOf = useMemo(() => {
     const m = new Map<string, string>();
     for (const t of model?.teams ?? []) m.set(t.name, t.group);
     return m;
   }, [model]);
 
-  const [team, setTeam] = useState<string>("");
-  const [formation, setFormation] = useState("4-3-3");
-  const [eleven, setEleven] = useState<string[]>([]);
-  const [captain, setCaptain] = useState("");
-  const [penaltyTaker, setPenaltyTaker] = useState("");
-  const [attackBias, setAttackBias] = useState(0);
-  const [selected, setSelected] = useState<string | null>(null);
-
-  // bench players (squad minus eleven), grouped by position
-  const benchByPos = useMemo(() => {
-    const out: Record<string, SquadPlayer[]> = { GK: [], DF: [], MF: [], FW: [] };
-    const squad = model && team ? model.squads[team] : null;
-    if (!squad) return out;
-    const set = new Set(eleven);
-    for (const p of squad.players) if (!set.has(p.name)) out[p.group]?.push(p);
-    for (const k of Object.keys(out)) out[k]!.sort((a, b) => b.ability - a.ability);
-    return out;
-  }, [model, team, eleven]);
-
-  // initialise on first team choice
-  const pickTeam = (name: string) => {
-    if (!model) return;
-    const squad = model.squads[name]!;
-    const xi = defaultElevenFor(squad, "4-3-3");
-    setTeam(name);
-    setFormation("4-3-3");
-    setEleven(xi);
-    setCaptain(xi.includes(squad.captain) ? squad.captain : xi[0]!);
-    setPenaltyTaker(xi.includes(squad.penalty_taker) ? squad.penalty_taker : xi[10] ?? xi[0]!);
-    setAttackBias(0);
-    setSelected(null);
-  };
-
-  const changeFormation = (f: string) => {
-    if (!model || !team) return;
-    const squad = model.squads[team]!;
-    const xi = defaultElevenFor(squad, f);
-    setFormation(f);
-    setEleven(xi);
-    if (!xi.includes(captain)) setCaptain(xi[0]!);
-    if (!xi.includes(penaltyTaker)) setPenaltyTaker(xi[10] ?? xi[0]!);
-    setSelected(null);
-  };
-
   if (!model) return null;
-  const squad = team ? model.squads[team] : null;
-  const teamRating = team ? model.teams.find((t) => t.name === team)! : null;
-
-  const swapIn = (benchName: string) => {
-    if (!squad) return;
-    const benchP = squad.players.find((p) => p.name === benchName)!;
-    // if a starter of the same position is selected, swap that one; else weakest
-    const set = new Set(eleven);
-    let target = selected && set.has(selected) ? selected : null;
-    if (target) {
-      const selP = squad.players.find((p) => p.name === target)!;
-      if (selP.group !== benchP.group) target = null; // only swap like-for-like
-    }
-    if (!target) {
-      const sameGroupStarters = eleven
-        .map((n) => squad.players.find((p) => p.name === n)!)
-        .filter((p) => p.group === benchP.group)
-        .sort((a, b) => a.ability - b.ability);
-      target = sameGroupStarters[0]?.name ?? null;
-    }
-    if (!target) return;
-    setEleven(eleven.map((n) => (n === target ? benchName : n)));
-    if (captain === target) setCaptain(benchName);
-    if (penaltyTaker === target) setPenaltyTaker(benchName);
-    setSelected(null);
-  };
-
-  // live rating preview
-  const live = team
-    ? managedRatings(model, team, eleven, formation, attackBias)
-    : { atk: 0, def: 0 };
-  const dRating = teamRating ? live.atk + live.def - teamRating.rating : 0;
-  const scorerPreview = squad ? managedScorers(squad, eleven, penaltyTaker).open_play.slice(0, 5) : [];
-  const mentality = attackBias <= -0.3 ? "def" : attackBias >= 0.3 ? "att" : "bal";
-
-  const run = () => {
-    if (!team || !squad) return;
-    const overrides = {
-      ratings: { [team]: { atk: live.atk, def: live.def } },
-      scorers: { [team]: managedScorers(squad, eleven, penaltyTaker) },
-    };
-    void runManage(overrides);
-  };
-
-  const managedOdds = manageResult?.teams.find((t) => t.team === team);
-  const baseOdds = baseline?.teams.find((t) => t.team === team);
 
   return (
     <div className="wrap">
       <div className="section-head">
         <div>
-          <div className="eyebrow">Manage mode</div>
-          <h2>Take over a squad</h2>
+          <div className="eyebrow">Manager mode</div>
+          <h2>Play the World Cup</h2>
         </div>
-        <select
-          className="team-select"
-          value={team}
-          onChange={(e) => pickTeam(e.target.value)}
-          aria-label="Choose a team to manage"
-        >
-          <option value="">Choose a team…</option>
-          {teamsSorted.map((t) => (
-            <option key={t.name} value={t.name}>
-              {t.name}
-            </option>
-          ))}
-        </select>
+        <div className="manage-topbar">
+          {career && (
+            <button className="btn btn--ghost manage-quit" onClick={resetCareer}>
+              {career.phase === "ended" ? "New game" : "Quit"}
+            </button>
+          )}
+          <select
+            className="team-select"
+            value={career?.team ?? ""}
+            onChange={(e) => e.target.value && startCareer(e.target.value)}
+            aria-label="Choose a team to manage"
+          >
+            <option value="">Choose a nation…</option>
+            {teamsSorted.map((t) => (
+              <option key={t.name} value={t.name}>{t.name}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
-      {!team || !squad ? (
-        <p className="mono" style={{ color: "var(--text-faint)" }}>
-          Pick a team, set its lineup and shape, then re-run the tournament to see how far it goes.
-        </p>
+      {!career ? (
+        <Intro />
+      ) : career.phase === "ended" && career.outcome ? (
+        <GradeScreen
+          team={career.team}
+          group={groupOf.get(career.team)}
+          reached={career.outcome.reached}
+          isChampion={career.outcome.isChampion}
+          projection={career.projection}
+          played={career.played}
+          onRestart={resetCareer}
+        />
       ) : (
-        <div className="manage-grid">
-          <div className="manage-pitch-col">
-            <div className="manage-formation">
-              {FORMATION_NAMES.map((f) => (
-                <button
-                  key={f}
-                  className={`group-tab ${f === formation ? "active" : ""}`}
-                  style={{ width: "auto", padding: "0 10px" }}
-                  onClick={() => changeFormation(f)}
-                >
-                  {f}
-                </button>
-              ))}
-            </div>
-            <FormationPitch
-              squad={squad}
-              eleven={eleven}
-              formation={formation}
-              group={teamRating!.group}
-              captain={captain}
-              penaltyTaker={penaltyTaker}
-              selected={selected}
-              onSelectSlot={(p) => setSelected(selected === p ? null : p)}
-            />
-            <p className="mono manage-hint">
-              {selected ? `Selected ${selected}. Tap a substitute below to swap.` : "Tap a player, then a substitute to swap."}
-            </p>
-          </div>
-
-          <div className="manage-controls">
-            <div className="manage-ratings flat-card">
-              <div className="manage-ratings__row">
-                <span>Attack</span>
-                <span className="mono">{live.atk.toFixed(3)}</span>
-              </div>
-              <div className="manage-ratings__row">
-                <span>Defence</span>
-                <span className="mono">{live.def.toFixed(3)}</span>
-              </div>
-              <div className="manage-ratings__row manage-ratings__overall">
-                <span>Overall vs default</span>
-                <span className="mono" style={{ color: dRating >= 0 ? "var(--mex-green)" : "var(--can-red)" }}>
-                  {dRating >= 0 ? "+" : ""}
-                  {dRating.toFixed(3)}
-                </span>
-              </div>
-            </div>
-
-            <div className="manage-mentality">
-              <span className="mono manage-mentality__label">Mentality</span>
-              <div className="manage-mentality__opts" role="group" aria-label="Team mentality">
-                {MENTALITIES.map((m) => (
-                  <button
-                    key={m.key}
-                    className={`mentality-btn ${mentality === m.key ? "active" : ""}`}
-                    onClick={() => setAttackBias(m.value)}
-                    aria-pressed={mentality === m.key}
-                  >
-                    {m.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <label className="manage-slider">
-              <span className="mono">
-                Fine-tune shape <em>{attackBias < -0.05 ? "defensive" : attackBias > 0.05 ? "attacking" : "balanced"}</em>
-              </span>
-              <input
-                type="range"
-                min={-1}
-                max={1}
-                step={0.1}
-                value={attackBias}
-                onChange={(e) => setAttackBias(Number(e.target.value))}
-              />
-            </label>
-
-            <div className="manage-pickers">
-              <label>
-                <span className="mono">Captain</span>
-                <select value={captain} onChange={(e) => setCaptain(e.target.value)}>
-                  {eleven.map((n) => (
-                    <option key={n} value={n}>
-                      {n}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                <span className="mono">Penalties</span>
-                <select value={penaltyTaker} onChange={(e) => setPenaltyTaker(e.target.value)}>
-                  {eleven.map((n) => (
-                    <option key={n} value={n}>
-                      {n}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-
-            <div className="manage-bench">
-              <div className="eyebrow">Substitutes</div>
-              {(["GK", "DF", "MF", "FW"] as const).map((pos) => (
-                <div key={pos} className="manage-bench__group">
-                  <span className="manage-bench__pos mono">{pos}</span>
-                  <div className="manage-bench__list">
-                    {benchByPos[pos]?.map((p) => (
-                      <button key={p.name} className="manage-bench__player" onClick={() => swapIn(p.name)} title={p.club}>
-                        {p.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <button className="btn manage-run" onClick={run} disabled={manageRunning}>
-              {manageRunning ? `Simulating ${Math.round(manageProgress * 100)}%` : "Run manage simulation"}
-            </button>
-
-            <div className="manage-scorers">
-              <div className="eyebrow">Projected scorers</div>
-              {scorerPreview.map((s) => (
-                <div key={s.player} className="manage-scorers__row mono">
-                  <span>{s.player}</span>
-                  <span>{pct(s.weight)}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="manage-howfar">
-            <div className="manage-howfar__head">
-              <TeamBadge team={team} group={teamRating!.group} size={28} />
-              <div>
-                <div className="anton" style={{ fontSize: "1.4rem" }}>{team}</div>
-                <div className="mono" style={{ color: "var(--text-faint)", fontSize: "var(--t-xs)" }}>
-                  how far they go
-                </div>
-              </div>
-            </div>
-            {managedOdds ? (
-              <HowFar managed={managedOdds} base={baseOdds} />
-            ) : (
-              <p className="mono" style={{ color: "var(--text-faint)" }}>
-                Set your lineup and run the simulation to see the team's path.
-              </p>
-            )}
-
-            {manageSingle && (
-              <ManagedRun
-                single={manageSingle}
-                team={team}
-                groupOf={groupOf}
-                model={model}
-                seed={seed}
-                eleven={eleven}
-                formation={formation}
-                captain={captain}
-                penaltyTaker={penaltyTaker}
-              />
-            )}
-          </div>
-        </div>
+        <Active model={model} seed={seed} career={career} groupOf={groupOf} />
       )}
     </div>
   );
 }
 
-function ManagedRun({
-  single,
-  team,
-  groupOf,
+function Intro() {
+  return (
+    <div className="manage-intro">
+      <p>
+        Pick a nation and you take charge for the whole tournament. Pick the shape, drag your XI onto the
+        pitch, set the tactics, and scout every opponent. Stamina drains and bookings stack across the
+        month, so you'll have to rotate and adapt — then we'll grade your run against what the model expected.
+      </p>
+    </div>
+  );
+}
+
+function Active({
   model,
   seed,
-  eleven,
-  formation,
-  captain,
-  penaltyTaker,
+  career,
+  groupOf,
 }: {
-  single: TournamentResult;
-  team: string;
-  groupOf: Map<string, string>;
   model: Model;
   seed: number;
-  eleven: string[];
-  formation: string;
-  captain: string;
-  penaltyTaker: string;
+  career: CareerState;
+  groupOf: Map<string, string>;
 }) {
-  const teamMatches = single.matches.filter((m) => m.home === team || m.away === team);
-  const reached = single.reached[team];
-  const isChampion = single.champion === team;
-  const outcome = isChampion ? "Champions" : `Out in the ${STAGE_LABEL[reached ?? "group"] ?? "group stage"}`;
+  const setFormation = useStore((s) => s.setFormation);
+  const setEleven = useStore((s) => s.setEleven);
+  const setDraft = useStore((s) => s.setDraft);
+  const playCurrentMatch = useStore((s) => s.playCurrentMatch);
+  const continueCareer = useStore((s) => s.continueCareer);
 
-  // the managed team's matches reflect the user's chosen eleven, shape and takers
-  const elevenOverride = { [team]: eleven };
-  const formationOverride = { [team]: formation };
-  const captainOverride = { [team]: captain };
-  const penaltyOverride = { [team]: penaltyTaker };
+  const { team, current, draft, phase, lastResult } = career;
+  const squad = model.squads[team]!;
+
+  if (phase === "result" && lastResult) {
+    const r = lastResult.result;
+    const won = r.winner ? r.winner === team : (r.home === team ? r.homeGoals > r.awayGoals : r.awayGoals > r.homeGoals);
+    const drew = !r.winner && r.homeGoals === r.awayGoals;
+    const verdict = won ? "Win" : drew ? "Draw" : "Defeat";
+    return (
+      <div className="manage-result">
+        {won && <Confetti />}
+        <div className={`manage-result__banner ${won ? "win" : drew ? "draw" : "loss"}`}>
+          <motion.div
+            className="manage-result__verdict anton"
+            initial={{ scale: 0.5, opacity: 0, y: 8 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            transition={{ type: "spring", stiffness: 320, damping: 18 }}
+          >
+            {verdict}
+          </motion.div>
+          <div className="manage-result__sub mono">{STAGE_HEAD[lastResult.info.stage]}</div>
+        </div>
+        <MatchResultCard
+          match={r}
+          groupOf={groupOf}
+          showStage
+          model={model}
+          seed={seed}
+          elevenOverride={{ [team]: lastResult.settings.eleven }}
+          formationOverride={{ [team]: lastResult.settings.formation }}
+          captainOverride={{ [team]: lastResult.settings.captain }}
+          penaltyOverride={{ [team]: lastResult.settings.penaltyTaker }}
+        />
+        <button className="btn manage-continue" onClick={continueCareer}>
+          Continue
+        </button>
+        <Journey career={career} team={team} />
+      </div>
+    );
+  }
+
+  if (!current || !draft) return null;
+  const oppGroup = groupOf.get(current.opponent);
 
   return (
-    <div className="managed-run">
-      <div className="managed-run__head">
-        <span className="eyebrow">This run, game by game</span>
-        <span className={`managed-run__outcome anton ${isChampion ? "champ" : ""}`}>{outcome}</span>
+    <div>
+      <div className="manage-matchbar flat-card">
+        <span className="manage-matchbar__stage eyebrow">
+          {STAGE_HEAD[current.stage]}
+          {current.matchday ? ` · Matchday ${current.matchday}` : ""}
+        </span>
+        <div className="manage-matchbar__teams">
+          <span className="manage-matchbar__team">
+            <TeamBadge team={team} group={groupOf.get(team)} size={24} />
+            {team}
+          </span>
+          <span className="manage-matchbar__v anton">vs</span>
+          <span className="manage-matchbar__team manage-matchbar__team--opp">
+            {current.opponent}
+            <TeamBadge team={current.opponent} group={oppGroup} size={24} />
+          </span>
+        </div>
       </div>
-      <div className="managed-run__matches">
-        {teamMatches.map((m, i) => (
-          <MatchResultCard
-            key={i}
-            match={m}
-            groupOf={groupOf}
-            showStage
-            model={model}
-            seed={seed}
-            elevenOverride={elevenOverride}
-            formationOverride={formationOverride}
-            captainOverride={captainOverride}
-            penaltyOverride={penaltyOverride}
+
+      <div className="manage-play">
+        <div className="manage-play__pitch">
+          <DragPitch
+            squad={squad}
+            eleven={draft.eleven}
+            formation={draft.formation}
+            captain={draft.captain}
+            penaltyTaker={draft.penaltyTaker}
+            states={career.playerStates}
+            onChange={setEleven}
           />
-        ))}
+        </div>
+
+        <div className="manage-play__side">
+          <ScoutCard model={model} opponent={current.opponent} group={oppGroup} />
+          <TacticsPanel
+            model={model}
+            team={team}
+            draft={draft}
+            states={career.playerStates}
+            onFormation={setFormation}
+            onPatch={setDraft}
+          />
+          <button className="btn manage-play__go" onClick={playCurrentMatch}>
+            Play match
+          </button>
+          <Projection projection={career.projection} />
+        </div>
+      </div>
+
+      <Journey career={career} team={team} />
+    </div>
+  );
+}
+
+function Projection({ projection }: { projection: TeamOdds | null }) {
+  if (!projection) return null;
+  return (
+    <div className="manage-proj">
+      <div className="eyebrow">Pre-tournament projection</div>
+      <div className="manage-proj__row mono">
+        <span>Advance</span>
+        <span>{oddsPct(projection.advance)}</span>
+      </div>
+      <div className="manage-proj__row mono">
+        <span>Reach semi</span>
+        <span>{oddsPct(projection.semi)}</span>
+      </div>
+      <div className="manage-proj__row mono">
+        <span>Win it</span>
+        <span>{oddsPct(projection.champion)}</span>
       </div>
     </div>
   );
 }
 
-function HowFar({ managed, base }: { managed: TeamOdds; base?: TeamOdds }) {
-  const rows: { label: string; key: keyof TeamOdds }[] = [
-    { label: "Win group", key: "winGroup" },
-    { label: "Advance", key: "advance" },
-    { label: "Round of 16", key: "round16" },
-    { label: "Quarter-final", key: "quarter" },
-    { label: "Semi-final", key: "semi" },
-    { label: "Final", key: "final" },
-    { label: "Champion", key: "champion" },
-  ];
+function Journey({ career, team }: { career: CareerState; team: string }) {
+  if (career.played.length === 0) return null;
   return (
-    <div className="howfar">
-      {rows.map((r) => {
-        const v = managed[r.key] as number;
-        const b = base ? (base[r.key] as number) : undefined;
-        const d = b !== undefined ? v - b : undefined;
-        return (
-          <div key={r.key} className="howfar__row">
-            <span className="howfar__label">{r.label}</span>
-            <span className="howfar__bar">
-              <span style={{ width: `${Math.min(100, v * 100)}%` }} />
-            </span>
-            <CountUp className="mono howfar__val" value={v} format={oddsPct} />
-            {d !== undefined && (
-              <span
-                className="mono howfar__delta"
-                style={{ color: d >= 0.0005 ? "var(--mex-green)" : d <= -0.0005 ? "var(--can-red)" : "var(--text-faint)" }}
-              >
-                {d >= 0 ? "+" : ""}
-                {(d * 100).toFixed(1)}
-              </span>
-            )}
-          </div>
-        );
-      })}
+    <div className="manage-journey">
+      <div className="eyebrow">Your run so far</div>
+      <div className="manage-journey__row">
+        {career.played.map((p, i) => {
+          const r = p.result;
+          const tg = r.home === team ? r.homeGoals : r.awayGoals;
+          const og = r.home === team ? r.awayGoals : r.homeGoals;
+          const opp = r.home === team ? r.away : r.home;
+          const won = r.winner ? r.winner === team : tg > og;
+          const drew = !r.winner && tg === og;
+          return (
+            <div key={i} className={`manage-journey__pip ${won ? "win" : drew ? "draw" : "loss"}`} title={`${STAGE_HEAD[p.info.stage]} vs ${opp}`}>
+              <span className="mono">{tg}-{og}</span>
+              <span className="manage-journey__opp">{opp}</span>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

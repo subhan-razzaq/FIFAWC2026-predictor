@@ -7,6 +7,10 @@
 // tradeoff. The scorer model is rebuilt from the chosen eleven too.
 
 import type { Model, ScorerModel, Squad, SquadPlayer } from "@weltmeister/sim";
+import { type Tactics, tacticalShift } from "./tactics";
+import { outOfPositionPenalty } from "./lineup";
+import { fatigueMult } from "./fatigue";
+import type { PlayerStates } from "./cards";
 
 export interface Formation {
   name: string;
@@ -105,41 +109,76 @@ function expectedMinutes(players: SquadPlayer[], eleven: Set<string>): Map<strin
   return m;
 }
 
-function squadQuality(players: SquadPlayer[], eleven: string[]): { attack: number; defence: number } {
+export interface SquadQuality {
+  attack: number;
+  defence: number;
+  /** extra concede risk (log-goal units) from playing people out of position */
+  concedePenalty: number;
+  /** names of starters fielded out of their natural line */
+  mismatches: string[];
+}
+
+/**
+ * Squad attack/defence aggregates for a custom eleven. `eleven[i]` is taken to
+ * occupy slot `i` of the formation, so a player whose natural line differs from
+ * that slot is docked (out-of-position). Tired starters contribute less when a
+ * stamina map is supplied.
+ */
+function squadQuality(
+  squad: Squad,
+  eleven: string[],
+  formationName: string,
+  states?: PlayerStates,
+): SquadQuality {
+  const f = FORMATIONS[formationName] ?? FORMATIONS["4-3-3"]!;
   const set = new Set(eleven);
-  const minutes = expectedMinutes(players, set);
+  const minutes = expectedMinutes(squad.players, set);
+  const byName = new Map(squad.players.map((p) => [p.name, p]));
   let attack = 0;
   let defence = 0;
-  for (const p of players) {
-    if (!set.has(p.name)) continue;
-    const mins = minutes.get(p.name)!;
-    attack += (p.npxg90 * p.position_factor + 0.4 * p.xa90) * p.club_strength * mins;
-    defence += p.defense_factor * (0.6 + 0.4 * p.ability) * p.club_strength * mins;
-  }
-  return { attack, defence };
+  let concedePenalty = 0;
+  const mismatches: string[] = [];
+  eleven.forEach((name, i) => {
+    const p = byName.get(name);
+    if (!p) return;
+    const slotPos = f.slots[i]?.pos ?? p.group;
+    const oop = outOfPositionPenalty(p.group, slotPos);
+    if (oop.contrib < 1) mismatches.push(name);
+    const fm = states ? fatigueMult(states[name]?.stamina ?? 100) : 1;
+    const eff = oop.contrib * fm;
+    const mins = minutes.get(name)!;
+    attack += (p.npxg90 * p.position_factor + 0.4 * p.xa90) * p.club_strength * mins * eff;
+    defence += p.defense_factor * (0.6 + 0.4 * p.ability) * p.club_strength * mins * eff;
+    concedePenalty += oop.concede;
+  });
+  return { attack, defence, concedePenalty: Math.min(0.15, concedePenalty), mismatches };
 }
 
 export interface ManagedRatings {
   atk: number;
   def: number;
+  mismatches: string[];
+  concedePenalty: number;
 }
 
-/** Recompute a team's attack/defence ratings for a custom eleven. */
+/** Recompute a team's attack/defence ratings for a custom eleven, formation,
+ * tactics and (optionally) squad condition. */
 export function managedRatings(
   model: Model,
   team: string,
   eleven: string[],
   formationName: string,
-  attackBias: number,
+  tactics: Tactics,
+  states?: PlayerStates,
 ): ManagedRatings {
   const squad = model.squads[team]!;
   const teamRating = model.teams.find((t) => t.name === team)!;
   const b = model.meta.blend;
   const h = model.meta.hyperparameters;
 
-  const { attack, defence } = squadQuality(squad.players, eleven);
-  const za = (attack - b.squad_attack_mean) / b.squad_attack_std;
-  const zd = (defence - b.squad_def_mean) / b.squad_def_std;
+  const q = squadQuality(squad, eleven, formationName, states);
+  const za = (q.attack - b.squad_attack_mean) / b.squad_attack_std;
+  const zd = (q.defence - b.squad_def_mean) / b.squad_def_std;
   // the engine standardizes the combined squad terms once more
   const zSqOverall = (za + zd) / b.squad_overall_std;
   const zSqTilt = (za - zd) / b.squad_tilt_std;
@@ -147,24 +186,34 @@ export function managedRatings(
   const wMleTilt = 1 - h.w_squad_tilt!;
   const prior = teamRating.prior;
   const zOverall = h.w_mle! * prior.z_overall_mle + h.w_elo! * prior.z_elo + h.w_squad! * zSqOverall;
-  let zTilt = wMleTilt * prior.z_tilt_mle + h.w_squad_tilt! * zSqTilt;
+  const zTilt = wMleTilt * prior.z_tilt_mle + h.w_squad_tilt! * zSqTilt;
 
   const overall = b.base_mean + zOverall * b.base_std;
   let tilt = (b.tilt_mean + zTilt * b.tilt_std) * h.tilt_shrink!;
-  // formation lean and the tactical slider are pure attack/defence tradeoffs
-  tilt += (FORMATIONS[formationName]?.tilt ?? 0) + attackBias * 0.2;
+  // the formation lean is a pure attack/defence tradeoff
+  tilt += FORMATIONS[formationName]?.tilt ?? 0;
 
-  return { atk: (overall + tilt) / 2, def: (overall - tilt) / 2 };
+  const shift = tacticalShift(tactics);
+  const atk = (overall + tilt) / 2 + shift.dAtk;
+  const def = (overall - tilt) / 2 + shift.dDef - q.concedePenalty;
+  return { atk, def, mismatches: q.mismatches, concedePenalty: q.concedePenalty };
 }
 
-/** Rebuild the scorer model for a custom eleven so attribution tracks the lineup. */
-export function managedScorers(squad: Squad, eleven: string[], penaltyTaker: string): ScorerModel {
+/** Rebuild the scorer model for a custom eleven so attribution tracks the lineup
+ * (and fades a tired player's share when a condition map is supplied). */
+export function managedScorers(
+  squad: Squad,
+  eleven: string[],
+  penaltyTaker: string,
+  states?: PlayerStates,
+): ScorerModel {
   const set = new Set(eleven);
   const minutes = expectedMinutes(squad.players, set);
   const weights: { player: string; weight: number }[] = [];
   let total = 0;
   for (const p of squad.players) {
-    const w = p.npxg90 * minutes.get(p.name)! * p.position_factor;
+    const fm = states && set.has(p.name) ? fatigueMult(states[p.name]?.stamina ?? 100) : 1;
+    const w = p.npxg90 * minutes.get(p.name)! * p.position_factor * fm;
     if (w > 0) {
       weights.push({ player: p.name, weight: w });
       total += w;
@@ -176,16 +225,35 @@ export function managedScorers(squad: Squad, eleven: string[], penaltyTaker: str
   return { open_play, penalty_taker: penaltyTaker, penalty_share: 0.1, own_goal_share: 0.035 };
 }
 
-/** Pick a default eleven for a formation: best available by ability per quota. */
-export function defaultElevenFor(squad: Squad, formationName: string): string[] {
+/**
+ * Build an eleven for a formation, in slot order (GK, then DF/MF/FW lines).
+ * `exclude` drops unavailable players (e.g. suspended); `prefer` keeps the user's
+ * current picks when the formation changes, falling back to best-by-ability.
+ */
+export function buildEleven(
+  squad: Squad,
+  formationName: string,
+  opts: { prefer?: string[]; exclude?: Set<string> } = {},
+): string[] {
   const f = FORMATIONS[formationName] ?? FORMATIONS["4-3-3"]!;
+  const exclude = opts.exclude ?? new Set<string>();
+  const prefer = new Set(opts.prefer ?? []);
   const byPos: Record<string, SquadPlayer[]> = { GK: [], DF: [], MF: [], FW: [] };
-  for (const p of squad.players) byPos[p.group]?.push(p);
-  for (const k of Object.keys(byPos)) byPos[k]!.sort((a, b) => b.ability - a.ability);
+  for (const p of squad.players) if (!exclude.has(p.name)) byPos[p.group]?.push(p);
+  for (const k of Object.keys(byPos)) {
+    byPos[k]!.sort(
+      (a, b) => Number(prefer.has(b.name)) - Number(prefer.has(a.name)) || b.ability - a.ability,
+    );
+  }
   const out: string[] = [];
-  out.push(byPos.GK![0]?.name ?? squad.players[0]!.name);
+  out.push(byPos.GK![0]?.name ?? squad.players.find((p) => !exclude.has(p.name))?.name ?? squad.players[0]!.name);
   (["DF", "MF", "FW"] as const).forEach((pos) => {
     for (const p of byPos[pos]!.slice(0, f.quota[pos])) out.push(p.name);
   });
   return out;
+}
+
+/** Pick a default eleven for a formation: best available by ability per quota. */
+export function defaultElevenFor(squad: Squad, formationName: string): string[] {
+  return buildEleven(squad, formationName);
 }
