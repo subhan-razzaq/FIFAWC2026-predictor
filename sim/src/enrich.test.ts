@@ -58,6 +58,42 @@ describe("match enrichment", () => {
     }
   });
 
+  it("keeps the score level at 90 when a tie needed extra time", () => {
+    // find a knockout that actually went to extra time
+    const aet = single.matches.find((m) => m.afterExtraTime);
+    if (!aet) return; // none in this seed; the invariant is enforced regardless
+    const e = enrichMatch({ model, match: aet, seed: 2026 });
+    const homeBy90 = e.events.filter((ev) => ev.side === "home" && ev.type === "goal" && ev.minute <= 90).length;
+    const awayBy90 = e.events.filter((ev) => ev.side === "away" && ev.type === "goal" && ev.minute <= 90).length;
+    // the broadcast timeline must agree with "a.e.t.": deadlocked after 90
+    expect(homeBy90).toBe(awayBy90);
+  });
+
+  it("never shows two yellows for one player without a red", () => {
+    for (let seed = 0; seed < 40; seed++) {
+      const e = enrichMatch({ model, match: scored, seed });
+      const yellowCount = new Map<string, number>();
+      for (const ev of e.events) {
+        if (ev.type === "yellow") yellowCount.set(ev.player, (yellowCount.get(ev.player) ?? 0) + 1);
+      }
+      for (const [, n] of yellowCount) expect(n).toBeLessThanOrEqual(1);
+    }
+  });
+
+  it("never substitutes off a player who scored or assisted", () => {
+    for (let seed = 0; seed < 40; seed++) {
+      const e = enrichMatch({ model, match: scored, seed });
+      const subbedOff = new Set(e.events.filter((ev) => ev.type === "sub").map((ev) => ev.player));
+      const contributed = new Set<string>();
+      for (const ev of e.events) {
+        if (ev.type !== "goal") continue;
+        contributed.add(ev.player);
+        if (ev.assist) contributed.add(ev.assist);
+      }
+      for (const name of subbedOff) expect(contributed.has(name)).toBe(false);
+    }
+  });
+
   it("respects a manage-mode lineup override", () => {
     const team = scored.home;
     const squad = model.squads[team]!;

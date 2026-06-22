@@ -10,7 +10,7 @@
 
 import { samplePoisson } from "./poisson";
 import { Rng, hashSeed } from "./rng";
-import type { MatchResult, Model, Squad } from "./types";
+import type { GoalEvent, MatchResult, Model, Squad } from "./types";
 
 export type MatchEventType = "goal" | "yellow" | "red" | "sub";
 
@@ -141,17 +141,27 @@ function weightedStarter(rng: Rng, lu: InternalLineup): string | null {
 function addCards(rng: Rng, events: MatchEvent[], side: "home" | "away", lu: InternalLineup, maxMin: number): void {
   if (lu.starters.length === 0) return;
   const yellows = Math.min(5, samplePoisson(rng, 1.7));
-  const booked = new Set<string>();
+  const bookedAt = new Map<string, number>();
+  const sentOff = new Set<string>();
   for (let i = 0; i < yellows; i++) {
     const name = weightedStarter(rng, lu);
-    if (!name) break;
-    events.push({ minute: 8 + rng.int(Math.max(1, maxMin - 8)), type: "yellow", side, team: lu.team, player: name });
-    booked.add(name);
+    if (!name || sentOff.has(name)) continue;
+    const first = bookedAt.get(name);
+    if (first !== undefined) {
+      // a second booking is a sending-off (second yellow), shown after the first
+      const minute = Math.min(maxMin, first + 5 + rng.int(Math.max(1, maxMin - first - 4)));
+      events.push({ minute, type: "red", side, team: lu.team, player: name });
+      sentOff.add(name);
+    } else {
+      const minute = 8 + rng.int(Math.max(1, maxMin - 8));
+      events.push({ minute, type: "yellow", side, team: lu.team, player: name });
+      bookedAt.set(name, minute);
+    }
   }
-  // a red is rare; model it as its own low-probability event
-  if (rng.chance(0.05)) {
+  // a straight red is rare; model it as its own low-probability event
+  if (rng.chance(0.04)) {
     const name = weightedStarter(rng, lu);
-    if (name) {
+    if (name && !sentOff.has(name)) {
       events.push({ minute: 30 + rng.int(Math.max(1, maxMin - 30)), type: "red", side, team: lu.team, player: name });
     }
   }
@@ -161,9 +171,16 @@ function addSubs(rng: Rng, events: MatchEvent[], side: "home" | "away", lu: Inte
   const sentOff = new Set(
     events.filter((e) => e.side === side && e.type === "red").map((e) => e.player),
   );
+  // players who scored or assisted stay on, so nobody is "subbed off then scores"
+  const contributed = new Set<string>();
+  for (const e of events) {
+    if (e.side !== side || e.type !== "goal") continue;
+    contributed.add(e.player);
+    if (e.assist) contributed.add(e.assist);
+  }
   // take off the weaker outfield starters first, with a little randomness
   const offPool = lu.starters
-    .filter((s) => s.pos !== "GK" && !sentOff.has(s.name))
+    .filter((s) => s.pos !== "GK" && !sentOff.has(s.name) && !contributed.has(s.name))
     .sort((a, b) => a.ability - b.ability + (rng.next() - 0.5) * 0.1);
   const benchPool = lu.bench.filter((b) => b.pos !== "GK");
   const n = Math.min(offPool.length, benchPool.length, 3 + rng.int(2)); // 3 or 4
@@ -300,18 +317,25 @@ export function enrichMatch(opts: EnrichOptions): EnrichedMatch {
   const maxMin = match.afterExtraTime ? 120 : 90;
   const events: MatchEvent[] = [];
 
-  for (const g of match.scorers) {
-    const side: "home" | "away" = g.team === match.home ? "home" : "away";
-    events.push({
-      minute: 1 + rng.int(maxMin),
-      type: "goal",
-      side,
-      team: g.team,
-      player: g.player,
-      assist: g.assist,
-      kind: g.kind,
+  // Place goals so the timeline never contradicts the score. For a tie that went
+  // to extra time the score MUST be level at 90, so each side keeps `level` goals
+  // in regulation and only the winner's surplus falls in 91-120; a match settled
+  // inside 90 puts every goal in the first 90 minutes.
+  const homeScorers = match.scorers.filter((g) => g.team === match.home);
+  const awayScorers = match.scorers.filter((g) => g.team === match.away);
+  const level = match.afterExtraTime
+    ? Math.min(homeScorers.length, awayScorers.length)
+    : Math.max(homeScorers.length, awayScorers.length);
+  const regMinute = () => 1 + rng.int(90);
+  const etMinute = () => 91 + rng.int(30);
+  const placeGoals = (goals: GoalEvent[], side: "home" | "away") => {
+    goals.forEach((g, idx) => {
+      const minute = match.afterExtraTime && idx >= level ? etMinute() : regMinute();
+      events.push({ minute, type: "goal", side, team: g.team, player: g.player, assist: g.assist, kind: g.kind });
     });
-  }
+  };
+  placeGoals(homeScorers, "home");
+  placeGoals(awayScorers, "away");
 
   addCards(rng, events, "home", homeLU, maxMin);
   addCards(rng, events, "away", awayLU, maxMin);
