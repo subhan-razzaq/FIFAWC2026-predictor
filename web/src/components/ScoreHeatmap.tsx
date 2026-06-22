@@ -69,7 +69,10 @@ export function ScoreHeatmap({ grid, homeTeam, awayTeam, modal, actual, max = 5 
                 <span
                   key={`${x}-${y}`}
                   className={`scoreheat__cell ${isModal ? "is-modal" : ""} ${isActual ? "is-actual" : ""}`}
-                  style={{ background: `color-mix(in srgb, ${outcomeVar(x, y)} ${fill}%, transparent)` }}
+                  style={{
+                    background: `color-mix(in srgb, ${outcomeVar(x, y)} ${fill}%, transparent)`,
+                    animationDelay: `${(x + y) * 26}ms`,
+                  }}
                   title={`${x}-${y} · ${(p * 100).toFixed(1)}%`}
                 />
               );
