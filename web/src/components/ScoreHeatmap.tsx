@@ -78,7 +78,7 @@ export function ScoreHeatmap({ grid, homeTeam, awayTeam, modal, actual, max = 5 
         </div>
       </div>
       <figcaption className="scoreheat__legend mono" aria-hidden>
-        rows ↓ {homeTeam} goals · cols → {awayTeam} goals
+        ↓ {home} goals · → {away} goals
       </figcaption>
     </figure>
   );
