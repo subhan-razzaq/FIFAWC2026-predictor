@@ -16,7 +16,7 @@ export function Trophy({ champion, group, locked }: Props) {
         className="trophy__art"
         initial={false}
         animate={locked ? { scale: 1, rotate: 0, opacity: 1 } : { scale: 0.9, opacity: 0.55 }}
-        transition={{ type: "spring", stiffness: 140, damping: 12 }}
+        transition={{ type: "spring", stiffness: 180, damping: 28 }}
       >
         <svg width="92" height="108" viewBox="0 0 92 108" aria-hidden>
           {/* cup bowl: a square with two quarter-circle cut corners */}

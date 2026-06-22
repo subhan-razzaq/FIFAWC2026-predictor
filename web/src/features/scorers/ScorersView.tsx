@@ -2,7 +2,6 @@ import { useMemo, useState } from "react";
 import { useStore } from "../../store/store";
 import { TeamBadge } from "../../components/TeamBadge";
 import { CountUp } from "../../components/CountUp";
-import { oddsPct } from "../../lib/format";
 import "./scorers.css";
 
 type Tab = "scorers" | "assists" | "clean";
@@ -11,12 +10,11 @@ interface Row {
   player: string;
   team: string;
   value: number;
-  extra?: number; // golden boot probability for scorers
 }
 
 export function ScorersView() {
   const model = useStore((s) => s.model);
-  const result = useStore((s) => s.result);
+  const single = useStore((s) => s.single);
   const run = useStore((s) => s.run);
   const status = useStore((s) => s.status);
   const [tab, setTab] = useState<Tab>("scorers");
@@ -27,29 +25,39 @@ export function ScorersView() {
     return m;
   }, [model]);
 
+  // every player maps back to their squad, so we can badge the goalscorers
+  const teamOf = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const [team, squad] of Object.entries(model?.squads ?? {})) {
+      for (const p of squad.players) m.set(p.name, team);
+    }
+    return m;
+  }, [model]);
+
   const rows: Row[] = useMemo(() => {
-    if (!result) return [];
-    if (tab === "scorers")
-      return result.scorers.slice(0, 25).map((s) => ({ player: s.player, team: s.team, value: s.expectedGoals, extra: s.goldenBootProb }));
-    if (tab === "assists")
-      return result.assisters.slice(0, 25).map((a) => ({ player: a.player, team: a.team, value: a.expectedAssists }));
-    return result.cleanSheets.slice(0, 25).map((c) => ({ player: c.player, team: c.team, value: c.expectedCleanSheets }));
-  }, [result, tab]);
+    if (!single) return [];
+    const src = tab === "scorers" ? single.goals : tab === "assists" ? single.assists : single.cleanSheets;
+    return Object.entries(src)
+      .map(([player, value]) => ({ player, team: teamOf.get(player) ?? "", value }))
+      .filter((r) => r.value > 0)
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 25);
+  }, [single, tab, teamOf]);
 
   const max = rows.length ? rows[0]!.value : 1;
-  const valueLabel = tab === "scorers" ? "xG" : tab === "assists" ? "xA" : "CS";
-  const heading = tab === "scorers" ? "Who scores the goals" : tab === "assists" ? "Who makes the goals" : "Who keeps them out";
+  const valueLabel = tab === "scorers" ? "Goals" : tab === "assists" ? "Assists" : "Sheets";
+  const heading = tab === "scorers" ? "Golden Boot" : tab === "assists" ? "Playmakers" : "Clean sheets";
 
   return (
     <div className="wrap">
       <div className="section-head">
         <div>
-          <div className="eyebrow">Tournament stats</div>
+          <div className="eyebrow">Tournament stats · this run</div>
           <h2>{heading}</h2>
         </div>
-        {result && (
+        {single && (
           <span className="mono" style={{ color: "var(--text-faint)" }}>
-            expected over {result.runs.toLocaleString()} simulated tournaments
+            {single.champion} lift the trophy
           </span>
         )}
       </div>
@@ -66,23 +74,28 @@ export function ScorersView() {
         </button>
       </div>
 
-      {rows.length === 0 ? (
+      {!single ? (
         <div className="stat-empty flat-card">
           <p className="mono" style={{ color: "var(--text-faint)" }}>
-            Run a simulation to project the tournament stats.
+            Run a simulation to see this tournament&rsquo;s stats.
           </p>
           <button className="btn" onClick={() => void run(true)} disabled={status === "running"}>
             {status === "running" ? "Running" : "Run simulation"}
           </button>
+        </div>
+      ) : rows.length === 0 ? (
+        <div className="stat-empty flat-card">
+          <p className="mono" style={{ color: "var(--text-faint)" }}>
+            No {tab === "clean" ? "clean sheets" : tab} recorded in this run.
+          </p>
         </div>
       ) : (
         <div className="scorer-list flat-card">
           <div className="scorer-row scorer-row--head mono">
             <span>#</span>
             <span>Player</span>
-            <span className="scorer-row__bar-h">Expected per tournament</span>
+            <span className="scorer-row__bar-h">This tournament</span>
             <span>{valueLabel}</span>
-            <span>{tab === "scorers" ? "Boot" : ""}</span>
           </div>
           {rows.map((r, i) => (
             <div key={r.player} className={`scorer-row ${i === 0 ? "lead" : ""}`}>
@@ -97,10 +110,7 @@ export function ScorersView() {
               <span className="scorer-row__bar">
                 <span style={{ width: `${(r.value / max) * 100}%` }} />
               </span>
-              <CountUp className="mono scorer-row__xg" value={r.value} format={(v) => v.toFixed(2)} />
-              <span className="mono scorer-row__boot">
-                {tab === "scorers" && r.extra !== undefined ? <CountUp value={r.extra} format={oddsPct} /> : ""}
-              </span>
+              <CountUp className="mono scorer-row__xg" value={r.value} format={(v) => String(Math.round(v))} />
             </div>
           ))}
         </div>

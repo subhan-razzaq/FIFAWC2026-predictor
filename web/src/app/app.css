@@ -101,13 +101,33 @@ main#main {
 }
 .theme-toggle {
   width: 38px;
-  padding: 8px 0;
-  text-align: center;
-  font-size: 1rem;
-  line-height: 1;
+  padding: 7px 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+}
+.theme-toggle:hover {
+  color: var(--gold);
+}
+.seedfield {
+  display: inline-flex;
+  align-items: stretch;
+}
+.seedfield__tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 8px;
+  font-size: var(--t-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-faint);
+  background: var(--surface-hi);
+  border: var(--border-strong);
+  border-right: none;
 }
 .simctl input {
-  width: 92px;
+  width: 78px;
   background: var(--surface);
   border: var(--border-strong);
   color: var(--text);
@@ -117,6 +137,20 @@ main#main {
 }
 .simctl input::placeholder {
   color: var(--text-faint);
+}
+.runs-select {
+  background: var(--surface);
+  border: var(--border-strong);
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: var(--t-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 6px 6px;
+}
+.runs-select:disabled {
+  opacity: 0.5;
+  cursor: progress;
 }
 .btn {
   font-family: var(--font-mono);
@@ -185,12 +219,9 @@ main#main {
   font-size: var(--t-title);
 }
 
-/* hide the mobile menu toggle target on wider screens */
+/* the runs selector is a desktop refinement; the seed + run button carry mobile */
 @media (max-width: 720px) {
-  .simctl .runs-select {
-    display: none;
-  }
-  .brand .brand-sub {
+  .runs-select {
     display: none;
   }
 }

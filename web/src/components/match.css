@@ -65,13 +65,287 @@
 .mrc__col--away {
   text-align: right;
 }
-.mrc__ball {
-  font-size: 9px;
-  filter: grayscale(0.2);
+.mrc__goal {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: var(--gold);
+  vertical-align: baseline;
 }
 .mrc__assist {
   color: var(--text-faint);
   font-style: normal;
+}
+.mrc__min {
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+  margin-right: 3px;
+}
+.mrc__col--away .mrc__min {
+  margin-right: 0;
+  margin-left: 3px;
+}
+
+.mrc__toggle {
+  margin-top: var(--s-3);
+  width: 100%;
+  font-size: var(--t-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  padding: 7px;
+  border: var(--border);
+  background: var(--bg);
+  transition: color var(--dur-fast), border-color var(--dur-fast);
+}
+.mrc__toggle:hover {
+  color: var(--gold);
+  border-color: var(--line-strong);
+}
+
+/* expanded match detail: timeline + lineups */
+.mdt {
+  margin-top: var(--s-3);
+  display: grid;
+  gap: var(--s-4);
+}
+.mdt__timeline {
+  display: grid;
+  gap: 3px;
+}
+.mdt__row {
+  display: grid;
+  grid-template-columns: 1fr 34px 1fr;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: var(--t-xs);
+}
+.mdt__min {
+  text-align: center;
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+}
+.mdt__cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.mdt__cell--home {
+  justify-content: flex-end;
+  text-align: right;
+}
+.mdt__text {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  min-width: 0;
+}
+.mdt__player {
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mdt__sub-name {
+  color: var(--text-faint);
+}
+.mdt__icon {
+  flex: 0 0 auto;
+}
+.mdt__icon--goal {
+  width: 7px;
+  height: 7px;
+  background: var(--gold);
+  display: inline-block;
+}
+.mdt__icon--card {
+  width: 7px;
+  height: 10px;
+  display: inline-block;
+}
+.mdt__icon--yellow {
+  background: #e6c130;
+}
+.mdt__icon--red {
+  background: var(--can-red);
+}
+
+.mdt__lineups {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-4);
+  border-top: var(--border);
+  padding-top: var(--s-3);
+}
+.mdt__lineup-head {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin-bottom: var(--s-2);
+  padding-bottom: var(--s-2);
+  border-bottom: var(--border);
+}
+.mdt__lineup--right .mdt__lineup-head {
+  flex-direction: row-reverse;
+}
+.mdt__lineup-team {
+  font-weight: 700;
+  font-size: var(--t-sm);
+}
+.mdt__lineup-form {
+  margin-left: auto;
+  color: var(--text-faint);
+  font-size: var(--t-xs);
+}
+.mdt__lineup--right .mdt__lineup-form {
+  margin-left: 0;
+  margin-right: auto;
+}
+.mdt__line {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: var(--s-2);
+  padding: 3px 0;
+  align-items: baseline;
+  font-size: var(--t-xs);
+}
+.mdt__lineup--right .mdt__line {
+  grid-template-columns: 1fr 24px;
+}
+.mdt__line-tag {
+  color: var(--text-faint);
+}
+.mdt__lineup--right .mdt__line-tag {
+  order: 2;
+  text-align: right;
+}
+.mdt__line-names {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 10px;
+  color: var(--text-dim);
+}
+.mdt__lineup--right .mdt__line-names {
+  justify-content: flex-end;
+}
+.mdt__name {
+  white-space: nowrap;
+}
+.mdt__badge {
+  font-style: normal;
+  font-size: 8px;
+  font-weight: 700;
+  margin-left: 2px;
+  vertical-align: super;
+}
+.mdt__badge--c {
+  color: var(--gold);
+}
+.mdt__badge--p {
+  color: var(--can-red);
+}
+
+/* model forecast block inside the match detail */
+.mdt__forecast {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-4);
+  align-items: center;
+  padding-bottom: var(--s-3);
+  border-bottom: var(--border);
+}
+.mdt__forecast-info {
+  flex: 1 1 170px;
+  min-width: 150px;
+}
+.mdt__forecast-info p {
+  font-size: var(--t-xs);
+  color: var(--text-dim);
+  margin-top: 4px;
+  line-height: 1.5;
+}
+.mdt__forecast-info strong {
+  color: var(--text);
+}
+.mdt__forecast-key {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.mdt__key {
+  width: 11px;
+  height: 11px;
+  display: inline-block;
+  background: color-mix(in srgb, var(--gold) 28%, transparent);
+}
+.mdt__key--modal {
+  outline: 1.5px solid var(--gold);
+  outline-offset: -1px;
+}
+.mdt__key--actual {
+  box-shadow: inset 0 0 0 1.5px var(--text);
+  margin-left: var(--s-2);
+}
+
+/* scoreline distribution heatmap (the full Dixon-Coles joint grid) */
+.scoreheat {
+  --rowlabel: 16px;
+  display: grid;
+  gap: 3px;
+  max-width: 260px;
+}
+.scoreheat__cols {
+  display: grid;
+  grid-template-columns: var(--rowlabel) repeat(var(--n), 1fr);
+  gap: 2px;
+  font-size: 10px;
+  color: var(--text-faint);
+}
+.scoreheat__cols > span {
+  text-align: center;
+}
+.scoreheat__rowhead {
+  font-size: 8px;
+  letter-spacing: -0.03em;
+  color: var(--text-faint);
+  align-self: center;
+}
+.scoreheat__main {
+  display: grid;
+  grid-template-columns: var(--rowlabel) 1fr;
+  gap: 2px;
+}
+.scoreheat__rows {
+  display: grid;
+  grid-auto-rows: 1fr;
+  gap: 2px;
+  font-size: 10px;
+  color: var(--text-faint);
+}
+.scoreheat__rows > span {
+  display: grid;
+  place-items: center;
+}
+.scoreheat__grid {
+  display: grid;
+  grid-template-columns: repeat(var(--n), 1fr);
+  gap: 2px;
+}
+.scoreheat__cell {
+  aspect-ratio: 1;
+}
+.scoreheat__cell.is-modal {
+  outline: 1.5px solid var(--gold);
+  outline-offset: -1px;
+}
+.scoreheat__cell.is-actual {
+  box-shadow: inset 0 0 0 1.5px var(--text);
+}
+.scoreheat__legend {
+  font-size: var(--t-xs);
+  color: var(--text-faint);
+  letter-spacing: 0.04em;
 }
 
 @media (max-width: 560px) {
@@ -80,5 +354,24 @@
   }
   .mrc__score {
     font-size: 1.4rem;
+  }
+  .mdt__lineups {
+    grid-template-columns: 1fr;
+  }
+  .mdt__lineup--right {
+    text-align: left;
+  }
+  .mdt__lineup--right .mdt__lineup-head {
+    flex-direction: row;
+  }
+  .mdt__lineup--right .mdt__line {
+    grid-template-columns: 24px 1fr;
+  }
+  .mdt__lineup--right .mdt__line-tag {
+    order: 0;
+    text-align: left;
+  }
+  .mdt__lineup--right .mdt__line-names {
+    justify-content: flex-start;
   }
 }

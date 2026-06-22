@@ -2,21 +2,50 @@ import { NavLink } from "react-router-dom";
 import { useStore } from "../store/store";
 
 const LINKS = [
-  { to: "/", label: "Home", end: true },
-  { to: "/predictions", label: "Predictions" },
-  { to: "/results", label: "Match center" },
+  { to: "/", label: "Dashboard", end: true },
+  { to: "/results", label: "Match Center" },
   { to: "/bracket", label: "Bracket" },
   { to: "/scorers", label: "Stats" },
-  { to: "/manage", label: "Manage" },
+  { to: "/manage", label: "Manager" },
   { to: "/methodology", label: "Method" },
   { to: "/about", label: "About" },
 ];
 
+const RUN_OPTIONS = [5000, 10000, 25000, 50000];
+
+function SunIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+      <circle cx="12" cy="12" r="4.2" />
+      {[0, 45, 90, 135, 180, 225, 270, 315].map((a) => {
+        const r = (a * Math.PI) / 180;
+        return (
+          <line
+            key={a}
+            x1={12 + Math.cos(r) * 7}
+            y1={12 + Math.sin(r) * 7}
+            x2={12 + Math.cos(r) * 9.4}
+            y2={12 + Math.sin(r) * 9.4}
+          />
+        );
+      })}
+    </svg>
+  );
+}
+
+function MoonIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden>
+      <path d="M20 14.2A8 8 0 1 1 9.8 4 6.4 6.4 0 0 0 20 14.2Z" />
+    </svg>
+  );
+}
+
 export function Header() {
   const status = useStore((s) => s.status);
   const progress = useStore((s) => s.progress);
-  const seedLabel = useStore((s) => s.seedLabel);
-  const setSeed = useStore((s) => s.setSeed);
+  const runs = useStore((s) => s.runs);
+  const setRuns = useStore((s) => s.setRuns);
   const run = useStore((s) => s.run);
   const theme = useStore((s) => s.theme);
   const toggleTheme = useStore((s) => s.toggleTheme);
@@ -45,29 +74,36 @@ export function Header() {
             aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
             title={theme === "dark" ? "Light mode" : "Dark mode"}
           >
-            {theme === "dark" ? "☀" : "☾"}
+            {theme === "dark" ? <SunIcon /> : <MoonIcon />}
           </button>
-          <label className="sr-only" htmlFor="seed">
-            Simulation seed
-          </label>
-          <input
-            id="seed"
-            value={seedLabel}
-            onChange={(e) => setSeed(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") void run(false);
-            }}
-            spellCheck={false}
-            aria-label="Simulation seed (press Enter to run this seed)"
-            title="Press Enter to run this exact seed"
-          />
+          <select
+            className="runs-select"
+            value={runs}
+            onChange={(e) => setRuns(Number(e.target.value))}
+            disabled={running}
+            aria-label="Number of simulated tournaments"
+            title="Tournaments per run: more runs tighten the odds"
+          >
+            {RUN_OPTIONS.map((n) => (
+              <option key={n} value={n}>
+                {(n / 1000).toLocaleString()}k runs
+              </option>
+            ))}
+          </select>
           <button className="btn" onClick={() => void run(true)} disabled={running} title="Run a fresh simulation">
             {running ? "Running" : "Run"}
           </button>
         </div>
       </div>
       {running && (
-        <div className="progress" aria-hidden>
+        <div
+          className="progress"
+          role="progressbar"
+          aria-label="Simulation progress"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={Math.round(progress * 100)}
+        >
           <span style={{ width: `${Math.round(progress * 100)}%` }} />
         </div>
       )}

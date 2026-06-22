@@ -3,12 +3,6 @@
   align-items: center;
   gap: var(--s-2);
 }
-.bracket-seed {
-  color: var(--text-faint);
-  font-size: var(--t-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
 
 .bracket {
   display: grid;

@@ -31,12 +31,6 @@
   margin-top: var(--s-5);
   flex-wrap: wrap;
 }
-.hero__seed {
-  color: var(--text-faint);
-  font-size: var(--t-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
 .hero__thisrun {
   margin-top: var(--s-5);
   display: grid;

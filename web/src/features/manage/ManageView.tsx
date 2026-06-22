@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import type { SquadPlayer, TeamOdds, TournamentResult } from "@weltmeister/sim";
+import type { Model, SquadPlayer, TeamOdds, TournamentResult } from "@weltmeister/sim";
 import { useStore } from "../../store/store";
 import { FORMATIONS, defaultElevenFor, managedRatings, managedScorers } from "../../lib/manage";
 import { FormationPitch } from "./FormationPitch";
@@ -11,6 +11,12 @@ import "./manage.css";
 
 const FORMATION_NAMES = Object.keys(FORMATIONS);
 
+const MENTALITIES: { key: string; label: string; value: number }[] = [
+  { key: "def", label: "Defensive", value: -0.6 },
+  { key: "bal", label: "Balanced", value: 0 },
+  { key: "att", label: "Attacking", value: 0.6 },
+];
+
 export function ManageView() {
   const model = useStore((s) => s.model);
   const baseline = useStore((s) => s.baseline);
@@ -19,6 +25,7 @@ export function ManageView() {
   const manageRunning = useStore((s) => s.manageRunning);
   const manageProgress = useStore((s) => s.manageProgress);
   const runManage = useStore((s) => s.runManage);
+  const seed = useStore((s) => s.seed);
 
   const teamsSorted = useMemo(
     () => [...(model?.teams ?? [])].sort((a, b) => b.rating - a.rating),
@@ -109,6 +116,7 @@ export function ManageView() {
     : { atk: 0, def: 0 };
   const dRating = teamRating ? live.atk + live.def - teamRating.rating : 0;
   const scorerPreview = squad ? managedScorers(squad, eleven, penaltyTaker).open_play.slice(0, 5) : [];
+  const mentality = attackBias <= -0.3 ? "def" : attackBias >= 0.3 ? "att" : "bal";
 
   const run = () => {
     if (!team || !squad) return;
@@ -197,9 +205,25 @@ export function ManageView() {
               </div>
             </div>
 
+            <div className="manage-mentality">
+              <span className="mono manage-mentality__label">Mentality</span>
+              <div className="manage-mentality__opts" role="group" aria-label="Team mentality">
+                {MENTALITIES.map((m) => (
+                  <button
+                    key={m.key}
+                    className={`mentality-btn ${mentality === m.key ? "active" : ""}`}
+                    onClick={() => setAttackBias(m.value)}
+                    aria-pressed={mentality === m.key}
+                  >
+                    {m.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <label className="manage-slider">
               <span className="mono">
-                Tactical shape <em>{attackBias < -0.05 ? "defensive" : attackBias > 0.05 ? "attacking" : "balanced"}</em>
+                Fine-tune shape <em>{attackBias < -0.05 ? "defensive" : attackBias > 0.05 ? "attacking" : "balanced"}</em>
               </span>
               <input
                 type="range"
@@ -284,7 +308,17 @@ export function ManageView() {
             )}
 
             {manageSingle && (
-              <ManagedRun single={manageSingle} team={team} groupOf={groupOf} />
+              <ManagedRun
+                single={manageSingle}
+                team={team}
+                groupOf={groupOf}
+                model={model}
+                seed={seed}
+                eleven={eleven}
+                formation={formation}
+                captain={captain}
+                penaltyTaker={penaltyTaker}
+              />
             )}
           </div>
         </div>
@@ -297,15 +331,33 @@ function ManagedRun({
   single,
   team,
   groupOf,
+  model,
+  seed,
+  eleven,
+  formation,
+  captain,
+  penaltyTaker,
 }: {
   single: TournamentResult;
   team: string;
   groupOf: Map<string, string>;
+  model: Model;
+  seed: number;
+  eleven: string[];
+  formation: string;
+  captain: string;
+  penaltyTaker: string;
 }) {
   const teamMatches = single.matches.filter((m) => m.home === team || m.away === team);
   const reached = single.reached[team];
   const isChampion = single.champion === team;
   const outcome = isChampion ? "Champions" : `Out in the ${STAGE_LABEL[reached ?? "group"] ?? "group stage"}`;
+
+  // the managed team's matches reflect the user's chosen eleven, shape and takers
+  const elevenOverride = { [team]: eleven };
+  const formationOverride = { [team]: formation };
+  const captainOverride = { [team]: captain };
+  const penaltyOverride = { [team]: penaltyTaker };
 
   return (
     <div className="managed-run">
@@ -315,7 +367,18 @@ function ManagedRun({
       </div>
       <div className="managed-run__matches">
         {teamMatches.map((m, i) => (
-          <MatchResultCard key={i} match={m} groupOf={groupOf} showStage />
+          <MatchResultCard
+            key={i}
+            match={m}
+            groupOf={groupOf}
+            showStage
+            model={model}
+            seed={seed}
+            elevenOverride={elevenOverride}
+            formationOverride={formationOverride}
+            captainOverride={captainOverride}
+            penaltyOverride={penaltyOverride}
+          />
         ))}
       </div>
     </div>

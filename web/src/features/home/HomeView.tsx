@@ -11,7 +11,6 @@ export function HomeView() {
   const single = useStore((s) => s.single);
   const status = useStore((s) => s.status);
   const runs = useStore((s) => s.runs);
-  const seedLabel = useStore((s) => s.seedLabel);
   const run = useStore((s) => s.run);
 
   const validation = model?.validation as
@@ -48,7 +47,6 @@ export function HomeView() {
               <Link to="/bracket" className="btn btn--ghost">
                 Watch the bracket
               </Link>
-              <span className="mono hero__seed">seed {seedLabel}</span>
             </div>
             {single && (
               <div className="hero__thisrun">
@@ -79,9 +77,6 @@ export function HomeView() {
                 ))}
               </div>
             )}
-            <Link to="/predictions" className="hero__more mono">
-              all 48 teams →
-            </Link>
           </aside>
         </div>
       </section>
@@ -110,9 +105,6 @@ export function HomeView() {
         <section className="wrap">
           <div className="section-head">
             <h2>Most likely to advance</h2>
-            <Link to="/predictions" className="mono" style={{ color: "var(--gold)" }}>
-              group by group →
-            </Link>
           </div>
           <div className="advance-grid">
             {[...result.teams]

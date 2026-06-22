@@ -11,7 +11,6 @@ export interface MatchPrediction {
   loss: number;
   grid: number[][];
   modal: { x: number; y: number; p: number };
-  topScores: { x: number; y: number; p: number }[];
 }
 
 export function createPredictor(model: Model) {
@@ -23,12 +22,13 @@ export function createPredictor(model: Model) {
       const [lamH, lamA] = ctx.lambdas(home, away, hostHome, hostAway);
       const [win, draw, loss] = outcomeProbs(lamH, lamA, rho);
       const grid = scorelineGrid(lamH, lamA, rho, 6);
-      const cells: { x: number; y: number; p: number }[] = [];
+      let modal = { x: 0, y: 0, p: -1 };
       for (let x = 0; x < grid.length; x++) {
-        for (let y = 0; y < grid[x]!.length; y++) cells.push({ x, y, p: grid[x]![y]! });
+        for (let y = 0; y < grid[x]!.length; y++) {
+          if (grid[x]![y]! > modal.p) modal = { x, y, p: grid[x]![y]! };
+        }
       }
-      cells.sort((a, b) => b.p - a.p);
-      return { lamH, lamA, win, draw, loss, grid, modal: cells[0]!, topScores: cells.slice(0, 5) };
+      return { lamH, lamA, win, draw, loss, grid, modal };
     },
   };
 }

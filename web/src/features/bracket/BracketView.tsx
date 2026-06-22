@@ -113,7 +113,6 @@ export function BracketView() {
           <h2>Live bracket</h2>
         </div>
         <div className="bracket-controls">
-          <span className="mono bracket-seed">seed {seedLabel}</span>
           <button className="btn btn--ghost" onClick={copyLink}>
             {copied ? "Copied" : "Copy link"}
           </button>

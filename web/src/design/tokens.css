@@ -34,7 +34,7 @@
   --line-strong: rgba(246, 244, 239, 0.28);
   --text: #f3f1ec;
   --text-dim: #aab0ac;
-  --text-faint: #767c78;
+  --text-faint: #868c88; /* lifted to clear WCAG AA for small meta text on dark */
 
   /* outcome mapping */
   --win: var(--mex-green);
@@ -94,7 +94,7 @@
   --line-strong: rgba(11, 11, 12, 0.3);
   --text: var(--ink);
   --text-dim: #4a4f52;
-  --text-faint: #8b9095;
+  --text-faint: #6d736f; /* darkened to clear WCAG AA for small meta text on paper */
   --usa-blue: var(--usa-blue-deep);
   --mex-green: var(--mex-green-deep);
   --win: var(--mex-green-deep);

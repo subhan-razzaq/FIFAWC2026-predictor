@@ -12,6 +12,7 @@ const KO_ORDER: Stage[] = ["R32", "R16", "QF", "SF", "third_place", "final"];
 export function ResultsView() {
   const model = useStore((s) => s.model);
   const single = useStore((s) => s.single);
+  const seed = useStore((s) => s.seed);
   const run = useStore((s) => s.run);
   const status = useStore((s) => s.status);
 
@@ -139,7 +140,7 @@ export function ResultsView() {
             </div>
             <div className="results-matches">
               {(groupMatches.get(group) ?? []).map(({ fx, m }) => (
-                <MatchResultCard key={fx.id} match={m} groupOf={groupOf} />
+                <MatchResultCard key={fx.id} match={m} groupOf={groupOf} model={model} seed={seed} />
               ))}
             </div>
           </div>
@@ -154,7 +155,7 @@ export function ResultsView() {
                 <h3 className="results-round__title">{STAGE_LABEL[stage] ?? stage}</h3>
                 <div className="results-round__grid">
                   {ms.map((m, i) => (
-                    <MatchResultCard key={i} match={m} groupOf={groupOf} />
+                    <MatchResultCard key={i} match={m} groupOf={groupOf} model={model} seed={seed} />
                   ))}
                 </div>
               </section>

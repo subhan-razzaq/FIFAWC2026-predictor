@@ -12,13 +12,6 @@ export function oddsPct(p: number): string {
   return `${Math.round(p * 100)}%`;
 }
 
-export function decimalOdds(p: number): string {
-  if (p <= 0) return "—";
-  const o = 1 / p;
-  if (o >= 100) return `${Math.round(o)}/1`;
-  return `${o.toFixed(1)}`;
-}
-
 export const STAGE_LABEL: Record<string, string> = {
   group: "Group stage",
   R32: "Round of 32",
