@@ -108,12 +108,15 @@ main#main {
 }
 .simctl input {
   width: 92px;
-  background: var(--pitch);
+  background: var(--surface);
   border: var(--border-strong);
   color: var(--text);
   font-family: var(--font-mono);
   font-size: var(--t-sm);
   padding: 6px 8px;
+}
+.simctl input::placeholder {
+  color: var(--text-faint);
 }
 .btn {
   font-family: var(--font-mono);

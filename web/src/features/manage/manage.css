@@ -86,8 +86,9 @@
   font-size: 10px;
   text-align: center;
   line-height: 1.05;
-  color: var(--text);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  /* the pitch is a dark stadium surface in both themes, so keep light text */
+  color: #f3f1ec;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
   max-width: 64px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -223,6 +224,28 @@
 .howfar__delta {
   text-align: right;
   font-size: var(--t-xs);
+}
+
+.managed-run {
+  margin-top: var(--s-5);
+  border-top: var(--border-strong);
+  padding-top: var(--s-4);
+}
+.managed-run__head {
+  display: grid;
+  gap: 2px;
+  margin-bottom: var(--s-3);
+}
+.managed-run__outcome {
+  font-size: 1.3rem;
+  color: var(--text);
+}
+.managed-run__outcome.champ {
+  color: var(--gold);
+}
+.managed-run__matches {
+  display: grid;
+  gap: var(--s-2);
 }
 
 @media (max-width: 980px) {

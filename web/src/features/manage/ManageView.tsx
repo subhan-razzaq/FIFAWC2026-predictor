@@ -1,11 +1,12 @@
 import { useMemo, useState } from "react";
-import type { SquadPlayer, TeamOdds } from "@weltmeister/sim";
+import type { SquadPlayer, TeamOdds, TournamentResult } from "@weltmeister/sim";
 import { useStore } from "../../store/store";
 import { FORMATIONS, defaultElevenFor, managedRatings, managedScorers } from "../../lib/manage";
 import { FormationPitch } from "./FormationPitch";
 import { CountUp } from "../../components/CountUp";
 import { TeamBadge } from "../../components/TeamBadge";
-import { oddsPct, pct } from "../../lib/format";
+import { MatchResultCard } from "../../components/MatchResultCard";
+import { oddsPct, pct, STAGE_LABEL } from "../../lib/format";
 import "./manage.css";
 
 const FORMATION_NAMES = Object.keys(FORMATIONS);
@@ -14,6 +15,7 @@ export function ManageView() {
   const model = useStore((s) => s.model);
   const baseline = useStore((s) => s.baseline);
   const manageResult = useStore((s) => s.manageResult);
+  const manageSingle = useStore((s) => s.manageSingle);
   const manageRunning = useStore((s) => s.manageRunning);
   const manageProgress = useStore((s) => s.manageProgress);
   const runManage = useStore((s) => s.runManage);
@@ -22,6 +24,12 @@ export function ManageView() {
     () => [...(model?.teams ?? [])].sort((a, b) => b.rating - a.rating),
     [model],
   );
+
+  const groupOf = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const t of model?.teams ?? []) m.set(t.name, t.group);
+    return m;
+  }, [model]);
 
   const [team, setTeam] = useState<string>("");
   const [formation, setFormation] = useState("4-3-3");
@@ -274,9 +282,42 @@ export function ManageView() {
                 Set your lineup and run the simulation to see the team's path.
               </p>
             )}
+
+            {manageSingle && (
+              <ManagedRun single={manageSingle} team={team} groupOf={groupOf} />
+            )}
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function ManagedRun({
+  single,
+  team,
+  groupOf,
+}: {
+  single: TournamentResult;
+  team: string;
+  groupOf: Map<string, string>;
+}) {
+  const teamMatches = single.matches.filter((m) => m.home === team || m.away === team);
+  const reached = single.reached[team];
+  const isChampion = single.champion === team;
+  const outcome = isChampion ? "Champions" : `Out in the ${STAGE_LABEL[reached ?? "group"] ?? "group stage"}`;
+
+  return (
+    <div className="managed-run">
+      <div className="managed-run__head">
+        <span className="eyebrow">This run, game by game</span>
+        <span className={`managed-run__outcome anton ${isChampion ? "champ" : ""}`}>{outcome}</span>
+      </div>
+      <div className="managed-run__matches">
+        {teamMatches.map((m, i) => (
+          <MatchResultCard key={i} match={m} groupOf={groupOf} showStage />
+        ))}
+      </div>
     </div>
   );
 }

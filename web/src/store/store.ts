@@ -46,6 +46,7 @@ interface StoreState {
 
   manage: ManageState;
   manageResult: MonteCarloResult | null;
+  manageSingle: TournamentResult | null;
   manageRunning: boolean;
   manageProgress: number;
 
@@ -96,6 +97,7 @@ export const useStore = create<StoreState>((set, get) => ({
 
   manage: { team: null, eleven: [], formation: "4-3-3", attackBias: 0 },
   manageResult: null,
+  manageSingle: null,
   manageRunning: false,
   manageProgress: 0,
 
@@ -174,6 +176,8 @@ export const useStore = create<StoreState>((set, get) => ({
     set({ manageRunning: true, manageProgress: 0 });
     try {
       const runner = getRunner();
+      // the managed team's actual run, game by game, for this seed
+      set({ manageSingle: runSingle(model, seed, overrides) });
       // ensure a like-for-like default-squad baseline at the same seed and runs
       if (!get().baseline) {
         const base = await runner.montecarlo(model, runs, seed, undefined);

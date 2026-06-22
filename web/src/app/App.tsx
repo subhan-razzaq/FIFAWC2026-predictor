@@ -6,6 +6,7 @@ import { Header } from "./Header";
 import { Footer } from "./Footer";
 import { HomeView } from "../features/home/HomeView";
 import { PredictionsView } from "../features/predictions/PredictionsView";
+import { ResultsView } from "../features/results/ResultsView";
 import { BracketView } from "../features/bracket/BracketView";
 import { ScorersView } from "../features/scorers/ScorersView";
 import { ManageView } from "../features/manage/ManageView";
@@ -56,6 +57,7 @@ export function App() {
         <Routes>
           <Route path="/" element={<HomeView />} />
           <Route path="/predictions" element={<PredictionsView />} />
+          <Route path="/results" element={<ResultsView />} />
           <Route path="/bracket" element={<BracketView />} />
           <Route path="/scorers" element={<ScorersView />} />
           <Route path="/manage" element={<ManageView />} />
