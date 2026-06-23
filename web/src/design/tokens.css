@@ -1,9 +1,9 @@
 /*
  * WELTMEISTER design tokens.
- * Built on the FIFA World Cup 2026 visual language: a deep-blue base with bold,
- * saturated colourblocking across the full tournament spectrum (red, orange,
- * yellow, green, teal, blue, purple, magenta) plus the prize gold. Sharp edges,
- * flat colour blocks, broadcast energy. Border radius is zero by default.
+ * Built on the FIFA World Cup 2026 visual language: a deep-blue base with a
+ * restrained, deliberate colourblock band drawn from the three host nations and
+ * the prize gold (blue, green, gold, red) rather than a full rainbow. Sharp
+ * edges, flat colour blocks, broadcast energy. Border radius is zero by default.
  */
 
 :root {
@@ -57,17 +57,15 @@
   --draw: var(--gold);
   --loss: var(--fifa-red);
 
-  /* the FIFA colourblock band, used as a header accent and section divider */
+  /* the unified colourblock band: three host nations + the prize gold, cool to
+     warm. Used as a header accent and section divider, and mirrored in the
+     poster export (see web/src/lib/posterExport.ts) so shares stay on-theme. */
   --fifa-band: linear-gradient(
     90deg,
-    var(--fifa-red) 0 12.5%,
-    var(--fifa-orange) 12.5% 25%,
-    var(--fifa-yellow) 25% 37.5%,
-    var(--fifa-green) 37.5% 50%,
-    var(--fifa-teal) 50% 62.5%,
-    var(--fifa-blue) 62.5% 75%,
-    var(--fifa-purple) 75% 87.5%,
-    var(--fifa-magenta) 87.5% 100%
+    var(--fifa-blue) 0 25%,
+    var(--fifa-green) 25% 50%,
+    var(--gold) 50% 75%,
+    var(--fifa-red) 75% 100%
   );
 
   /* type families */

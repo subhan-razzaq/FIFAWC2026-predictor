@@ -11,7 +11,9 @@ const TEXT = "#f3f5fd";
 const DIM = "#aab0c8";
 const FAINT = "#7c84a4";
 const GOLD = "#d8a93f";
-const SPECTRUM = ["#e8202d", "#ff7a1a", "#f7c43a", "#16b85c", "#00bcd4", "#2f6bff", "#8b3cff", "#ff2d8e"];
+// The unified colourblock band: the three host nations and the prize gold, in a
+// cool-to-warm ramp. Kept in lockstep with --fifa-band in tokens.css.
+const SPECTRUM = ["#2f6bff", "#16b85c", "#d8a93f", "#e8202d"];
 
 const W = 1080;
 const H = 1350;
@@ -177,15 +179,32 @@ export async function exportManagerPoster(d: ManagerPosterData): Promise<void> {
   await document.fonts.ready;
   await chrome(ctx, "MANAGER MODE · MY WORLD CUP");
 
-  // grade chip
+  // grade chip — drawn centred in its box and scaled to fit, so two-character
+  // grades like "A+" stay inside the chip instead of clipping its edge.
+  const CHIP_X = 64;
+  const CHIP_Y = 210;
+  const CHIP_S = 168;
+  const cx = CHIP_X + CHIP_S / 2;
+  const cy = CHIP_Y + CHIP_S / 2;
   const gc = d.isChampion ? GOLD : gradeColor(d.grade);
   ctx.fillStyle = gc;
-  ctx.fillRect(64, 210, 168, 168);
+  ctx.fillRect(CHIP_X, CHIP_Y, CHIP_S, CHIP_S);
+
   ctx.fillStyle = NAVY;
-  ctx.font = "400 132px Anton, Archivo, Arial, sans-serif";
   ctx.textAlign = "center";
-  ctx.fillText(d.grade, 148, 224);
+  ctx.textBaseline = "middle";
+  let gradeSize = 128;
+  ctx.font = `400 ${gradeSize}px Anton, Archivo, Arial, sans-serif`;
+  const maxGradeW = CHIP_S - 40; // keep a comfortable margin on both sides
+  const gradeW = ctx.measureText(d.grade).width;
+  if (gradeW > maxGradeW) {
+    gradeSize = Math.floor((gradeSize * maxGradeW) / gradeW);
+    ctx.font = `400 ${gradeSize}px Anton, Archivo, Arial, sans-serif`;
+  }
+  // Anton's caps sit a touch high in the em box; nudge down for true optical centre.
+  ctx.fillText(d.grade, cx, cy + gradeSize * 0.06);
   ctx.textAlign = "left";
+  ctx.textBaseline = "top";
 
   // team + reached
   ctx.fillStyle = TEXT;
