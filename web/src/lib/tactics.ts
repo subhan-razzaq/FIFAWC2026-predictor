@@ -42,6 +42,18 @@ export function tacticalShift(t: Tactics): TacticalShift {
   };
 }
 
+/**
+ * Extra attack handed to the OPPONENT (log-goal units) when the managed side
+ * over-commits. Pushing the mentality toward all-out attack tilts your own
+ * attack/defence up via `tacticalShift`, but it also leaves space in behind: this
+ * is the counter-attack tax. A balanced or defensive setup adds nothing; maxed
+ * out it lifts the opponent's expected goals by roughly 12%.
+ */
+export function counterAttackRisk(mentality: number): number {
+  const m = clamp(mentality, -1, 1);
+  return m > 0 ? m * 0.12 : 0;
+}
+
 export function mentalityLabel(m: number): string {
   if (m <= -0.66) return "Ultra-defensive";
   if (m <= -0.2) return "Defensive";

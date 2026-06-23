@@ -5,18 +5,23 @@
 
 import { create } from "zustand";
 import {
+  arrangeEleven,
+  deriveSeed,
   enrichMatch,
   extractManagedCards,
   extractManagedMinutes,
   hashSeed,
   managedGroupSchedule,
-  playManagedMatch,
   resolveBracketForManaged,
   resolveGroupStage,
   runSingle,
+  simulateLiveSegment,
+  simulateLiveShootout,
   type EnrichedMatch,
+  type GoalEvent,
   type GroupStageOutcome,
   type ManagedMatchInfo,
+  type MatchEvent,
   type MatchResult,
   type Model,
   type MonteCarloResult,
@@ -28,7 +33,7 @@ import {
 } from "@weltmeister/sim";
 import { getRunner } from "../sim/runner";
 import { buildEleven, managedRatings, managedScorers } from "../lib/manage";
-import { DEFAULT_TACTICS, type Tactics } from "../lib/tactics";
+import { counterAttackRisk, DEFAULT_TACTICS, type Tactics } from "../lib/tactics";
 import {
   applyMatchCards,
   clearServedSuspensions,
@@ -50,7 +55,7 @@ function readTheme(): Theme {
 
 // --- Manager Mode (career) types ---------------------------------------------
 
-export type CareerPhase = "setup" | "preMatch" | "result" | "ended";
+export type CareerPhase = "setup" | "preMatch" | "live" | "halftime" | "result" | "ended";
 
 export interface MatchSettings {
   formation: string;
@@ -67,11 +72,43 @@ export interface PlayedMatch {
   enriched: EnrichedMatch;
 }
 
+/** A half-time (or in-running) substitution the manager made. */
+export interface LiveSub {
+  minute: number;
+  off: string;
+  on: string;
+}
+
+/** The in-progress live match: the score and timeline so far, which half is on,
+ * and the manager's running substitutions. Goals are precomputed per half but
+ * revealed minute by minute by the Live Match Center. */
+export interface LiveMatchState {
+  info: ManagedMatchInfo;
+  start: MatchSettings; // the XI / shape / tactics that kicked off
+  managedSide: "home" | "away";
+  home: string;
+  away: string;
+  goals: MatchEvent[]; // accumulated goal events (both sides), minute-stamped
+  homeGoals: number;
+  awayGoals: number;
+  half: 1 | 2;
+  endClock: number; // final-whistle minute for the current half (45, 90 or 120)
+  fullTime: number; // the match's final whistle once known (90 or 120)
+  subs: LiveSub[];
+  tactics: Tactics; // the tactics currently in force (may change at half-time)
+  formation: string; // the shape in force (may change at half-time)
+  afterExtraTime: boolean;
+  shootout?: { home: number; away: number; winner: string };
+  winner?: string;
+  secondHalfPlayed: boolean;
+}
+
 export interface CareerState {
   team: string;
   phase: CareerPhase;
   current: ManagedMatchInfo | null; // the match being prepared
   draft: MatchSettings | null; // working lineup/tactics for `current`
+  live: LiveMatchState | null; // the match in progress, if any
   playerStates: PlayerStates;
   played: PlayedMatch[];
   group: GroupStageOutcome | null;
@@ -79,6 +116,8 @@ export interface CareerState {
   projection: TeamOdds | null;
   lastResult: PlayedMatch | null;
 }
+
+export const MAX_HALFTIME_SUBS = 3;
 
 interface StoreState {
   model: Model | null;
@@ -112,7 +151,15 @@ interface StoreState {
   setDraft: (patch: Partial<MatchSettings>) => void;
   setFormation: (formation: string) => void;
   setEleven: (eleven: string[]) => void;
-  playCurrentMatch: () => void;
+  // live match lifecycle
+  kickOff: () => void;
+  goToHalftime: () => void;
+  halftimeSub: (off: string, on: string) => void;
+  undoHalftimeSub: (on: string) => void;
+  setHalftimeTactics: (patch: Partial<Tactics>) => void;
+  setHalftimeFormation: (formation: string) => void;
+  resumeSecondHalf: () => void;
+  finishMatch: () => void;
   continueCareer: () => void;
   resetCareer: () => void;
 }
@@ -159,16 +206,51 @@ function defaultSettings(
   return { formation, eleven, tactics: { ...DEFAULT_TACTICS }, captain, penaltyTaker };
 }
 
-/** Overrides for the managed team built from the current draft + squad condition. */
-function draftOverrides(model: Model, team: string, draft: MatchSettings, states: PlayerStates): Overrides {
-  const r = managedRatings(model, team, draft.eleven, draft.formation, draft.tactics, states);
+/**
+ * Build the match overrides for one segment: the managed team's tactics/fatigue
+ * adjusted attack/defence and scorer model, plus the counter-attack tax handed to
+ * the opponent when the manager over-commits. `eleven` is whoever is on the pitch
+ * for this segment, `states` the squad condition at the start of it.
+ */
+function buildLiveOverrides(
+  model: Model,
+  team: string,
+  opponent: string,
+  eleven: string[],
+  formation: string,
+  tactics: Tactics,
+  penaltyTaker: string,
+  states: PlayerStates,
+): Overrides {
+  const r = managedRatings(model, team, eleven, formation, tactics, states);
+  const ratings: Record<string, { atk: number; def: number }> = { [team]: { atk: r.atk, def: r.def } };
+  const risk = counterAttackRisk(tactics.mentality);
+  if (risk > 0) {
+    const opp = model.teams.find((t) => t.name === opponent);
+    if (opp) ratings[opponent] = { atk: opp.atk + risk, def: opp.def };
+  }
   return {
-    ratings: { [team]: { atk: r.atk, def: r.def } },
-    scorers: { [team]: managedScorers(model.squads[team]!, draft.eleven, draft.penaltyTaker, states) },
+    ratings,
+    scorers: { [team]: managedScorers(model.squads[team]!, eleven, penaltyTaker, states) },
   };
 }
 
 const KO_STAGES = new Set<Stage>(["R32", "R16", "QF", "SF", "third_place", "final"]);
+
+/** Squad condition after playing `minutes` this match, by player position group. */
+function depleteForMinutes(
+  states: PlayerStates,
+  minutes: Map<string, number>,
+  byName: Map<string, { group: string }>,
+): PlayerStates {
+  const next: PlayerStates = { ...states };
+  for (const [name, mins] of minutes) {
+    const grp = byName.get(name)?.group ?? "MF";
+    const cur = next[name] ?? freshCondition();
+    next[name] = { ...cur, stamina: depleteStamina(cur.stamina, mins, grp) };
+  }
+  return next;
+}
 
 export const useStore = create<StoreState>((set, get) => ({
   model: null,
@@ -265,6 +347,7 @@ export const useStore = create<StoreState>((set, get) => ({
         phase: "preMatch",
         current,
         draft,
+        live: null,
         playerStates: states,
         played: [],
         group: null,
@@ -316,47 +399,222 @@ export const useStore = create<StoreState>((set, get) => ({
     set({ career: { ...c, draft: { ...c.draft, eleven, captain, penaltyTaker } } });
   },
 
-  playCurrentMatch: () => {
+  // --- live match lifecycle ---------------------------------------------------
+  // A managed match is played in segments so half-time decisions are real: the
+  // first half is simulated at kick-off with the chosen XI/tactics; the manager
+  // then makes up to three changes; the second half (and any extra time / pens) is
+  // simulated AFTERWARDS with the updated lineup, tactics and mid-match fatigue.
+
+  kickOff: () => {
     const { model, seed } = get();
     const c = get().career;
     if (!model || !c || !c.current || !c.draft) return;
 
     const info = c.current;
-    const overrides = draftOverrides(model, c.team, c.draft, c.playerStates);
-    const result = playManagedMatch(model, seed, c.team, info, overrides);
+    const team = c.team;
+    const home = info.isHome ? team : info.opponent;
+    const away = info.isHome ? info.opponent : team;
+    const managedSide: "home" | "away" = info.isHome ? "home" : "away";
+    const spec = { home, away, stage: info.stage, hostHome: info.hostHome, hostAway: info.hostAway };
+    const base = deriveSeed(seed, info.matchNo);
+
+    const ov = buildLiveOverrides(
+      model, team, info.opponent, c.draft.eleven, c.draft.formation, c.draft.tactics, c.draft.penaltyTaker, c.playerStates,
+    );
+    const h1 = simulateLiveSegment(model, ov, deriveSeed(base, 11), spec, 0, 45);
+
+    set({
+      career: {
+        ...c,
+        phase: "live",
+        live: {
+          info,
+          start: { ...c.draft, tactics: { ...c.draft.tactics } },
+          managedSide,
+          home,
+          away,
+          goals: h1.goals,
+          homeGoals: h1.homeGoals,
+          awayGoals: h1.awayGoals,
+          half: 1,
+          endClock: 45,
+          fullTime: 90,
+          subs: [],
+          tactics: { ...c.draft.tactics },
+          formation: c.draft.formation,
+          afterExtraTime: false,
+          secondHalfPlayed: false,
+        },
+      },
+    });
+  },
+
+  goToHalftime: () => {
+    const c = get().career;
+    if (!c || !c.live || c.live.half !== 1 || c.phase !== "live") return;
+    set({ career: { ...c, phase: "halftime" } });
+  },
+
+  halftimeSub: (off, on) => {
+    const c = get().career;
+    if (!c || !c.live || c.phase !== "halftime") return;
+    const live = c.live;
+    if (live.subs.length >= MAX_HALFTIME_SUBS) return;
+    const subbedOff = new Set(live.subs.map((s) => s.off));
+    const broughtOn = new Set(live.subs.map((s) => s.on));
+    // `off` must be a starter still on the pitch; `on` a genuine bench player.
+    if (!live.start.eleven.includes(off) || subbedOff.has(off)) return;
+    if (live.start.eleven.includes(on) || broughtOn.has(on)) return;
+    set({ career: { ...c, live: { ...live, subs: [...live.subs, { minute: 45, off, on }] } } });
+  },
+
+  undoHalftimeSub: (on) => {
+    const c = get().career;
+    if (!c || !c.live || c.phase !== "halftime") return;
+    set({ career: { ...c, live: { ...c.live, subs: c.live.subs.filter((s) => s.on !== on) } } });
+  },
+
+  setHalftimeTactics: (patch) => {
+    const c = get().career;
+    if (!c || !c.live || c.phase !== "halftime") return;
+    set({ career: { ...c, live: { ...c.live, tactics: { ...c.live.tactics, ...patch } } } });
+  },
+
+  setHalftimeFormation: (formation) => {
+    const c = get().career;
+    if (!c || !c.live || c.phase !== "halftime") return;
+    set({ career: { ...c, live: { ...c.live, formation } } });
+  },
+
+  resumeSecondHalf: () => {
+    const { model, seed } = get();
+    const c = get().career;
+    if (!model || !c || !c.live || c.phase !== "halftime") return;
+    const live = c.live;
+    const team = c.team;
+    const info = live.info;
+    const spec = { home: live.home, away: live.away, stage: info.stage, hostHome: info.hostHome, hostAway: info.hostAway };
+    const base = deriveSeed(seed, info.matchNo);
+
+    // mid-match fatigue: every starter has played 45'; the players coming on are fresh.
+    const byName = new Map(model.squads[team]!.players.map((p) => [p.name, p]));
+    const h1Minutes = new Map<string, number>();
+    for (const name of live.start.eleven) h1Minutes.set(name, 45);
+    const statesH2 = depleteForMinutes(c.playerStates, h1Minutes, byName);
+
+    // the XI on the pitch for the second half, after the substitutions, arranged
+    // into whatever shape is now in force (the manager may have switched at the break)
+    const swapped = live.start.eleven.map((n) => live.subs.find((s) => s.off === n)?.on ?? n);
+    const elevenH2 = arrangeEleven(model.squads[team]!, swapped, live.formation);
+
+    const ovH2 = buildLiveOverrides(
+      model, team, info.opponent, elevenH2, live.formation, live.tactics, live.start.penaltyTaker, statesH2,
+    );
+    const h2 = simulateLiveSegment(model, ovH2, deriveSeed(base, 22), spec, 45, 90);
+
+    let goals = [...live.goals, ...h2.goals];
+    let homeGoals = live.homeGoals + h2.homeGoals;
+    let awayGoals = live.awayGoals + h2.awayGoals;
+    let endClock = 90;
+    let fullTime = 90;
+    let afterExtraTime = false;
+    let shootout: { home: number; away: number; winner: string } | undefined;
+    let winner: string | undefined;
+
+    const isKO = KO_STAGES.has(info.stage);
+    if (isKO && homeGoals === awayGoals) {
+      afterExtraTime = true;
+      const et = simulateLiveSegment(model, ovH2, deriveSeed(base, 33), spec, 90, 120);
+      goals = [...goals, ...et.goals];
+      homeGoals += et.homeGoals;
+      awayGoals += et.awayGoals;
+      endClock = 120;
+      fullTime = 120;
+    }
+    if (isKO) {
+      if (homeGoals > awayGoals) winner = live.home;
+      else if (awayGoals > homeGoals) winner = live.away;
+      else {
+        shootout = simulateLiveShootout(model, ovH2, deriveSeed(base, 44), live.home, live.away);
+        winner = shootout.winner;
+      }
+    }
+
+    set({
+      career: {
+        ...c,
+        phase: "live",
+        live: {
+          ...live,
+          goals,
+          homeGoals,
+          awayGoals,
+          half: 2,
+          endClock,
+          fullTime,
+          afterExtraTime,
+          ...(shootout ? { shootout } : {}),
+          ...(winner ? { winner } : {}),
+          secondHalfPlayed: true,
+        },
+      },
+    });
+  },
+
+  finishMatch: () => {
+    const { model, seed } = get();
+    const c = get().career;
+    if (!model || !c || !c.live || !c.live.secondHalfPlayed) return;
+    const live = c.live;
+    const team = c.team;
+    const info = live.info;
+
+    const scorers: GoalEvent[] = [...live.goals]
+      .sort((a, b) => a.minute - b.minute)
+      .map((e) => ({ team: e.team, player: e.player, kind: e.kind ?? "open", ...(e.assist ? { assist: e.assist } : {}) }));
+    const result: MatchResult = {
+      home: live.home,
+      away: live.away,
+      homeGoals: live.homeGoals,
+      awayGoals: live.awayGoals,
+      stage: info.stage,
+      scorers,
+    };
+    if (live.afterExtraTime) result.afterExtraTime = true;
+    if (live.shootout) result.shootout = live.shootout;
+    if (live.winner) result.winner = live.winner;
+
+    // canonical timeline: the live goals at their real minutes plus the manager's
+    // own substitutions, so the post-match detail is exactly what played out.
     const enriched = enrichMatch({
       model,
       match: result,
       seed,
-      elevenOverride: { [c.team]: c.draft.eleven },
-      formationOverride: { [c.team]: c.draft.formation },
-      captainOverride: { [c.team]: c.draft.captain },
-      penaltyOverride: { [c.team]: c.draft.penaltyTaker },
+      elevenOverride: { [team]: live.start.eleven },
+      formationOverride: { [team]: live.start.formation },
+      captainOverride: { [team]: live.start.captain },
+      penaltyOverride: { [team]: live.start.penaltyTaker },
+      providedGoalEvents: live.goals,
+      subsOverride: { [team]: live.subs.map((s) => ({ minute: s.minute, off: s.off, on: s.on })) },
     });
 
-    // update squad condition from the SAME events the timeline shows
+    // squad condition from the SAME events the timeline shows
     let states: PlayerStates = { ...c.playerStates };
-    const minutes = extractManagedMinutes(enriched, c.team, result.afterExtraTime);
-    const byName = new Map(model.squads[c.team]!.players.map((p) => [p.name, p]));
-    for (const [name, mins] of minutes) {
-      const grp = byName.get(name)?.group ?? "MF";
-      const cur = states[name] ?? freshCondition();
-      states[name] = { ...cur, stamina: depleteStamina(cur.stamina, mins, grp) };
-    }
-    // players banned for this match have now served it
+    const minutes = extractManagedMinutes(enriched, team, live.afterExtraTime);
+    const byName = new Map(model.squads[team]!.players.map((p) => [p.name, p]));
+    states = depleteForMinutes(states, minutes, byName);
     const suspendedForThis = Object.keys(states).filter((n) => c.playerStates[n]?.suspendedNext);
     states = clearServedSuspensions(states, suspendedForThis);
-    // new bookings from this match
-    const cards = extractManagedCards(enriched, c.team);
+    const cards = extractManagedCards(enriched, team);
     states = applyMatchCards(states, cards.yellows, cards.reds);
-    // FIFA: accumulated yellows are wiped after the quarter-finals
     if (info.stage === "QF") states = wipeYellows(states);
 
-    const playedMatch: PlayedMatch = { info, settings: c.draft, result, enriched };
+    const playedMatch: PlayedMatch = { info, settings: live.start, result, enriched };
     set({
       career: {
         ...c,
         phase: "result",
+        live: null,
         playerStates: states,
         played: [...c.played, playedMatch],
         lastResult: playedMatch,

@@ -3,9 +3,10 @@
 // Every player carries stamina in [0,100], starting fresh. Minutes deplete it
 // (forwards and midfielders harder than defenders, keepers least); rest between
 // matches recovers some. A tired player is worth less: their effective output is
-// scaled by `fatigueMult`, capped at a 20% drop so a knackered star is poor but
-// not useless, exactly the 15-20% the brief asks for. This is what forces the
-// user to rotate across the three group games instead of riding their best XI.
+// scaled by `fatigueMult`. Above half stamina the wear is gentle, but BELOW 50%
+// the penalty turns steep — a player run into the ground falls off a cliff, which
+// is what forces the user to rotate and to use the half-time window rather than
+// riding their best XI through the whole month.
 
 const ROLE_DEPLETE: Record<string, number> = { GK: 0.4, DF: 0.9, MF: 1.1, FW: 1.0 };
 const BASE_DEPLETE = 26; // a full 90 for a midfielder costs ~29 stamina
@@ -14,10 +15,25 @@ const BASE_DEPLETE = 26; // a full 90 for a midfielder costs ~29 stamina
 export const GROUP_REST = 16;
 export const KO_REST = 22;
 
-/** Effective-output multiplier for a player starting at this stamina. */
+/** The stamina at which the heavy penalty kicks in. */
+export const FATIGUE_THRESHOLD = 50;
+
+/**
+ * Effective-output multiplier for a player starting at this stamina. Gentle
+ * linear wear down to 50% (about a 6% loss at the threshold), then a steep
+ * quadratic penalty below it, bottoming out near a 34% loss for a spent player.
+ */
 export function fatigueMult(stamina: number): number {
   const s = Math.max(0, Math.min(100, stamina));
-  return 1 - 0.2 * (1 - s / 100);
+  const linear = 1 - 0.12 * (1 - s / 100);
+  if (s >= FATIGUE_THRESHOLD) return linear;
+  const deficit = (FATIGUE_THRESHOLD - s) / FATIGUE_THRESHOLD; // 0 at 50%, 1 at empty
+  return linear - 0.22 * deficit * deficit;
+}
+
+/** True when a player is fatigued enough to carry the heavy penalty. */
+export function isFatigued(stamina: number): boolean {
+  return stamina < FATIGUE_THRESHOLD;
 }
 
 /** New stamina after playing `minutes` in a position group. */
