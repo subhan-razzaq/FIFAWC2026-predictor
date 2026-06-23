@@ -8,6 +8,8 @@ import { TeamBadge } from "../../components/TeamBadge";
 import { Confetti } from "../../components/Confetti";
 import { Trophy } from "../bracket/Trophy";
 import { STAGE_LABEL } from "../../lib/format";
+import { exportManagerPoster, type RoadStop } from "../../lib/posterExport";
+import { useStore } from "../../store/store";
 import type { PlayedMatch } from "../../store/store";
 
 const STAT_VARIANT = {
@@ -26,12 +28,38 @@ interface Props {
 }
 
 export function GradeScreen({ team, group, reached, isChampion, projection, played, onRestart }: Props) {
+  const seedLabel = useStore((s) => s.seedLabel);
   const grade = gradeRun(reached, isChampion, projection ?? undefined);
   const results: MatchResult[] = played.map((p) => p.result);
   const enriched: EnrichedMatch[] = played.map((p) => p.enriched);
   const scorers = tournamentScorers(results, team).slice(0, 5);
   const subs = impactSubs(enriched, team);
   const subGoals = subs.reduce((s, x) => s + x.goals, 0);
+
+  const sharePoster = () => {
+    const road: RoadStop[] = played.map((p) => {
+      const r = p.result;
+      const home = r.home === team;
+      const stop: RoadStop = {
+        stage: p.info.stage,
+        opp: home ? r.away : r.home,
+        gf: home ? r.homeGoals : r.awayGoals,
+        ga: home ? r.awayGoals : r.homeGoals,
+      };
+      if (r.shootout) stop.pens = home ? [r.shootout.home, r.shootout.away] : [r.shootout.away, r.shootout.home];
+      if (r.afterExtraTime) stop.aet = true;
+      return stop;
+    });
+    void exportManagerPoster({
+      team,
+      grade: grade.grade,
+      reachedLabel: grade.reachedLabel,
+      isChampion,
+      road,
+      ...(scorers.length > 0 ? { topScorer: { player: scorers[0]!.player, goals: scorers[0]!.goals } } : {}),
+      seedLabel,
+    });
+  };
 
   return (
     <div className="grade">
@@ -127,9 +155,14 @@ export function GradeScreen({ team, group, reached, isChampion, projection, play
         })}
       </div>
 
-      <button className="btn grade__restart" onClick={onRestart}>
-        Take another nation
-      </button>
+      <div className="grade__actions">
+        <button className="btn" onClick={sharePoster}>
+          Share poster
+        </button>
+        <button className="btn btn--ghost grade__restart" onClick={onRestart}>
+          Take another nation
+        </button>
+      </div>
     </div>
   );
 }

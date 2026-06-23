@@ -116,7 +116,7 @@ export function BracketView() {
           <button className="btn btn--ghost" onClick={copyLink}>
             {copied ? "Copied" : "Copy link"}
           </button>
-          <button className="btn btn--ghost" onClick={() => single && exportPoster(single, seedLabel)}>
+          <button className="btn btn--ghost" onClick={() => single && void exportPoster(single, seedLabel)}>
             Share poster
           </button>
           <button className="btn btn--ghost" onClick={() => play()}>

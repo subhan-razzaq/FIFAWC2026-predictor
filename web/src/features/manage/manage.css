@@ -670,3 +670,6 @@
 .tpanel__path-score { font-weight: 700; }
 .tpanel__path-opp { display: flex; align-items: center; gap: 6px; justify-content: flex-end; min-width: 0; }
 @media (max-width: 920px) { .tpanel__mine { grid-template-columns: 1fr; } .tpanel__grid { grid-template-columns: 1fr; } }
+
+.grade__actions { display: flex; flex-wrap: wrap; gap: var(--s-3); margin-top: var(--s-2); }
+.grade__actions .grade__restart { max-width: none; }
