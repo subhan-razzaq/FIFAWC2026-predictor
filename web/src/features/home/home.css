@@ -6,34 +6,100 @@
     radial-gradient(70% 90% at 92% 0%, color-mix(in srgb, var(--gold) 12%, transparent), transparent 60%),
     linear-gradient(180deg, color-mix(in srgb, var(--fifa-blue) 9%, var(--bg)), var(--bg) 70%);
 }
-/* faint scoreboard hairlines for a broadcast surface, not a gradient blob */
-.hero::before {
-  content: "";
+/* tactics-board pitch markings, the soccer spine of the hero */
+.hero__pitch {
   position: absolute;
   inset: 0;
-  background-image: repeating-linear-gradient(90deg, transparent 0 71px, var(--line) 71px 72px);
-  opacity: 0.5;
+  width: 100%;
+  height: 100%;
+  color: var(--line-strong);
+  opacity: 0.4;
   pointer-events: none;
 }
-/* the 26 mark, ghosted in as identity rather than decoration */
-.hero__ghost {
+/* the 26 ball mark, floated in as the hero graphic */
+.hero__ball {
   position: absolute;
-  right: -4%;
-  bottom: -14%;
-  width: clamp(280px, 38vw, 560px);
+  right: 3%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: clamp(240px, 32vw, 500px);
   height: auto;
-  opacity: 0.05;
+  opacity: 0.035;
   pointer-events: none;
   user-select: none;
+  /* heavy blur + glow keep it a pure atmospheric wash, so its resolution never reads */
+  filter: blur(3px) drop-shadow(0 0 80px color-mix(in srgb, var(--gold) 22%, transparent));
+}
+.theme-light .hero__ball {
+  opacity: 0.05;
 }
 .hero__inner {
   position: relative;
   display: grid;
   grid-template-columns: 1.15fr 0.85fr;
   gap: var(--s-7);
-  padding: var(--s-8) var(--s-5) var(--s-9);
+  padding: var(--s-7) var(--s-5) var(--s-9);
   align-items: center;
 }
+
+/* flag ticker */
+.flag-ticker {
+  position: relative;
+  overflow: hidden;
+  border-bottom: var(--border);
+  background: color-mix(in srgb, var(--bg) 60%, var(--surface));
+  padding: 9px 0;
+}
+.flag-ticker::before,
+.flag-ticker::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 80px;
+  z-index: 1;
+  pointer-events: none;
+}
+.flag-ticker::before { left: 0; background: linear-gradient(90deg, var(--bg), transparent); }
+.flag-ticker::after { right: 0; background: linear-gradient(270deg, var(--bg), transparent); }
+.flag-ticker__track {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  width: max-content;
+  animation: flag-scroll 80s linear infinite;
+}
+.flag-ticker:hover .flag-ticker__track { animation-play-state: paused; }
+.flag-ticker__flag {
+  width: 34px;
+  height: 23px;
+  object-fit: cover;
+  flex: 0 0 auto;
+  border: 1px solid var(--line);
+  opacity: 0.78;
+}
+@keyframes flag-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .flag-ticker__track { animation: none; }
+}
+
+/* animated headline */
+.hero__eyebrow { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); }
+.hero__hosts {
+  color: var(--gold);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  padding-right: var(--s-2);
+  border-right: var(--border-strong);
+}
+.hero__title-line {
+  display: block;
+  overflow: hidden;
+}
+.hero__title-word { display: block; }
 .hero__title {
   font-size: var(--t-hero);
   line-height: 0.92;
@@ -52,20 +118,47 @@
   margin-top: var(--s-5);
   flex-wrap: wrap;
 }
-.hero__thisrun {
+/* the flagship action: a soft gold ring draws the eye without shouting */
+.hero__cta-primary {
+  position: relative;
+  animation: cta-pulse 2.8s var(--ease-broadcast) infinite;
+}
+@keyframes cta-pulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--gold) 45%, transparent); }
+  55% { box-shadow: 0 0 0 12px color-mix(in srgb, var(--gold) 0%, transparent); }
+  100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--gold) 0%, transparent); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero__cta-primary { animation: none; }
+}
+/* champion spotlight: the run's predicted winner, surfaced as an event */
+.champ-spot {
   margin-top: var(--s-5);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-4);
+  padding: var(--s-3) var(--s-5) var(--s-3) var(--s-3);
+  border: var(--border-strong);
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--gold) 16%, transparent), transparent 70%),
+    var(--surface);
+}
+.champ-spot__flag {
+  display: inline-flex;
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+.champ-spot__copy {
   display: grid;
   gap: 2px;
-  border-left: var(--keyline);
-  padding-left: var(--s-4);
 }
-.hero__thisrun-champ {
-  font-size: clamp(1.4rem, 3vw, 2.2rem);
+.champ-spot__name {
+  font-size: clamp(1.5rem, 3vw, 2.3rem);
   color: var(--gold);
-  line-height: 1.05;
+  line-height: 1;
 }
-.hero__thisrun-sub {
-  color: var(--text-faint);
+.champ-spot__sub {
+  color: var(--text-dim);
   font-size: var(--t-xs);
 }
 .hero__odds {
