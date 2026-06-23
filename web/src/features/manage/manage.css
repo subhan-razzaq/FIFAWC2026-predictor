@@ -680,6 +680,7 @@
 
 .lmc { display: grid; gap: var(--s-4); margin-top: var(--s-3); }
 .lmc__board {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
@@ -689,6 +690,26 @@
     radial-gradient(140% 90% at 50% 0%, color-mix(in srgb, var(--gold) 9%, transparent), transparent 60%),
     var(--surface);
   border-color: var(--line-strong);
+  overflow: hidden;
+}
+/* goal flash overlay */
+.lmc__flash {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  gap: 2px;
+  padding: 6px 14px;
+  background: color-mix(in srgb, var(--gold) 92%, transparent);
+  color: var(--ink);
+  pointer-events: none;
+}
+.lmc__flash.left { left: var(--s-4); }
+.lmc__flash.right { right: var(--s-4); text-align: right; }
+.lmc__flash-word { font-size: 1.5rem; line-height: 1; letter-spacing: 0.06em; }
+.lmc__flash-who { font-size: var(--t-xs); font-weight: 700; }
+@media (prefers-reduced-motion: reduce) {
+  .lmc__flash { transition: none; }
 }
 .lmc__side { display: flex; align-items: center; gap: var(--s-3); min-width: 0; }
 .lmc__side--away { justify-content: flex-end; text-align: right; }
@@ -701,6 +722,8 @@
 
 .lmc__controls { display: flex; align-items: center; justify-content: center; gap: var(--s-3); flex-wrap: wrap; }
 .lmc__speeds { display: flex; gap: 2px; }
+.lmc__adjust { padding: 8px 16px; }
+.lmc__adjust:disabled { opacity: 0.45; cursor: not-allowed; }
 
 .lmc__feed { display: grid; gap: 2px; border: var(--border); background: var(--surface); max-height: 360px; overflow-y: auto; }
 .lmc__feed-empty { padding: var(--s-5); text-align: center; color: var(--text-faint); }
@@ -736,44 +759,66 @@
 .lmc__col-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-3); margin-bottom: var(--s-2); }
 .lmc__subs-left { color: var(--gold); font-weight: 700; font-size: var(--t-xs); }
 
-/* the visual XI: four pitch lines, drawn on a faint pitch */
-.lmc__pitch {
-  display: grid;
-  gap: var(--s-2);
-  padding: var(--s-3) var(--s-2);
-  background:
-    repeating-linear-gradient(180deg, color-mix(in srgb, var(--pitch) 60%, var(--surface)) 0 38px, color-mix(in srgb, var(--pitch-2) 60%, var(--surface)) 38px 76px);
-  border: var(--border);
-}
-.lmc__pitch-line { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--s-2); }
+/* half-time read-outs */
+.lmc__insights { display: grid; gap: 6px; }
+.lmc__insight { display: flex; align-items: center; gap: 8px; font-size: var(--t-sm); color: var(--text-dim); }
+.lmc__insight-dot { width: 7px; height: 7px; flex: 0 0 auto; }
+.lmc__insight.good .lmc__insight-dot { background: var(--mex-green); }
+.lmc__insight.bad .lmc__insight-dot { background: var(--fifa-red); }
+.lmc__insight.neutral .lmc__insight-dot { background: var(--gold); }
 
-.lmc-pc {
-  display: flex; align-items: center; gap: 8px;
-  width: 168px; max-width: 100%;
-  padding: 6px 9px;
-  background: color-mix(in srgb, var(--surface-hi) 88%, transparent);
+/* the XI on a real pitch, same visual as the pre-match sheet */
+.lmc__subpitch { width: 100%; max-width: 340px; margin: 0 auto; aspect-ratio: 3 / 4; }
+.lmc-pp {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  animation: none;
+}
+.lmc-pp:disabled { cursor: default; }
+.lmc-pp .pitch__dot { transition: outline var(--dur-fast), border-color var(--dur-fast); }
+.lmc-pp:not(:disabled):hover .pitch__dot { outline: 2px solid var(--gold); outline-offset: 2px; }
+.lmc-pp.sel .pitch__dot { outline: 3px solid var(--gold); outline-offset: 2px; box-shadow: 0 0 14px color-mix(in srgb, var(--gold) 70%, transparent); }
+.lmc-pp.inc .pitch__dot { border-color: var(--mex-green); }
+.lmc-pp.inc { opacity: 0.92; }
+.lmc-pp__ovr {
+  position: absolute;
+  bottom: -3px;
+  right: -7px;
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 10px;
+  background: var(--ink);
+  color: var(--gold);
+  padding: 0 3px;
+  border: 1px solid color-mix(in srgb, var(--gold) 40%, transparent);
+}
+
+/* bench as OVR-rated chips */
+.lmc__bench { display: grid; gap: var(--s-2); max-height: 460px; overflow-y: auto; padding-right: 2px; align-content: start; }
+.lmc__bench.armed { outline: 1px dashed color-mix(in srgb, var(--gold) 60%, transparent); outline-offset: 4px; }
+.lmc-bchip {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%;
+  padding: 7px 10px;
+  background: color-mix(in srgb, var(--surface-hi) 90%, transparent);
   border: var(--border-strong);
   text-align: left;
-  transition: transform var(--dur-fast), border-color var(--dur-fast), background var(--dur-fast);
+  transition: transform var(--dur-fast), border-color var(--dur-fast);
 }
-.lmc-pc:not(:disabled):hover { transform: translateY(-1px); border-color: var(--gold); }
-.lmc-pc.sel { border-color: var(--gold); background: color-mix(in srgb, var(--gold) 18%, var(--surface-hi)); outline: 2px solid var(--gold); outline-offset: -2px; }
-.lmc-pc.inc { border-left: 3px solid var(--mex-green); }
-.lmc-pc.locked { opacity: 0.78; }
-.lmc-pc:disabled { opacity: 0.4; cursor: not-allowed; }
-.lmc-pc__num { width: 22px; text-align: center; font-weight: 700; color: var(--gold); flex: 0 0 auto; }
-.lmc-pc__body { display: grid; gap: 2px; min-width: 0; flex: 1; }
-.lmc-pc__name { font-size: var(--t-sm); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.lmc-pc__meta { font-size: var(--t-xs); color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.04em; }
-.lmc-pc__bar { height: 3px; background: var(--line); display: block; }
-.lmc-pc__bar-fill { display: block; height: 100%; }
-
-.lmc__bench { display: grid; gap: var(--s-2); max-height: 320px; overflow-y: auto; padding-right: 2px; }
-.lmc__bench.armed { outline: 1px dashed color-mix(in srgb, var(--gold) 60%, transparent); outline-offset: 4px; }
-.lmc-pc.bench { width: 100%; }
+.lmc-bchip:not(:disabled):hover { transform: translateY(-1px); border-color: var(--gold); }
+.lmc-bchip:disabled { opacity: 0.45; cursor: not-allowed; }
+.lmc-bchip__ovr { min-width: 28px; text-align: center; font-family: var(--font-mono); font-weight: 700; font-size: 1.05rem; color: var(--gold); }
+.lmc-bchip__body { display: grid; gap: 1px; flex: 1; min-width: 0; }
+.lmc-bchip__name { font-size: var(--t-sm); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lmc-bchip__pos { font-size: var(--t-xs); color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.04em; }
+.lmc-bchip__dot { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; }
 
 .lmc__sublist { display: grid; gap: 4px; margin-top: var(--s-3); }
 .lmc__sublist li { display: flex; align-items: center; gap: 6px; font-size: var(--t-sm); }
+.lmc__sub-min { color: var(--text-faint); min-width: 26px; }
 .lmc__sub-on { color: var(--mex-green); font-weight: 700; }
 .lmc__sub-undo { margin-left: auto; color: var(--text-faint); border: var(--border); width: 20px; height: 20px; line-height: 1; }
 .lmc__sub-undo:hover { color: var(--fifa-red); border-color: var(--fifa-red); }

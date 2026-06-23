@@ -101,6 +101,8 @@ export interface LiveMatchState {
   shootout?: { home: number; away: number; winner: string };
   winner?: string;
   secondHalfPlayed: boolean;
+  /** bumps on every in-running re-simulation so each replay is distinct yet reproducible */
+  resimCount: number;
 }
 
 export interface CareerState {
@@ -117,7 +119,8 @@ export interface CareerState {
   lastResult: PlayedMatch | null;
 }
 
-export const MAX_HALFTIME_SUBS = 3;
+/** Total substitutions allowed across the match (made at any stoppage). */
+export const MAX_SUBS = 5;
 
 interface StoreState {
   model: Model | null;
@@ -154,10 +157,11 @@ interface StoreState {
   // live match lifecycle
   kickOff: () => void;
   goToHalftime: () => void;
-  halftimeSub: (off: string, on: string) => void;
-  undoHalftimeSub: (on: string) => void;
-  setHalftimeTactics: (patch: Partial<Tactics>) => void;
-  setHalftimeFormation: (formation: string) => void;
+  liveSub: (off: string, on: string, minute: number) => void;
+  undoLiveSub: (on: string) => void;
+  setLiveTactics: (patch: Partial<Tactics>) => void;
+  setLiveFormation: (formation: string) => void;
+  commitLiveChanges: (fromMinute: number) => void;
   resumeSecondHalf: () => void;
   finishMatch: () => void;
   continueCareer: () => void;
@@ -250,6 +254,35 @@ function depleteForMinutes(
     next[name] = { ...cur, stamina: depleteStamina(cur.stamina, mins, grp) };
   }
   return next;
+}
+
+/** Minutes each player has logged by `upto`, read off the substitution timeline. */
+function minutesPlayedSoFar(live: LiveMatchState, upto: number): Map<string, number> {
+  const m = new Map<string, number>();
+  for (const name of live.start.eleven) {
+    const sub = live.subs.find((s) => s.off === name);
+    m.set(name, Math.max(0, sub ? Math.min(sub.minute, upto) : upto));
+  }
+  for (const s of live.subs) {
+    if (s.minute <= upto) m.set(s.on, Math.max(0, upto - s.minute));
+  }
+  return m;
+}
+
+/** Squad condition `upto` minutes into this match (pre-match stamina minus wear). */
+function statesAtMinute(
+  base: PlayerStates,
+  live: LiveMatchState,
+  upto: number,
+  byName: Map<string, { group: string }>,
+): PlayerStates {
+  return depleteForMinutes(base, minutesPlayedSoFar(live, upto), byName);
+}
+
+/** The XI on the pitch right now (starters with subs applied), in the live shape. */
+function currentLiveEleven(model: Model, team: string, live: LiveMatchState): string[] {
+  const swapped = live.start.eleven.map((n) => live.subs.find((s) => s.off === n)?.on ?? n);
+  return arrangeEleven(model.squads[team]!, swapped, live.formation);
 }
 
 export const useStore = create<StoreState>((set, get) => ({
@@ -444,6 +477,7 @@ export const useStore = create<StoreState>((set, get) => ({
           formation: c.draft.formation,
           afterExtraTime: false,
           secondHalfPlayed: false,
+          resimCount: 0,
         },
       },
     });
@@ -455,35 +489,96 @@ export const useStore = create<StoreState>((set, get) => ({
     set({ career: { ...c, phase: "halftime" } });
   },
 
-  halftimeSub: (off, on) => {
+  // Substitutions and tactical changes can be made at any stoppage, not only at
+  // half-time. `minute` is when the change goes in; `commitLiveChanges` then
+  // re-simulates the rest of the current half so the change actually bites.
+  liveSub: (off, on, minute) => {
     const c = get().career;
-    if (!c || !c.live || c.phase !== "halftime") return;
+    if (!c || !c.live || (c.phase !== "live" && c.phase !== "halftime")) return;
     const live = c.live;
-    if (live.subs.length >= MAX_HALFTIME_SUBS) return;
+    if (live.subs.length >= MAX_SUBS) return;
     const subbedOff = new Set(live.subs.map((s) => s.off));
     const broughtOn = new Set(live.subs.map((s) => s.on));
     // `off` must be a starter still on the pitch; `on` a genuine bench player.
     if (!live.start.eleven.includes(off) || subbedOff.has(off)) return;
     if (live.start.eleven.includes(on) || broughtOn.has(on)) return;
-    set({ career: { ...c, live: { ...live, subs: [...live.subs, { minute: 45, off, on }] } } });
+    set({ career: { ...c, live: { ...live, subs: [...live.subs, { minute, off, on }] } } });
   },
 
-  undoHalftimeSub: (on) => {
+  undoLiveSub: (on) => {
     const c = get().career;
-    if (!c || !c.live || c.phase !== "halftime") return;
+    if (!c || !c.live || (c.phase !== "live" && c.phase !== "halftime")) return;
     set({ career: { ...c, live: { ...c.live, subs: c.live.subs.filter((s) => s.on !== on) } } });
   },
 
-  setHalftimeTactics: (patch) => {
+  setLiveTactics: (patch) => {
     const c = get().career;
-    if (!c || !c.live || c.phase !== "halftime") return;
+    if (!c || !c.live || (c.phase !== "live" && c.phase !== "halftime")) return;
     set({ career: { ...c, live: { ...c.live, tactics: { ...c.live.tactics, ...patch } } } });
   },
 
-  setHalftimeFormation: (formation) => {
+  setLiveFormation: (formation) => {
     const c = get().career;
-    if (!c || !c.live || c.phase !== "halftime") return;
+    if (!c || !c.live || (c.phase !== "live" && c.phase !== "halftime")) return;
     set({ career: { ...c, live: { ...c.live, formation } } });
+  },
+
+  // Re-simulate the remainder of the CURRENT half from `fromMinute` with whatever
+  // lineup, shape and tactics are now in force, plus the real mid-match fatigue.
+  // Events already shown (minute <= fromMinute) are kept; the rest is re-rolled.
+  commitLiveChanges: (fromMinute) => {
+    const { model, seed } = get();
+    const c = get().career;
+    if (!model || !c || !c.live || c.phase !== "live") return;
+    const live = c.live;
+    const team = c.team;
+    const info = live.info;
+    const spec = { home: live.home, away: live.away, stage: info.stage, hostHome: info.hostHome, hostAway: info.hostAway };
+    const base = deriveSeed(seed, info.matchNo);
+    const byName = new Map(model.squads[team]!.players.map((p) => [p.name, p]));
+
+    const states = statesAtMinute(c.playerStates, live, fromMinute, byName);
+    const eleven = currentLiveEleven(model, team, live);
+    const ov = buildLiveOverrides(model, team, info.opponent, eleven, live.formation, live.tactics, live.start.penaltyTaker, states);
+
+    const regEnd = live.half === 1 ? 45 : 90;
+    const resimCount = live.resimCount + 1;
+    const rem = simulateLiveSegment(model, ov, deriveSeed(base, live.half * 100000 + fromMinute * 100 + resimCount), spec, fromMinute, regEnd);
+
+    let goals = [...live.goals.filter((g) => g.minute <= fromMinute), ...rem.goals];
+    let homeGoals = goals.filter((g) => g.side === "home" && g.minute <= regEnd).length;
+    let awayGoals = goals.filter((g) => g.side === "away" && g.minute <= regEnd).length;
+    let endClock = regEnd;
+    let afterExtraTime = false;
+    let shootout: { home: number; away: number; winner: string } | undefined;
+    let winner: string | undefined;
+
+    if (live.half === 2) {
+      const isKO = KO_STAGES.has(info.stage);
+      if (isKO && homeGoals === awayGoals) {
+        afterExtraTime = true;
+        const et = simulateLiveSegment(model, ov, deriveSeed(base, 33000 + resimCount), spec, 90, 120);
+        goals = [...goals, ...et.goals];
+        homeGoals += et.homeGoals;
+        awayGoals += et.awayGoals;
+        endClock = 120;
+      }
+      if (isKO) {
+        if (homeGoals > awayGoals) winner = live.home;
+        else if (awayGoals > homeGoals) winner = live.away;
+        else {
+          shootout = simulateLiveShootout(model, ov, deriveSeed(base, 44000 + resimCount), live.home, live.away);
+          winner = shootout.winner;
+        }
+      }
+    }
+
+    set({
+      career: {
+        ...c,
+        live: { ...live, goals, homeGoals, awayGoals, endClock, fullTime: endClock, afterExtraTime, shootout, winner, resimCount },
+      },
+    });
   },
 
   resumeSecondHalf: () => {
@@ -496,16 +591,10 @@ export const useStore = create<StoreState>((set, get) => ({
     const spec = { home: live.home, away: live.away, stage: info.stage, hostHome: info.hostHome, hostAway: info.hostAway };
     const base = deriveSeed(seed, info.matchNo);
 
-    // mid-match fatigue: every starter has played 45'; the players coming on are fresh.
+    // mid-match fatigue accounting for exactly when each player came on/off
     const byName = new Map(model.squads[team]!.players.map((p) => [p.name, p]));
-    const h1Minutes = new Map<string, number>();
-    for (const name of live.start.eleven) h1Minutes.set(name, 45);
-    const statesH2 = depleteForMinutes(c.playerStates, h1Minutes, byName);
-
-    // the XI on the pitch for the second half, after the substitutions, arranged
-    // into whatever shape is now in force (the manager may have switched at the break)
-    const swapped = live.start.eleven.map((n) => live.subs.find((s) => s.off === n)?.on ?? n);
-    const elevenH2 = arrangeEleven(model.squads[team]!, swapped, live.formation);
+    const statesH2 = statesAtMinute(c.playerStates, live, 45, byName);
+    const elevenH2 = currentLiveEleven(model, team, live);
 
     const ovH2 = buildLiveOverrides(
       model, team, info.opponent, elevenH2, live.formation, live.tactics, live.start.penaltyTaker, statesH2,
