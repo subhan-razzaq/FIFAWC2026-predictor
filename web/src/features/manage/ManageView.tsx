@@ -11,6 +11,7 @@ import { TacticsPanel } from "./TacticsPanel";
 import { ScoutCard } from "./ScoutCard";
 import { GradeScreen } from "./GradeScreen";
 import { TournamentPanel } from "./TournamentPanel";
+import { LiveMatchCenter } from "./LiveMatchCenter";
 import { MatchResultCard } from "../../components/MatchResultCard";
 import { TeamBadge } from "../../components/TeamBadge";
 import { oddsPct } from "../../lib/format";
@@ -119,11 +120,28 @@ function Active({
   const setFormation = useStore((s) => s.setFormation);
   const setEleven = useStore((s) => s.setEleven);
   const setDraft = useStore((s) => s.setDraft);
-  const playCurrentMatch = useStore((s) => s.playCurrentMatch);
+  const kickOff = useStore((s) => s.kickOff);
   const continueCareer = useStore((s) => s.continueCareer);
 
   const { team, current, draft, phase, lastResult } = career;
   const squad = model.squads[team]!;
+
+  if ((phase === "live" || phase === "halftime") && career.live) {
+    return (
+      <div>
+        <div className="manage-matchbar flat-card">
+          <span className="manage-matchbar__stage eyebrow">
+            {STAGE_HEAD[career.live.info.stage]}
+            {career.live.info.matchday ? ` · Matchday ${career.live.info.matchday}` : ""}
+          </span>
+          <span className="manage-matchbar__live mono">● Live</span>
+        </div>
+        <LiveMatchCenter model={model} career={career} groupOf={groupOf} />
+        <Journey career={career} team={team} />
+        <TournamentPanel model={model} seed={seed} career={career} groupOf={groupOf} />
+      </div>
+    );
+  }
 
   if (phase === "result" && lastResult) {
     const r = lastResult.result;
@@ -150,6 +168,7 @@ function Active({
           showStage
           model={model}
           seed={seed}
+          enriched={lastResult.enriched}
           elevenOverride={{ [team]: lastResult.settings.eleven }}
           formationOverride={{ [team]: lastResult.settings.formation }}
           captainOverride={{ [team]: lastResult.settings.captain }}
@@ -210,8 +229,8 @@ function Active({
             onFormation={setFormation}
             onPatch={setDraft}
           />
-          <button className="btn manage-play__go" onClick={playCurrentMatch}>
-            Play match
+          <button className="btn manage-play__go" onClick={kickOff}>
+            Kick off →
           </button>
           <Projection projection={career.projection} />
         </div>

@@ -4,7 +4,7 @@
 // ratings, so you always see the standings and what is happening elsewhere.
 
 import { useMemo, useState } from "react";
-import { resolveGroupStage, type GroupStanding } from "@weltmeister/sim";
+import { liveGroupStandings, type GroupStanding } from "@weltmeister/sim";
 import { TeamBadge } from "../../components/TeamBadge";
 import type { CareerState } from "../../store/store";
 import type { Model } from "@weltmeister/sim";
@@ -37,7 +37,7 @@ export function TournamentPanel({
   const standings = useMemo(() => {
     const played = career.played.filter((p) => p.info.stage === "group").map((p) => p.result);
     try {
-      return resolveGroupStage(model, seed, team, played).standings;
+      return liveGroupStandings(model, seed, played);
     } catch {
       return null;
     }
@@ -98,7 +98,7 @@ export function TournamentPanel({
           ))}
         </div>
       )}
-      <p className="tpanel__note mono">Your finished games are final. The rest of the tournament is projected.</p>
+      <p className="tpanel__note mono">The table fills in matchday by matchday — only rounds that have been played count.</p>
     </div>
   );
 }

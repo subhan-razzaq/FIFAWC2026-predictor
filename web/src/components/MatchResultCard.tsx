@@ -23,6 +23,9 @@ interface Props {
   formationOverride?: Record<string, string>;
   captainOverride?: Record<string, string>;
   penaltyOverride?: Record<string, string>;
+  /** A pre-built timeline (manage-mode live match) used verbatim instead of
+   * re-deriving one, so the detail matches exactly what played out. */
+  enriched?: EnrichedMatch | null;
 }
 
 interface DisplayGoal {
@@ -63,15 +66,17 @@ export function MatchResultCard({
   formationOverride,
   captainOverride,
   penaltyOverride,
+  enriched: enrichedProp,
 }: Props) {
   const [open, setOpen] = useState(false);
 
   const enriched = useMemo(
     () =>
-      model && seed != null
+      enrichedProp ??
+      (model && seed != null
         ? enrichMatch({ model, match, seed, elevenOverride, formationOverride, captainOverride, penaltyOverride })
-        : null,
-    [model, match, seed, elevenOverride, formationOverride, captainOverride, penaltyOverride],
+        : null),
+    [enrichedProp, model, match, seed, elevenOverride, formationOverride, captainOverride, penaltyOverride],
   );
 
   const homeGoals = goalsFor(match, enriched, "home", match.home);
