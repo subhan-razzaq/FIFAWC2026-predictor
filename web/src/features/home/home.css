@@ -3,13 +3,33 @@
   overflow: hidden;
   border-bottom: var(--border);
   background:
-    radial-gradient(90% 70% at 88% -10%, rgba(255, 45, 142, 0.18), transparent 55%),
-    radial-gradient(80% 70% at 60% -20%, rgba(47, 107, 255, 0.2), transparent 55%),
-    radial-gradient(90% 80% at -10% 120%, rgba(22, 184, 92, 0.16), transparent 55%);
+    radial-gradient(70% 90% at 92% 0%, color-mix(in srgb, var(--gold) 12%, transparent), transparent 60%),
+    linear-gradient(180deg, color-mix(in srgb, var(--fifa-blue) 9%, var(--bg)), var(--bg) 70%);
+}
+/* faint scoreboard hairlines for a broadcast surface, not a gradient blob */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(90deg, transparent 0 71px, var(--line) 71px 72px);
+  opacity: 0.5;
+  pointer-events: none;
+}
+/* the 26 mark, ghosted in as identity rather than decoration */
+.hero__ghost {
+  position: absolute;
+  right: -4%;
+  bottom: -14%;
+  width: clamp(280px, 38vw, 560px);
+  height: auto;
+  opacity: 0.05;
+  pointer-events: none;
+  user-select: none;
 }
 .hero__inner {
+  position: relative;
   display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
+  grid-template-columns: 1.15fr 0.85fr;
   gap: var(--s-7);
   padding: var(--s-8) var(--s-5) var(--s-9);
   align-items: center;
@@ -115,33 +135,38 @@
   font-size: var(--t-sm);
 }
 
-/* credibility band */
-.cred {
+/* proof ledger: one broadcast strip with hairline dividers, not floating cards */
+.proof {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--s-4);
-  margin-top: calc(-1 * var(--s-6));
+  margin-top: calc(-1 * var(--s-7));
   position: relative;
   z-index: 2;
-}
-.cred__stat {
   background: var(--surface);
-  border: var(--border);
-  padding: var(--s-4) var(--s-4) var(--s-4) var(--s-5);
+  border: var(--border-strong);
 }
-.cred__big {
-  font-size: clamp(2rem, 4vw, 3.2rem);
+.proof__item {
+  padding: var(--s-5) var(--s-5) var(--s-4);
+  border-right: var(--border);
+}
+.proof__item:last-child {
+  border-right: none;
+}
+.proof__value {
+  font-size: clamp(2.2rem, 4.4vw, 3.4rem);
   color: var(--gold);
   line-height: 1;
+  font-variant-numeric: tabular-nums;
 }
-.cred__label {
+.proof__label {
   font-weight: 700;
-  margin-top: var(--s-2);
+  margin-top: var(--s-3);
 }
-.cred__sub {
+.proof__note {
   color: var(--text-faint);
   font-size: var(--t-xs);
-  margin-top: 4px;
+  margin-top: 6px;
+  line-height: 1.5;
 }
 
 /* advance grid */
@@ -171,9 +196,16 @@
     gap: var(--s-5);
     padding: var(--s-6) var(--s-5);
   }
-  .cred {
+  .proof {
     grid-template-columns: 1fr;
     margin-top: var(--s-4);
+  }
+  .proof__item {
+    border-right: none;
+    border-bottom: var(--border);
+  }
+  .proof__item:last-child {
+    border-bottom: none;
   }
   .advance-grid {
     grid-template-columns: 1fr;
@@ -183,36 +215,77 @@
   }
 }
 
-/* manager-mode call to action */
+/* manager-mode call to action: the flagship destination, given real presence */
 .manage-cta {
-  display: flex;
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1fr auto;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--s-5);
-  flex-wrap: wrap;
-  padding: var(--s-5);
+  gap: var(--s-6);
+  padding: var(--s-7) var(--s-6);
+  border: var(--border-strong);
   background:
-    radial-gradient(120% 140% at 100% 0%, rgba(200, 162, 75, 0.12), transparent 60%),
+    radial-gradient(90% 160% at 100% 0%, color-mix(in srgb, var(--gold) 14%, transparent), transparent 58%),
     var(--surface);
   color: var(--text);
-  transition: background-color var(--dur-fast), transform var(--dur-fast);
+  transition: background var(--dur), border-color var(--dur);
+}
+.manage-cta::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--fifa-band);
 }
 .manage-cta:hover {
+  border-color: var(--gold);
   background:
-    radial-gradient(120% 140% at 100% 0%, rgba(200, 162, 75, 0.2), transparent 60%),
+    radial-gradient(90% 160% at 100% 0%, color-mix(in srgb, var(--gold) 22%, transparent), transparent 58%),
     var(--surface-hi);
 }
 .manage-cta__copy {
-  max-width: 560px;
+  max-width: 60ch;
 }
 .manage-cta__copy h2 {
   margin: var(--s-2) 0;
+  font-size: var(--t-display);
 }
 .manage-cta__copy p {
   color: var(--text-dim);
-  line-height: 1.55;
+  line-height: 1.6;
 }
 .manage-cta__go {
-  white-space: nowrap;
-  pointer-events: none;
+  display: inline-block;
+  margin-top: var(--s-4);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: var(--t-sm);
+  color: var(--gold);
+}
+.manage-cta:hover .manage-cta__go {
+  color: var(--gold-bright);
+}
+.manage-cta__pitch {
+  color: var(--line-strong);
+  width: 120px;
+  flex: 0 0 auto;
+}
+.manage-cta__pitch svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+@media (max-width: 640px) {
+  .manage-cta {
+    grid-template-columns: 1fr;
+    padding: var(--s-5);
+  }
+  .manage-cta__pitch {
+    display: none;
+  }
 }

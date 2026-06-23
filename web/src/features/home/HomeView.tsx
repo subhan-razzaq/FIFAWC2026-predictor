@@ -28,6 +28,7 @@ export function HomeView() {
   return (
     <div>
       <section className="hero">
+        <img className="hero__ghost" src={`${import.meta.env.BASE_URL}26.png`} alt="" aria-hidden />
         <div className="wrap hero__inner">
           <div className="hero__copy">
             <div className="eyebrow">World Cup 2026 · 48 teams · 104 matches</div>
@@ -85,37 +86,46 @@ export function HomeView() {
       </section>
 
       <section className="wrap">
-        <div className="cred">
-          <CredStat
-            big={edge !== null ? `+${edge.toFixed(1)}%` : "-"}
+        <div className="proof" aria-label="How the model performs">
+          <ProofItem
+            value={edge !== null ? `+${edge.toFixed(1)}%` : "—"}
             label="better than Elo-only on RPS"
-            sub="backtested on the 2018 and 2022 World Cups"
+            note="backtested on the 2018 and 2022 World Cups"
           />
-          <CredStat
-            big={validation?.calibration ? validation.calibration.ece.toFixed(3) : "-"}
+          <ProofItem
+            value={validation?.calibration ? validation.calibration.ece.toFixed(3) : "—"}
             label="calibration error (ECE)"
-            sub="when it says 30%, it happens about 30% of the time"
+            note="when it says 30%, it happens about 30% of the time"
           />
-          <CredStat
-            big={model ? model.meta.n_fit_matches.toLocaleString() : "-"}
+          <ProofItem
+            value={model ? model.meta.n_fit_matches.toLocaleString() : "—"}
             label="real matches fit"
-            sub="international results since 1872, time-weighted"
+            note="international results since 1872, time-weighted"
           />
         </div>
       </section>
 
       <section className="wrap">
-        <Link to="/manage" className="manage-cta keyline-gold">
+        <Link to="/manage" className="manage-cta">
           <div className="manage-cta__copy">
-            <div className="eyebrow">Manager mode</div>
+            <div className="eyebrow">The main event · Manager mode</div>
             <h2 className="anton">Take charge of a nation</h2>
             <p>
-              Pick your XI on a drag-and-drop pitch, set the tactics, scout every opponent, and juggle
-              stamina and suspensions across the whole tournament, then get graded against what the
-              model expected of your squad.
+              Pick your XI on a drag-and-drop pitch and play every match live. Pause whenever you want
+              to make subs, switch shape and read the game, and the result bends to your calls. One
+              nation, one month, graded against what the model expected of your squad.
             </p>
+            <span className="manage-cta__go">Play the World Cup →</span>
           </div>
-          <span className="manage-cta__go btn">Play the World Cup →</span>
+          <div className="manage-cta__pitch" aria-hidden>
+            <svg viewBox="0 0 60 80" preserveAspectRatio="none">
+              <rect x="1" y="1" width="58" height="78" fill="none" stroke="currentColor" />
+              <line x1="1" y1="40" x2="59" y2="40" stroke="currentColor" />
+              <circle cx="30" cy="40" r="8" fill="none" stroke="currentColor" />
+              <rect x="18" y="1" width="24" height="11" fill="none" stroke="currentColor" />
+              <rect x="18" y="68" width="24" height="11" fill="none" stroke="currentColor" />
+            </svg>
+          </div>
         </Link>
       </section>
 
@@ -144,12 +154,12 @@ export function HomeView() {
   );
 }
 
-function CredStat({ big, label, sub }: { big: string; label: string; sub: string }) {
+function ProofItem({ value, label, note }: { value: string; label: string; note: string }) {
   return (
-    <div className="cred__stat keyline-gold">
-      <div className="cred__big anton">{big}</div>
-      <div className="cred__label">{label}</div>
-      <div className="cred__sub mono">{sub}</div>
+    <div className="proof__item">
+      <div className="proof__value anton">{value}</div>
+      <div className="proof__label">{label}</div>
+      <div className="proof__note mono">{note}</div>
     </div>
   );
 }
