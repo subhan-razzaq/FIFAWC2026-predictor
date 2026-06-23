@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import type { KoNode } from "../../lib/bracketLayout";
 import { teamCode } from "../../lib/teamCode";
-import { groupColor } from "../../design/colors";
+import { TeamBadge } from "../../components/TeamBadge";
 
 interface Props {
   node: KoNode;
@@ -26,10 +26,14 @@ function Slot({
   filled: boolean;
   groupOf: Map<string, string>;
 }) {
-  const accent = groupColor(groupOf.get(team) ?? "");
   return (
     <div className={`ko-slot ${decided && isWinner ? "win" : ""} ${decided && !isWinner ? "out" : ""}`}>
-      <span className="ko-slot__tick" style={{ background: filled ? accent : "transparent" }} />
+      {filled ? (
+        // the real national flag, the same marker the group stage uses
+        <TeamBadge team={team} group={groupOf.get(team)} size={18} />
+      ) : (
+        <span className="ko-slot__flag-empty" aria-hidden />
+      )}
       <span className="ko-slot__code mono">{filled ? teamCode(team) : "-"}</span>
       <span className="ko-slot__goals mono">{decided ? goals : ""}</span>
     </div>

@@ -14,7 +14,7 @@ export function BracketView() {
   const model = useStore((s) => s.model);
   const single = useStore((s) => s.single);
   const seedLabel = useStore((s) => s.seedLabel);
-  const runReveal = useStore((s) => s.runReveal);
+  const status = useStore((s) => s.status);
   const run = useStore((s) => s.run);
 
   const [stage, setStage] = useState(5);
@@ -38,11 +38,6 @@ export function BracketView() {
   }, [model]);
 
   const layout = useMemo(() => (single ? buildBracket(single) : null), [single]);
-
-  // generate the reveal on first visit if we do not have one yet
-  useEffect(() => {
-    if (!single) void runReveal();
-  }, [single, runReveal]);
 
   const clearTimers = () => {
     timers.current.forEach((t) => clearTimeout(t));
@@ -68,19 +63,46 @@ export function BracketView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layout]);
 
+  // "New run" rolls a fresh seed; the first "Start" keeps the current seed so the
+  // pristine bracket is reproducible from the URL.
   const reveal = async () => {
     await run(true);
   };
+  const start = async () => {
+    await run(false);
+  };
 
+  // Pristine state: the bracket never runs on its own. It waits, blank, until the
+  // user explicitly starts a simulation.
   if (!layout) {
+    const running = status === "running";
     return (
-      <div className="wrap">
+      <div className="wrap bracket-wrap">
         <div className="section-head">
-          <h2>Live bracket</h2>
+          <div>
+            <div className="eyebrow">The 48 to 1, one seeded run</div>
+            <h2>Live bracket</h2>
+          </div>
         </div>
-        <p className="mono" style={{ color: "var(--text-faint)" }}>
-          building the bracket…
-        </p>
+        <div className="bracket-empty">
+          <img
+            className="bracket-empty__mark"
+            src={`${import.meta.env.BASE_URL}26.png`}
+            alt=""
+            aria-hidden
+            width={92}
+            height={92}
+          />
+          <h3 className="anton">Nothing simulated yet</h3>
+          <p className="mono">
+            The bracket stays blank until you run it. Start a simulation to play one seeded
+            tournament from the Round of 32 to the final, revealed round by round.
+          </p>
+          <button className="btn" onClick={() => void start()} disabled={running}>
+            {running ? "Simulating…" : "Start simulation"}
+          </button>
+          <span className="mono bracket-empty__seed">seed · {seedLabel}</span>
+        </div>
       </div>
     );
   }
