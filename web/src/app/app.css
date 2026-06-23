@@ -102,6 +102,22 @@ main#main {
   color: var(--gold);
   border-bottom-color: var(--gold);
 }
+/* the flagship: Manager Mode reads as the headline destination */
+.nav a.nav-primary {
+  color: var(--gold);
+}
+.nav a.nav-primary::before {
+  content: "";
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  margin-right: 6px;
+  vertical-align: middle;
+  background: var(--gold);
+}
+.nav a.nav-primary:hover {
+  color: var(--gold-bright);
+}
 
 /* sim control */
 .simctl {

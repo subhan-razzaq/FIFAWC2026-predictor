@@ -3,10 +3,10 @@ import { useStore } from "../store/store";
 
 const LINKS = [
   { to: "/", label: "Dashboard", end: true },
+  { to: "/manage", label: "Manager", primary: true },
   { to: "/results", label: "Match Center" },
   { to: "/bracket", label: "Bracket" },
   { to: "/scorers", label: "Stats" },
-  { to: "/manage", label: "Manager" },
   { to: "/methodology", label: "Method" },
   { to: "/about", label: "About" },
 ];
@@ -61,7 +61,12 @@ export function Header() {
 
         <nav className="nav" aria-label="Primary">
           {LINKS.map((l) => (
-            <NavLink key={l.to} to={l.to} end={l.end} className={({ isActive }) => (isActive ? "active" : "")}>
+            <NavLink
+              key={l.to}
+              to={l.to}
+              end={l.end}
+              className={({ isActive }) => `${isActive ? "active" : ""}${l.primary ? " nav-primary" : ""}`}
+            >
               {l.label}
             </NavLink>
           ))}
