@@ -12,6 +12,7 @@ import { useStore } from "../../store/store";
 import type { CareerState, LiveSub } from "../../store/store";
 import { MAX_SUBS } from "../../store/store";
 import { TeamBadge } from "../../components/TeamBadge";
+import { BallIcon, SubIcon } from "../../components/icons";
 import { FORMATIONS, managedRatings } from "../../lib/manage";
 import { mentalityLabel, pacingLabel, pressingLabel, type Tactics } from "../../lib/tactics";
 import { isAvailable, type PlayerStates } from "../../lib/cards";
@@ -59,8 +60,49 @@ const reduceMotion = () =>
 interface FeedItem {
   minute: number;
   kind: "period" | "goal" | "sub";
-  text: string;
   side?: "home" | "away";
+  // goal payload
+  scorer?: string;
+  assist?: string;
+  goalKind?: "open" | "penalty" | "own";
+  // sub payload
+  on?: string;
+  off?: string;
+  // period label
+  text?: string;
+}
+
+// Small monochrome control glyphs (currentColor), drawn rather than emoji so the
+// toolbar reads the same on the gold primary and the ghost buttons.
+function PlayGlyph() {
+  return (
+    <svg width="9" height="11" viewBox="0 0 9 11" aria-hidden focusable="false">
+      <path d="M0 0 L9 5.5 L0 11 Z" fill="currentColor" />
+    </svg>
+  );
+}
+function PauseGlyph() {
+  return (
+    <svg width="8" height="11" viewBox="0 0 8 11" aria-hidden focusable="false">
+      <rect x="0" width="2.6" height="11" fill="currentColor" />
+      <rect x="5.4" width="2.6" height="11" fill="currentColor" />
+    </svg>
+  );
+}
+function SwapGlyph() {
+  return (
+    <svg width="13" height="12" viewBox="0 0 13 12" aria-hidden focusable="false">
+      <path d="M3.4 0 L6 3 H4.3 V9.2 H2.5 V3 H0.8 Z" fill="currentColor" />
+      <path d="M9.6 12 L7 9 H8.7 V2.8 H10.5 V9 H12.2 Z" fill="currentColor" />
+    </svg>
+  );
+}
+function ChevronGlyph() {
+  return (
+    <svg width="6" height="9" viewBox="0 0 6 9" aria-hidden focusable="false">
+      <path d="M0.6 0.6 L5 4.5 L0.6 8.4" fill="none" stroke="currentColor" strokeWidth="1.4" />
+    </svg>
+  );
 }
 
 export function LiveMatchCenter({
@@ -168,7 +210,7 @@ export function LiveMatchCenter({
 
   const canAdjust = phase === "live" && !ftReached && clock < 90;
   const boardOpen = phase === "halftime" || adjusting;
-  const feed = buildFeed(live, clock, ftReached, phase === "halftime");
+  const feed = buildFeed(live, clock, ftReached);
 
   // signature of the manager's setup, so resuming only re-simulates the rest of
   // the half when something genuinely changed (no free re-rolls on a peek).
@@ -201,26 +243,47 @@ export function LiveMatchCenter({
 
       {phase === "live" && !ftReached && !adjusting && (
         <div className="lmc__controls">
-          <button className="btn btn--ghost" onClick={() => setPlaying((p) => !p)}>
-            {playing ? "Pause" : "Resume"}
-          </button>
-          <div className="lmc__speeds" role="group" aria-label="Playback speed">
-            {SPEEDS.map((s) => (
-              <button
-                key={s}
-                className={`group-tab ${speed === s ? "active" : ""}`}
-                style={{ width: "auto", padding: "0 10px" }}
-                onClick={() => setSpeed(s)}
-              >
-                {s}×
-              </button>
-            ))}
+          <div className="lmc__transport">
+            <button
+              className="btn btn--ghost lmc__ctrl"
+              onClick={() => setPlaying((p) => !p)}
+              aria-label={playing ? "Pause the match" : "Resume the match"}
+            >
+              {playing ? <PauseGlyph /> : <PlayGlyph />}
+              {playing ? "Pause" : "Resume"}
+            </button>
+            <div className="lmc__speedbox">
+              <span className="lmc__ctrl-label mono">Speed</span>
+              <div className="lmc__speeds" role="group" aria-label="Playback speed">
+                {SPEEDS.map((s) => (
+                  <button
+                    key={s}
+                    className={`group-tab ${speed === s ? "active" : ""}`}
+                    style={{ width: "auto", padding: "0 11px" }}
+                    onClick={() => setSpeed(s)}
+                    aria-pressed={speed === s}
+                  >
+                    {s}×
+                  </button>
+                ))}
+              </div>
+            </div>
+            <button
+              className="btn btn--ghost lmc__ctrl"
+              onClick={skipFor(half, segEnd, minuteRef, setClock, setPlaying, goToHalftime, setFtReached)}
+            >
+              {half === 1 ? "Skip to half-time" : "Skip to full-time"}
+              <ChevronGlyph />
+            </button>
           </div>
-          <button className="btn lmc__adjust" onClick={openAdjust} disabled={!canAdjust} title={canAdjust ? "" : "Changes reopen after extra time kicks off"}>
+          <button
+            className="btn lmc__adjust"
+            onClick={openAdjust}
+            disabled={!canAdjust}
+            title={canAdjust ? "Pause the match and open the tactical board" : "Changes reopen after extra time kicks off"}
+          >
+            <SwapGlyph />
             Subs &amp; tactics
-          </button>
-          <button className="btn btn--ghost" onClick={skipFor(half, segEnd, minuteRef, setClock, setPlaying, goToHalftime, setFtReached)}>
-            {half === 1 ? "Skip to half-time" : "Skip to full-time"}
           </button>
         </div>
       )}
@@ -302,11 +365,19 @@ function Scoreboard({
   phaseLabel: string;
   flash: { side: "home" | "away"; text: string } | null;
 }) {
+  const goals = live.goals.filter((g) => g.minute <= clock);
+  const homeScorers = goals.filter((g) => g.side === "home");
+  const awayScorers = goals.filter((g) => g.side === "away");
+  const pct = Math.max(0, Math.min(100, (clock / (live.endClock || 90)) * 100));
+
   return (
     <div className="lmc__board flat-card">
       <div className="lmc__side">
         <TeamBadge team={live.home} group={groupOf.get(live.home)} size={34} />
-        <span className="lmc__team anton">{live.home}</span>
+        <div className="lmc__ident">
+          <span className="lmc__team anton">{live.home}</span>
+          <ScorerList goals={homeScorers} side="home" />
+        </div>
       </div>
       <div className="lmc__center">
         <motion.div key={`${homeScore}-${awayScore}`} className="lmc__score anton" initial={{ scale: 1.3 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 320, damping: 16 }}>
@@ -316,8 +387,15 @@ function Scoreboard({
         <div className="lmc__phase eyebrow">{phaseLabel}</div>
       </div>
       <div className="lmc__side lmc__side--away">
-        <span className="lmc__team anton">{live.away}</span>
+        <div className="lmc__ident lmc__ident--away">
+          <span className="lmc__team anton">{live.away}</span>
+          <ScorerList goals={awayScorers} side="away" />
+        </div>
         <TeamBadge team={live.away} group={groupOf.get(live.away)} size={34} />
+      </div>
+
+      <div className="lmc__progress" aria-hidden>
+        <span style={{ width: `${pct}%` }} />
       </div>
 
       <AnimatePresence>
@@ -330,7 +408,8 @@ function Scoreboard({
             exit={{ opacity: 0, scale: 1.1 }}
             transition={{ type: "spring", stiffness: 360, damping: 18 }}
           >
-            <span className="lmc__flash-word anton">GOAL</span>
+            <BallIcon size={15} />
+            <span className="lmc__flash-word anton">Goal</span>
             <span className="lmc__flash-who mono">{flash.text}</span>
           </motion.div>
         )}
@@ -339,29 +418,118 @@ function Scoreboard({
   );
 }
 
+// Goalscorers listed under each team, the way a broadcast lower-third reads them.
+function ScorerList({ goals, side }: { goals: NonNullable<CareerState["live"]>["goals"]; side: "home" | "away" }) {
+  if (goals.length === 0) return null;
+  return (
+    <ul className={`lmc__scorers ${side === "away" ? "is-away" : ""}`}>
+      {goals.map((g, i) => {
+        const tag = g.kind === "penalty" ? " (P)" : g.kind === "own" ? " (OG)" : "";
+        return (
+          <li key={`${g.player}-${g.minute}-${i}`} className="lmc__scorer">
+            <BallIcon size={9} />
+            <span className="lmc__scorer-name">{lastName(g.player)}{tag}</span>
+            <span className="lmc__scorer-min mono">{g.minute}&prime;</span>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
 function CommentaryFeed({ feed }: { feed: FeedItem[] }) {
   return (
     <div className="lmc__feed">
       {feed.length === 0 ? (
-        <div className="lmc__feed-empty mono">The match is under way…</div>
+        <div className="lmc__feed-empty mono">Kick-off coming up, the match is about to start…</div>
       ) : (
         <AnimatePresence initial={false}>
-          {feed.map((f) => (
-            <motion.div
-              key={`${f.minute}-${f.kind}-${f.text}`}
-              layout
-              className={`lmc__event lmc__event--${f.kind}`}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.25 }}
-            >
-              <span className="lmc__event-min mono">{f.minute}&prime;</span>
-              <span className="lmc__event-text">{f.text}</span>
-            </motion.div>
-          ))}
+          {feed.map((f) => {
+            const key = `${f.minute}-${f.kind}-${f.scorer ?? f.on ?? f.text ?? ""}`;
+            if (f.kind === "period") {
+              return (
+                <motion.div
+                  key={key}
+                  layout
+                  className="lmc__ev lmc__ev--period"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  <span className="lmc__ev-min mono">{f.minute}&prime;</span>
+                  <span className="lmc__ev-period-label">{f.text}</span>
+                </motion.div>
+              );
+            }
+            const fromLeft = f.side === "home";
+            return (
+              <motion.div
+                key={key}
+                layout
+                className={`lmc__ev lmc__ev--${f.kind} is-${f.side}`}
+                initial={{ opacity: 0, x: fromLeft ? -12 : 12 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <span className="lmc__ev-cell lmc__ev-cell--home">
+                  {f.side === "home" && <EventContent f={f} side="home" />}
+                </span>
+                <span className="lmc__ev-min mono">{f.minute}&prime;</span>
+                <span className="lmc__ev-cell lmc__ev-cell--away">
+                  {f.side === "away" && <EventContent f={f} side="away" />}
+                </span>
+              </motion.div>
+            );
+          })}
         </AnimatePresence>
       )}
     </div>
+  );
+}
+
+// One commentary entry, mirrored so the icon always sits toward the centre line.
+function EventContent({ f, side }: { f: FeedItem; side: "home" | "away" }) {
+  let body: JSX.Element;
+  let icon: JSX.Element;
+  if (f.kind === "goal") {
+    const tag = f.goalKind === "penalty" ? " (pen)" : f.goalKind === "own" ? " (o.g.)" : "";
+    body = (
+      <span className="lmc__ev-txt">
+        <span className="lmc__ev-name">
+          {f.scorer}
+          {tag}
+        </span>
+        {f.assist && <span className="lmc__ev-assist">{f.assist}</span>}
+      </span>
+    );
+    icon = (
+      <span className="lmc__ev-ic lmc__ev-ic--goal">
+        <BallIcon size={14} />
+      </span>
+    );
+  } else {
+    body = (
+      <span className="lmc__ev-txt">
+        <span className="lmc__ev-name lmc__ev-on">{f.on}</span>
+        <span className="lmc__ev-assist">{f.off}</span>
+      </span>
+    );
+    icon = (
+      <span className="lmc__ev-ic">
+        <SubIcon size={13} />
+      </span>
+    );
+  }
+  return side === "home" ? (
+    <>
+      {body}
+      {icon}
+    </>
+  ) : (
+    <>
+      {icon}
+      {body}
+    </>
   );
 }
 
@@ -436,10 +604,14 @@ function TacticalBoard({
   const dDef = r.def - base.def;
   const tiredCount = onPitch.filter((n) => (midStates[n]?.stamina ?? 100) < 50).length;
 
-  // half-time read: how the matchup, the scoreline and fatigue actually stack up
+  // half-time read: how the matchup, the scoreline and fatigue actually stack up.
+  // Score is taken as it stands at this minute, never the full-time total, so
+  // pausing early never spoils goals the clock has not reached yet.
   const oppTeam = model.teams.find((x) => x.name === live.info.opponent);
-  const myGoals = live.managedSide === "home" ? live.homeGoals : live.awayGoals;
-  const oppGoals = live.managedSide === "home" ? live.awayGoals : live.homeGoals;
+  const homeAt = live.goals.filter((g) => g.side === "home" && g.minute <= minute).length;
+  const awayAt = live.goals.filter((g) => g.side === "away" && g.minute <= minute).length;
+  const myGoals = live.managedSide === "home" ? homeAt : awayAt;
+  const oppGoals = live.managedSide === "home" ? awayAt : homeAt;
   const tips = buildInsights(r.atk, r.def, oppTeam?.atk ?? 1, oppTeam?.def ?? 1, myGoals, oppGoals, tiredCount);
 
   const pickOff = (name: string) => {
@@ -461,7 +633,7 @@ function TacticalBoard({
         <div>
           <div className="eyebrow">{title}</div>
           <div className="lmc__ht-score anton">
-            {live.home} {live.homeGoals} – {live.awayGoals} {live.away}
+            {live.home} {homeAt} – {awayAt} {live.away}
           </div>
         </div>
         <div className="lmc__readout">
@@ -748,37 +920,36 @@ function Slider({
   );
 }
 
-function goalText(player: string, assist: string | undefined, kind: string | undefined, team: string): string {
-  if (kind === "own") return `Own goal! ${player} turns it into his own net, it counts for ${team}.`;
-  if (kind === "penalty") return `GOAL! ${player} steps up and buries the penalty for ${team}.`;
-  const lead = `GOAL! ${player} finds the net for ${team}`;
-  return assist ? `${lead}, teed up by ${assist}.` : `${lead}.`;
-}
-
 function buildFeed(
   live: NonNullable<CareerState["live"]>,
   clock: number,
   ftReached: boolean,
-  atHalftime: boolean,
 ): FeedItem[] {
-  const items: FeedItem[] = [{ minute: 0, kind: "period", text: "Kick-off, we are under way." }];
+  const items: FeedItem[] = [{ minute: 0, kind: "period", text: "Kick-off" }];
   for (const g of live.goals) {
     if (g.minute > clock) continue;
-    items.push({ minute: g.minute, kind: "goal", side: g.side, text: goalText(g.player, g.assist, g.kind, g.team) });
+    items.push({
+      minute: g.minute,
+      kind: "goal",
+      side: g.side,
+      scorer: g.player,
+      assist: g.assist,
+      goalKind: g.kind === "own" ? "own" : g.kind === "penalty" ? "penalty" : "open",
+    });
   }
   for (const s of live.subs as LiveSub[]) {
     if (s.minute > clock) continue;
-    items.push({ minute: s.minute, kind: "sub", side: live.managedSide, text: `Substitution: ${s.on} on for ${s.off}.` });
+    items.push({ minute: s.minute, kind: "sub", side: live.managedSide, on: s.on, off: s.off });
   }
-  if (clock >= 45) items.push({ minute: 45, kind: "period", text: atHalftime ? "Half-time." : "Half-time whistle." });
-  if (live.afterExtraTime && clock >= 90) items.push({ minute: 90, kind: "period", text: "Level after 90, into extra time." });
+  if (clock >= 45) items.push({ minute: 45, kind: "period", text: "Half-time" });
+  if (live.afterExtraTime && clock >= 90) items.push({ minute: 90, kind: "period", text: "Into extra time" });
   if (ftReached) {
-    items.push({ minute: live.endClock, kind: "period", text: "Full-time." });
+    items.push({ minute: live.endClock, kind: "period", text: "Full-time" });
     if (live.shootout) {
       items.push({
         minute: live.endClock,
         kind: "period",
-        text: `Penalty shootout: ${live.home} ${live.shootout.home}–${live.shootout.away} ${live.away}. ${live.winner} go through.`,
+        text: `Shootout ${live.shootout.home}–${live.shootout.away}, ${live.winner} advance`,
       });
     }
   }

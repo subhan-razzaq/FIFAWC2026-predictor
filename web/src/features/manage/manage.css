@@ -340,10 +340,20 @@
   font-size: var(--t-sm);
 }
 .tactics__warn {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
   border-top: var(--border);
   padding-top: 6px;
   font-size: var(--t-xs);
   color: var(--can-red);
+}
+.tactics__warn-mark {
+  flex: 0 0 auto;
+  width: 7px;
+  height: 7px;
+  margin-top: 3px;
+  background: var(--can-red);
 }
 .manage-slider {
   display: grid;
@@ -664,8 +674,9 @@
 .tgtable__pts { color: var(--gold); font-weight: 700; }
 .tpanel__path { display: grid; gap: var(--s-2); align-content: start; }
 .tpanel__path-list { display: grid; gap: 2px; }
-.tpanel__path-row { display: grid; grid-template-columns: 1fr auto 1.2fr; align-items: center; gap: var(--s-2); padding: 7px var(--s-3); background: var(--surface); border: var(--border); border-left: 3px solid var(--fifa-green); font-size: var(--t-sm); }
-.tpanel__path-row.out { border-left-color: var(--fifa-red); opacity: 0.85; }
+.tpanel__path-row { display: grid; grid-template-columns: 1fr auto 1.2fr; align-items: center; gap: var(--s-2); padding: 7px var(--s-3); border: var(--border); font-size: var(--t-sm); }
+.tpanel__path-row.win { background: linear-gradient(90deg, color-mix(in srgb, var(--fifa-green) 14%, transparent), var(--surface) 58%); }
+.tpanel__path-row.out { background: linear-gradient(90deg, color-mix(in srgb, var(--fifa-red) 14%, transparent), var(--surface) 58%); opacity: 0.9; }
 .tpanel__path-stage { color: var(--text-dim); font-size: var(--t-xs); }
 .tpanel__path-score { font-weight: 700; }
 .tpanel__path-opp { display: flex; align-items: center; gap: 6px; justify-content: flex-end; min-width: 0; }
@@ -697,44 +708,86 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  display: grid;
-  gap: 2px;
-  padding: 6px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px 14px;
   background: color-mix(in srgb, var(--gold) 92%, transparent);
   color: var(--ink);
   pointer-events: none;
 }
-.lmc__flash.left { left: var(--s-4); }
-.lmc__flash.right { right: var(--s-4); text-align: right; }
+.lmc__flash.left { left: var(--s-4); align-items: flex-start; }
+.lmc__flash.right { right: var(--s-4); align-items: flex-end; text-align: right; }
 .lmc__flash-word { font-size: 1.5rem; line-height: 1; letter-spacing: 0.06em; }
 .lmc__flash-who { font-size: var(--t-xs); font-weight: 700; }
 @media (prefers-reduced-motion: reduce) {
   .lmc__flash { transition: none; }
 }
+
+/* match-clock progress along the board's bottom edge */
+.lmc__progress { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--line); }
+.lmc__progress > span { display: block; height: 100%; background: var(--gold); transition: width 0.18s linear; }
+
 .lmc__side { display: flex; align-items: center; gap: var(--s-3); min-width: 0; }
 .lmc__side--away { justify-content: flex-end; text-align: right; }
-.lmc__team { font-size: clamp(1rem, 2.6vw, 1.6rem); letter-spacing: 0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lmc__ident { display: grid; gap: 6px; min-width: 0; }
+.lmc__ident--away { justify-items: end; }
+.lmc__team { font-size: clamp(1rem, 2.6vw, 1.6rem); letter-spacing: 0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+
+/* goalscorers, broadcast lower-third style, under each team */
+.lmc__scorers { display: grid; gap: 3px; }
+.lmc__scorer { display: flex; align-items: center; gap: 5px; font-size: var(--t-xs); color: var(--text-dim); min-width: 0; }
+.lmc__scorers.is-away .lmc__scorer { flex-direction: row-reverse; }
+.lmc__scorer svg { flex: 0 0 auto; }
+.lmc__scorer-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lmc__scorer-min { color: var(--text-faint); }
 .lmc__center { display: grid; justify-items: center; gap: 2px; }
 .lmc__score { font-size: clamp(2.4rem, 7vw, 3.6rem); line-height: 1; letter-spacing: 0.02em; }
 .lmc__colon { color: var(--gold); margin: 0 6px; }
 .lmc__clock { color: var(--gold); font-weight: 700; font-size: var(--t-h); }
 .lmc__phase { color: var(--text-faint); }
 
-.lmc__controls { display: flex; align-items: center; justify-content: center; gap: var(--s-3); flex-wrap: wrap; }
+.lmc__controls { display: flex; align-items: center; justify-content: space-between; gap: var(--s-3) var(--s-4); flex-wrap: wrap; }
+.lmc__transport { display: flex; align-items: center; gap: var(--s-3); flex-wrap: wrap; }
+.lmc__ctrl { display: inline-flex; align-items: center; gap: 7px; }
+.lmc__ctrl svg { flex: 0 0 auto; }
+.lmc__speedbox { display: inline-flex; align-items: center; gap: 9px; padding-left: var(--s-3); border-left: var(--border); }
+.lmc__ctrl-label { font-size: var(--t-xs); text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-faint); }
 .lmc__speeds { display: flex; gap: 2px; }
-.lmc__adjust { padding: 8px 16px; }
+.lmc__adjust { display: inline-flex; align-items: center; gap: 8px; padding: 9px 18px; }
+.lmc__adjust svg { flex: 0 0 auto; }
 .lmc__adjust:disabled { opacity: 0.45; cursor: not-allowed; }
 
-.lmc__feed { display: grid; gap: 2px; border: var(--border); background: var(--surface); max-height: 360px; overflow-y: auto; }
-.lmc__feed-empty { padding: var(--s-5); text-align: center; color: var(--text-faint); }
-.lmc__event { display: grid; grid-template-columns: 46px 1fr; align-items: baseline; gap: var(--s-3); padding: 9px var(--s-4); border-bottom: var(--border); }
-.lmc__event:last-child { border-bottom: none; }
-.lmc__event-min { color: var(--text-faint); font-weight: 700; }
-.lmc__event--goal { background: linear-gradient(90deg, color-mix(in srgb, var(--gold) 16%, transparent), transparent 70%); }
-.lmc__event--goal .lmc__event-text { font-weight: 700; }
-.lmc__event--goal .lmc__event-min { color: var(--gold); }
-.lmc__event--period { color: var(--text-dim); font-style: italic; }
-.lmc__event--sub .lmc__event-min { color: var(--mex-green); }
+/* two-sided commentary: each update sits on the side of the team it belongs to */
+.lmc__feed { display: grid; gap: 0; border: var(--border); background: var(--surface); max-height: 380px; overflow-y: auto; }
+.lmc__feed-empty { padding: var(--s-5); text-align: center; color: var(--text-faint); font-size: var(--t-sm); }
+
+.lmc__ev { padding: 8px var(--s-4); border-bottom: var(--border); }
+.lmc__ev:last-child { border-bottom: none; }
+
+.lmc__ev--goal,
+.lmc__ev--sub { display: grid; grid-template-columns: 1fr 40px 1fr; align-items: center; gap: var(--s-2); }
+.lmc__ev-cell { display: flex; align-items: center; gap: 7px; min-width: 0; font-size: var(--t-sm); }
+.lmc__ev-cell--home { justify-content: flex-end; text-align: right; }
+.lmc__ev-min { text-align: center; color: var(--text-faint); font-weight: 700; font-size: var(--t-xs); font-variant-numeric: tabular-nums; }
+
+.lmc__ev-txt { display: inline-flex; flex-direction: column; gap: 1px; min-width: 0; }
+.lmc__ev-cell--home .lmc__ev-txt { align-items: flex-end; }
+.lmc__ev-name { color: var(--text); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.lmc__ev-assist { color: var(--text-faint); font-size: var(--t-xs); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.lmc__ev-on { color: var(--mex-green); }
+.lmc__ev-ic { flex: 0 0 auto; display: inline-flex; }
+
+/* goal emphasis: a soft gold wash flowing in from the scoring side */
+.lmc__ev--goal.is-home { background: linear-gradient(90deg, color-mix(in srgb, var(--gold) 20%, transparent), transparent 62%); }
+.lmc__ev--goal.is-away { background: linear-gradient(270deg, color-mix(in srgb, var(--gold) 20%, transparent), transparent 62%); }
+.lmc__ev--goal .lmc__ev-min { color: var(--gold); }
+
+/* period divider: centred label with hairlines flanking it */
+.lmc__ev--period { display: flex; align-items: center; gap: var(--s-3); color: var(--text-faint); }
+.lmc__ev--period::before,
+.lmc__ev--period::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.lmc__ev-period-label { font-size: var(--t-xs); text-transform: uppercase; letter-spacing: 0.14em; }
 
 .lmc__playout { display: grid; gap: var(--s-4); }
 .lmc__finish { justify-self: center; }

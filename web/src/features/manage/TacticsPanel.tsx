@@ -52,7 +52,8 @@ export function TacticsPanel({ model, team, draft, states, onFormation, onPatch 
         <Rating label="Defence" value={live.def} delta={dDef} />
         {live.mismatches.length > 0 && (
           <div className="tactics__warn mono">
-            ⚠ {live.mismatches.length} out of position, weaker shape, easier to score against.
+            <span className="tactics__warn-mark" aria-hidden />
+            {live.mismatches.length} out of position, weaker shape, easier to score against.
           </div>
         )}
       </div>
