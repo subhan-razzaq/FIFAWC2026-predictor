@@ -49,23 +49,19 @@ export function HomeView() {
       <section className="hero">
         {teams.length > 0 && <FlagTicker teams={teams} />}
         <PitchBackdrop />
-        <motion.img
+        <motion.div
           className="hero__ball"
-          src={`${import.meta.env.BASE_URL}26.png`}
-          alt=""
           aria-hidden
           initial={reduce ? false : { opacity: 0, scale: 0.9, rotate: -6 }}
-          animate={
-            reduce
-              ? { opacity: 1 }
-              : { opacity: 1, scale: 1, rotate: 0, y: [0, -16, 0] }
-          }
+          animate={reduce ? { opacity: 1 } : { opacity: 1, scale: 1, rotate: 0, y: [0, -16, 0] }}
           transition={
             reduce
               ? undefined
               : { opacity: { duration: 0.8 }, scale: { duration: 0.8 }, rotate: { duration: 0.8 }, y: { duration: 6, repeat: Infinity, ease: "easeInOut", delay: 0.6 } }
           }
-        />
+        >
+          <BallMark />
+        </motion.div>
         <div className="wrap hero__inner">
           <div className="hero__copy">
             <div className="eyebrow hero__eyebrow">
@@ -253,6 +249,25 @@ function FlagTicker({ teams }: { teams: { name: string }[] }) {
         ))}
       </div>
     </div>
+  );
+}
+
+// Crisp vector of the "26" ball mark, so it stays sharp at any hero size.
+function BallMark() {
+  return (
+    <svg viewBox="0 0 100 100" className="ballmark" role="img" aria-label="World Cup 26">
+      <g fill="none" stroke="currentColor" strokeLinejoin="round">
+        <circle cx="50" cy="50" r="46" strokeWidth="2.4" />
+        <path
+          strokeWidth="1.6"
+          d="M50 36 L63.3 45.7 L58.2 61.3 L41.8 61.3 L36.7 45.7 Z
+             M50 36 L50 4 M63.3 45.7 L93.7 35.8 M58.2 61.3 L77 87.2 M41.8 61.3 L23 87.2 M36.7 45.7 L6.3 35.8"
+        />
+      </g>
+      <text x="50" y="53" textAnchor="middle" dominantBaseline="central" className="ballmark__num">
+        26
+      </text>
+    </svg>
   );
 }
 

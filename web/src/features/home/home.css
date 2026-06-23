@@ -24,14 +24,27 @@
   transform: translateY(-50%);
   width: clamp(240px, 32vw, 500px);
   height: auto;
-  opacity: 0.035;
+  color: var(--gold);
+  opacity: 0.5;
   pointer-events: none;
   user-select: none;
-  /* heavy blur + glow keep it a pure atmospheric wash, so its resolution never reads */
-  filter: blur(3px) drop-shadow(0 0 80px color-mix(in srgb, var(--gold) 22%, transparent));
+  /* a crisp vector now, so it can carry presence with just a soft glow */
+  filter: drop-shadow(0 0 70px color-mix(in srgb, var(--gold) 28%, transparent));
 }
 .theme-light .hero__ball {
-  opacity: 0.05;
+  opacity: 0.42;
+}
+.ballmark {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.ballmark__num {
+  font-family: var(--font-anton);
+  font-size: 46px;
+  font-weight: 700;
+  fill: currentColor;
+  letter-spacing: 1px;
 }
 .hero__inner {
   position: relative;
