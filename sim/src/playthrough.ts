@@ -164,6 +164,54 @@ export function resolveGroupStage(
   return { standings, thirds, advanced, finishRank: myStanding.rank };
 }
 
+/**
+ * Live, chronological group standings for the managed run. Only the matchdays the
+ * managed team has actually completed are counted, so before kick-off every team
+ * reads zero games played and the tables fill in matchday by matchday as the
+ * tournament advances alongside the managed games — nothing is pre-evaluated.
+ */
+export function liveGroupStandings(
+  model: Model,
+  seed: number,
+  managedResults: MatchResult[],
+): Record<string, GroupStanding[]> {
+  const fifa = fifaMap(model);
+  const baseCtx = new SimContext(model, {});
+  const matchdaysPlayed = managedResults.length; // 0..3 group games banked by the manager
+
+  const groupTeams = new Map<string, string[]>();
+  for (const t of model.teams) {
+    const arr = groupTeams.get(t.group) ?? [];
+    arr.push(t.name);
+    groupTeams.set(t.group, arr);
+  }
+
+  const byGroup = new Map<string, MatchResult[]>();
+  model.fixtures.forEach((fx, idx) => {
+    if (fx.matchday > matchdaysPlayed) return; // this matchday has not been played yet
+    const managed = managedResults.find((m) => m.home === fx.home && m.away === fx.away);
+    const r =
+      managed ??
+      simulateGroupMatch(baseCtx, new Rng(deriveSeed(seed, idx)), {
+        home: fx.home,
+        away: fx.away,
+        stage: "group",
+        hostHome: fx.host_home,
+        hostAway: fx.host_away,
+      });
+    const arr = byGroup.get(fx.group) ?? [];
+    arr.push(r);
+    byGroup.set(fx.group, arr);
+  });
+
+  const standings: Record<string, GroupStanding[]> = {};
+  for (const [group, teams] of groupTeams) {
+    const rng = new Rng(deriveSeed(seed, 5000 + group.charCodeAt(0)));
+    standings[group] = computeStandings(teams, byGroup.get(group) ?? [], fifa, rng);
+  }
+  return standings;
+}
+
 export type BracketStatus =
   | {
       status: "pending";

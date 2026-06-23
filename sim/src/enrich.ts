@@ -50,6 +50,12 @@ export interface EnrichedMatch {
   away: MatchLineup;
 }
 
+export interface SubInstruction {
+  minute: number;
+  off: string;
+  on: string;
+}
+
 export interface EnrichOptions {
   model: Model;
   match: MatchResult;
@@ -61,6 +67,17 @@ export interface EnrichOptions {
   /** Custom captain / penalty taker per team (manage mode). */
   captainOverride?: Record<string, string>;
   penaltyOverride?: Record<string, string>;
+  /**
+   * Pre-placed goal events (manage-mode live match). When given, these goals are
+   * used verbatim — minutes included — instead of being re-scattered, so the
+   * post-match timeline matches exactly what played out minute by minute.
+   */
+  providedGoalEvents?: MatchEvent[];
+  /**
+   * Explicit substitutions per team (manage-mode live match). When given for a
+   * side, the manager's actual subs are used instead of auto-generated ones.
+   */
+  subsOverride?: Record<string, SubInstruction[]>;
 }
 
 // relative likelihood of picking up a booking, by position
@@ -165,6 +182,24 @@ function addCards(rng: Rng, events: MatchEvent[], side: "home" | "away", lu: Int
       events.push({ minute: 30 + rng.int(Math.max(1, maxMin - 30)), type: "red", side, team: lu.team, player: name });
     }
   }
+}
+
+/** Apply the manager's explicit substitutions when provided, otherwise fall back
+ * to the auto-generated ones. Returns the names brought on. */
+function applySubs(
+  rng: Rng,
+  events: MatchEvent[],
+  side: "home" | "away",
+  lu: InternalLineup,
+  override?: SubInstruction[],
+): string[] {
+  if (!override) return addSubs(rng, events, side, lu);
+  const on: string[] = [];
+  for (const s of override) {
+    events.push({ minute: s.minute, type: "sub", side, team: lu.team, player: s.off, playerOn: s.on });
+    on.push(s.on);
+  }
+  return on;
 }
 
 function addSubs(rng: Rng, events: MatchEvent[], side: "home" | "away", lu: InternalLineup): string[] {
@@ -324,30 +359,36 @@ export function enrichMatch(opts: EnrichOptions): EnrichedMatch {
   const maxMin = match.afterExtraTime ? 120 : 90;
   const events: MatchEvent[] = [];
 
-  // Place goals so the timeline never contradicts the score. For a tie that went
-  // to extra time the score MUST be level at 90, so each side keeps `level` goals
-  // in regulation and only the winner's surplus falls in 91-120; a match settled
-  // inside 90 puts every goal in the first 90 minutes.
-  const homeScorers = match.scorers.filter((g) => g.team === match.home);
-  const awayScorers = match.scorers.filter((g) => g.team === match.away);
-  const level = match.afterExtraTime
-    ? Math.min(homeScorers.length, awayScorers.length)
-    : Math.max(homeScorers.length, awayScorers.length);
-  const regMinute = () => 1 + rng.int(90);
-  const etMinute = () => 91 + rng.int(30);
-  const placeGoals = (goals: GoalEvent[], side: "home" | "away") => {
-    goals.forEach((g, idx) => {
-      const minute = match.afterExtraTime && idx >= level ? etMinute() : regMinute();
-      events.push({ minute, type: "goal", side, team: g.team, player: g.player, assist: g.assist, kind: g.kind });
-    });
-  };
-  placeGoals(homeScorers, "home");
-  placeGoals(awayScorers, "away");
+  if (opts.providedGoalEvents) {
+    // Live match: the goals already happened at known minutes; keep them verbatim
+    // (an empty array is a legitimate goalless match).
+    for (const e of opts.providedGoalEvents) if (e.type === "goal") events.push({ ...e });
+  } else {
+    // Place goals so the timeline never contradicts the score. For a tie that went
+    // to extra time the score MUST be level at 90, so each side keeps `level` goals
+    // in regulation and only the winner's surplus falls in 91-120; a match settled
+    // inside 90 puts every goal in the first 90 minutes.
+    const homeScorers = match.scorers.filter((g) => g.team === match.home);
+    const awayScorers = match.scorers.filter((g) => g.team === match.away);
+    const level = match.afterExtraTime
+      ? Math.min(homeScorers.length, awayScorers.length)
+      : Math.max(homeScorers.length, awayScorers.length);
+    const regMinute = () => 1 + rng.int(90);
+    const etMinute = () => 91 + rng.int(30);
+    const placeGoals = (goals: GoalEvent[], side: "home" | "away") => {
+      goals.forEach((g, idx) => {
+        const minute = match.afterExtraTime && idx >= level ? etMinute() : regMinute();
+        events.push({ minute, type: "goal", side, team: g.team, player: g.player, assist: g.assist, kind: g.kind });
+      });
+    };
+    placeGoals(homeScorers, "home");
+    placeGoals(awayScorers, "away");
+  }
 
   addCards(rng, events, "home", homeLU, maxMin);
   addCards(rng, events, "away", awayLU, maxMin);
-  addSubs(rng, events, "home", homeLU);
-  addSubs(rng, events, "away", awayLU);
+  applySubs(rng, events, "home", homeLU, opts.subsOverride?.[match.home]);
+  applySubs(rng, events, "away", awayLU, opts.subsOverride?.[match.away]);
 
   events.sort((a, b) => a.minute - b.minute || eventRank(a) - eventRank(b));
 

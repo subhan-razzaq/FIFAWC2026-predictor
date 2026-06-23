@@ -8,6 +8,7 @@ export * from "./rng";
 export * from "./poisson";
 export * from "./context";
 export * from "./match";
+export * from "./livematch";
 export * from "./formations";
 export * from "./enrich";
 export * from "./group";
