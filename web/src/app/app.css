@@ -93,7 +93,7 @@ main#main {
   padding: var(--s-2) var(--s-3);
   border-bottom: 2px solid transparent;
   white-space: nowrap;
-  transition: color var(--dur-fast);
+  transition: color var(--dur-fast), border-bottom-color var(--dur-fast);
 }
 .nav a:hover {
   color: var(--text);

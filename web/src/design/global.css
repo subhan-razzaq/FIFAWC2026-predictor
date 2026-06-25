@@ -89,6 +89,34 @@ svg {
   color: var(--ink);
 }
 
+/* scrollbars dressed for the broadcast skin: thin, square, tinted to the keyline
+   rather than the bright OS default. The nav opts out with its own rule. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--steel);
+}
+
+/* the theme toggle crossfades the whole page instead of snapping (browsers
+   without view transitions fall back to the instant swap) */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--dur);
+  animation-timing-function: var(--ease-broadcast);
+}
+
 /* layout helpers */
 .wrap {
   width: 100%;
