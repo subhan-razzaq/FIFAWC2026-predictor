@@ -6,8 +6,8 @@
 // in model.json, then apply a formation lean and a tactical attack/defence
 // tradeoff. The scorer model is rebuilt from the chosen eleven too.
 
-import { arrangeEleven, type Model, type ScorerModel, type Squad, type SquadPlayer } from "@weltmeister/sim";
-import { type Tactics, tacticalShift } from "./tactics";
+import { arrangeEleven, outcomeProbs, type Model, type ScorerModel, type Squad, type SquadPlayer } from "@weltmeister/sim";
+import { counterAttackRisk, type Tactics, tacticalShift } from "./tactics";
 import { outOfPositionPenalty } from "./lineup";
 import { fatigueMult } from "./fatigue";
 import type { PlayerStates } from "./cards";
@@ -194,9 +194,61 @@ export function managedRatings(
   tilt += FORMATIONS[formationName]?.tilt ?? 0;
 
   const shift = tacticalShift(tactics);
-  const atk = (overall + tilt) / 2 + shift.dAtk;
-  const def = (overall - tilt) / 2 + shift.dDef - q.concedePenalty;
+  // selection quality: fielding a higher-rated XI than the team's projected one
+  // lifts attack and defence a touch, a weaker XI dents them. Zero at the default
+  // XI and bounded so it stays believable, this is what makes a player's OVR bite
+  // on the pitch rather than being a cosmetic number.
+  const qBonus = selectionBonus(squad, eleven);
+  const atk = (overall + tilt) / 2 + shift.dAtk + qBonus;
+  const def = (overall - tilt) / 2 + shift.dDef - q.concedePenalty + qBonus;
   return { atk, def, mismatches: q.mismatches, concedePenalty: q.concedePenalty };
+}
+
+/** Bounded attack/defence nudge (log-goal units) from how the chosen eleven's
+ * average rating compares to the squad's projected XI. */
+function selectionBonus(squad: Squad, eleven: string[]): number {
+  const abilityOf = new Map(squad.players.map((p) => [p.name, p.ability]));
+  const meanAbility = (names: string[]) => {
+    let sum = 0;
+    let count = 0;
+    for (const n of names) {
+      const a = abilityOf.get(n);
+      if (a !== undefined) {
+        sum += a;
+        count += 1;
+      }
+    }
+    return count ? sum / count : 0.5;
+  };
+  const delta = meanAbility(eleven) - meanAbility(squad.projected_eleven);
+  return Math.max(-0.1, Math.min(0.1, delta * 2.2));
+}
+
+// EA-style overall rating (a familiar 40-99 scale) from the model's ability index,
+// recalibrated so the field looks like a real tournament: a handful of ~90s at the
+// very top, most internationals in the 70s-80s, the squad fringe in the 60s. The
+// curve is anchored rather than linear, so the elite compress instead of every
+// star piling up at 99.
+const OVR_ANCHORS: [number, number][] = [
+  [0.25, 58],
+  [0.32, 67],
+  [0.42, 73],
+  [0.55, 78],
+  [0.7, 82],
+  [0.82, 85],
+  [0.92, 88],
+  [1.0, 91],
+];
+export function ovr(ability: number): number {
+  const a = Math.max(0.25, Math.min(1, ability));
+  for (let i = 1; i < OVR_ANCHORS.length; i++) {
+    const [a1, o1] = OVR_ANCHORS[i]!;
+    if (a <= a1) {
+      const [a0, o0] = OVR_ANCHORS[i - 1]!;
+      return Math.round(o0 + ((o1 - o0) * (a - a0)) / (a1 - a0));
+    }
+  }
+  return 91;
 }
 
 /** Rebuild the scorer model for a custom eleven so attribution tracks the lineup
@@ -258,4 +310,73 @@ export function buildEleven(
 /** Pick a default eleven for a formation: best available by ability per quota. */
 export function defaultElevenFor(squad: Squad, formationName: string): string[] {
   return buildEleven(squad, formationName);
+}
+
+/** Stamina below which a starter is rested by the one-tap rotation. */
+export const REST_BELOW = 55;
+
+/**
+ * Best XI for a formation that rests tired legs: fresh players (>= REST_BELOW)
+ * fill each line by ability first, only dipping into the tired when a line is
+ * short of fresh cover. Suspended players are never selected.
+ */
+export function rotatedEleven(squad: Squad, formationName: string, states: PlayerStates): string[] {
+  const f = FORMATIONS[formationName] ?? FORMATIONS["4-3-3"]!;
+  const byPos: Record<string, SquadPlayer[]> = { GK: [], DF: [], MF: [], FW: [] };
+  for (const p of squad.players) {
+    if (states[p.name]?.suspendedNext) continue;
+    byPos[p.group]?.push(p);
+  }
+  const fresh = (p: SquadPlayer) => ((states[p.name]?.stamina ?? 100) >= REST_BELOW ? 1 : 0);
+  for (const k of Object.keys(byPos)) {
+    byPos[k]!.sort((a, b) => fresh(b) - fresh(a) || b.ability - a.ability);
+  }
+  const out: string[] = [];
+  out.push(byPos.GK![0]?.name ?? squad.players[0]!.name);
+  (["DF", "MF", "FW"] as const).forEach((pos) => {
+    for (const p of byPos[pos]!.slice(0, f.quota[pos])) out.push(p.name);
+  });
+  return arrangeEleven(squad, out, formationName);
+}
+
+export interface MatchOdds {
+  /** managed team win / draw / opponent win, summing to ~1 */
+  win: number;
+  draw: number;
+  loss: number;
+}
+
+/**
+ * Honest win/draw/loss odds for the managed team in a specific fixture, using the
+ * SAME Dixon-Coles maths the sim plays out: the chosen XI, formation and tactics
+ * set the team's attack/defence, an all-out mentality hands the opponent the
+ * counter-attack tax, and the host term lands on the right side. This lets the
+ * pre-match panel show how a tactical change actually moves the result.
+ */
+export function managedMatchOdds(
+  model: Model,
+  team: string,
+  opponent: string,
+  eleven: string[],
+  formationName: string,
+  tactics: Tactics,
+  states: PlayerStates | undefined,
+  fixture: { isHome: boolean; hostHome: boolean; hostAway: boolean },
+): MatchOdds {
+  const opp = model.teams.find((t) => t.name === opponent);
+  if (!opp) return { win: 0, draw: 0, loss: 0 };
+  const me = managedRatings(model, team, eleven, formationName, tactics, states);
+  const oppAtk = opp.atk + counterAttackRisk(tactics.mentality);
+  const { mu, gamma_host, rho } = model.meta.global;
+
+  // orient the two sides exactly as the engine would for this fixture
+  const homeAtk = fixture.isHome ? me.atk : oppAtk;
+  const homeDef = fixture.isHome ? me.def : opp.def;
+  const awayAtk = fixture.isHome ? oppAtk : me.atk;
+  const awayDef = fixture.isHome ? opp.def : me.def;
+  const lamHome = Math.exp(mu + homeAtk - awayDef + (fixture.hostHome ? gamma_host : 0));
+  const lamAway = Math.exp(mu + awayAtk - homeDef + (fixture.hostAway ? gamma_host : 0));
+
+  const [homeWin, draw, awayWin] = outcomeProbs(lamHome, lamAway, rho);
+  return fixture.isHome ? { win: homeWin, draw, loss: awayWin } : { win: awayWin, draw, loss: homeWin };
 }

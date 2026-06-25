@@ -169,6 +169,7 @@ interface StoreState {
 }
 
 const DEFAULT_RUNS = 10000;
+const CAREER_KEY = "wm-career-v1";
 
 function readSeedFromUrl(): { seed: number; label: string } {
   if (typeof window === "undefined") return { seed: 2026, label: "2026" };
@@ -305,7 +306,20 @@ export const useStore = create<StoreState>((set, get) => ({
   toggleTheme: () => {
     const next: Theme = get().theme === "dark" ? "light" : "dark";
     if (typeof window !== "undefined") window.localStorage.setItem("wm-theme", next);
-    set({ theme: next });
+    // flip the document class synchronously so a view transition (when supported)
+    // captures the crossfade; React then catches up to swap the toggle icon.
+    const apply = () => {
+      if (typeof document !== "undefined")
+        document.documentElement.classList.toggle("theme-light", next === "light");
+      set({ theme: next });
+    };
+    const startViewTransition = (
+      document as Document & { startViewTransition?: (cb: () => void) => void }
+    ).startViewTransition;
+    const reduce =
+      typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (startViewTransition && !reduce) startViewTransition.call(document, apply);
+    else apply();
   },
 
   init: async () => {
@@ -314,6 +328,28 @@ export const useStore = create<StoreState>((set, get) => ({
       if (!res.ok) throw new Error(`could not load model.json (${res.status})`);
       const model = (await res.json()) as Model;
       set({ model, status: "ready" });
+      // resume a saved career for this exact model snapshot, unless the page was
+      // opened on a shared ?seed link (which is about reproducing one bracket).
+      try {
+        if (typeof window !== "undefined" && !new URLSearchParams(window.location.search).has("seed")) {
+          const raw = window.localStorage.getItem(CAREER_KEY);
+          if (raw) {
+            const saved = JSON.parse(raw) as {
+              snapshot?: string;
+              seed?: number;
+              seedLabel?: string;
+              career?: CareerState;
+            };
+            if (saved.career && saved.snapshot === model.meta.snapshot_date && typeof saved.seed === "number") {
+              set({ career: saved.career, seed: saved.seed, seedLabel: saved.seedLabel ?? String(saved.seed) });
+            } else {
+              window.localStorage.removeItem(CAREER_KEY);
+            }
+          }
+        }
+      } catch {
+        /* corrupt or unavailable storage: start fresh */
+      }
     } catch (err) {
       set({ status: "error", error: err instanceof Error ? err.message : String(err) });
     }
@@ -778,3 +814,28 @@ export const useStore = create<StoreState>((set, get) => ({
 
   resetCareer: () => set({ career: null }),
 }));
+
+// Persist the managed run so a refresh or a trip to another page never loses it.
+// Stored against the model snapshot and the seed it was played on, so resuming is
+// deterministic; cleared automatically when the career ends or is quit.
+function persistCareer(s: StoreState): void {
+  if (typeof window === "undefined") return;
+  try {
+    if (!s.career || !s.model) {
+      window.localStorage.removeItem(CAREER_KEY);
+      return;
+    }
+    window.localStorage.setItem(
+      CAREER_KEY,
+      JSON.stringify({ snapshot: s.model.meta.snapshot_date, seed: s.seed, seedLabel: s.seedLabel, career: s.career }),
+    );
+  } catch {
+    /* storage full or unavailable: keep playing without a save */
+  }
+}
+
+if (typeof window !== "undefined") {
+  useStore.subscribe((s, prev) => {
+    if (s.career !== prev.career || s.seed !== prev.seed) persistCareer(s);
+  });
+}

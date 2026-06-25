@@ -15,6 +15,20 @@ import type { MatchSettings } from "../../store/store";
 
 const FORMATION_NAMES = Object.keys(FORMATIONS);
 
+const PRESETS: { label: string; tactics: Tactics }[] = [
+  { label: "Defensive", tactics: { mentality: -0.6, pressing: 0.3, pacing: 0.35 } },
+  { label: "Balanced", tactics: { mentality: 0, pressing: 0.5, pacing: 0.5 } },
+  { label: "All-out", tactics: { mentality: 0.7, pressing: 0.8, pacing: 0.8 } },
+];
+
+function sameTactics(a: Tactics, b: Tactics): boolean {
+  return (
+    Math.abs(a.mentality - b.mentality) < 1e-6 &&
+    Math.abs(a.pressing - b.pressing) < 1e-6 &&
+    Math.abs(a.pacing - b.pacing) < 1e-6
+  );
+}
+
 interface Props {
   model: Model;
   team: string;
@@ -56,6 +70,19 @@ export function TacticsPanel({ model, team, draft, states, onFormation, onPatch 
             {live.mismatches.length} out of position, weaker shape, easier to score against.
           </div>
         )}
+      </div>
+
+      <div className="tactics__presets" role="group" aria-label="Tactical presets">
+        {PRESETS.map((p) => (
+          <button
+            key={p.label}
+            className={`group-tab ${sameTactics(draft.tactics, p.tactics) ? "active" : ""}`}
+            style={{ width: "auto", padding: "0 12px" }}
+            onClick={() => setTactics(p.tactics)}
+          >
+            {p.label}
+          </button>
+        ))}
       </div>
 
       <Slider

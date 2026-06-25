@@ -7,13 +7,13 @@
 
 import { useEffect, useMemo, useRef, useState, type MutableRefObject } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { arrangeEleven, type Model } from "@weltmeister/sim";
+import { arrangeEleven, type Model, type SquadPlayer } from "@weltmeister/sim";
 import { useStore } from "../../store/store";
 import type { CareerState, LiveSub } from "../../store/store";
 import { MAX_SUBS } from "../../store/store";
 import { TeamBadge } from "../../components/TeamBadge";
 import { BallIcon, SubIcon } from "../../components/icons";
-import { FORMATIONS, managedRatings } from "../../lib/manage";
+import { FORMATIONS, managedRatings, ovr } from "../../lib/manage";
 import { mentalityLabel, pacingLabel, pressingLabel, type Tactics } from "../../lib/tactics";
 import { isAvailable, type PlayerStates } from "../../lib/cards";
 import { depleteStamina, staminaTier } from "../../lib/fatigue";
@@ -36,10 +36,14 @@ const RING: Record<string, string> = {
   FW: "var(--can-red)",
 };
 
-/** A player's overall rating on a familiar 40-99 scale, from the model's ability. */
-function ovr(ability: number): number {
-  return Math.max(40, Math.min(99, Math.round(49 + ability * 50)));
-}
+// forwards first: managers reach for an attacker when chasing a game
+const POS_ORDER = ["FW", "MF", "DF", "GK"] as const;
+const POS_LABEL: Record<string, string> = {
+  GK: "Goalkeepers",
+  DF: "Defenders",
+  MF: "Midfielders",
+  FW: "Forwards",
+};
 
 function lastName(name: string): string {
   const parts = name.split(" ");
@@ -56,6 +60,12 @@ const PRESETS: { label: string; t: Tactics }[] = [
 
 const reduceMotion = () =>
   typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// signature of the manager's setup, so resuming only re-simulates the rest of the
+// half when something genuinely changed (no free re-rolls on a peek).
+function setupSig(l: NonNullable<CareerState["live"]>): string {
+  return `${l.subs.map((s) => s.on).join(",")}|${l.formation}|${l.tactics.mentality},${l.tactics.pressing},${l.tactics.pacing}`;
+}
 
 interface FeedItem {
   minute: number;
@@ -129,6 +139,7 @@ export function LiveMatchCenter({
   const [flash, setFlash] = useState<{ side: "home" | "away"; text: string } | null>(null);
   const minuteRef = useRef(0);
   const prevGoalsRef = useRef(0);
+  const snapRef = useRef("");
 
   const half = live?.half ?? 1;
   const endClock = live?.endClock ?? 45;
@@ -193,6 +204,30 @@ export function LiveMatchCenter({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [total]);
 
+  // keyboard shortcuts during live play: Space pauses, S opens the board, 1/2/4 set
+  // the speed. Ignored while typing in a control or once the board/full-time is up.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement | null)?.tagName;
+      if (tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA") return;
+      if (phase !== "live" || ftReached) return;
+      if (e.code === "Space") {
+        e.preventDefault();
+        if (!adjusting) setPlaying((p) => !p);
+      } else if (e.key === "s" || e.key === "S") {
+        if (!adjusting && live && clock < 90) {
+          snapRef.current = setupSig(live);
+          setPlaying(false);
+          setAdjusting(true);
+        }
+      } else if (e.key === "1") setSpeed(1);
+      else if (e.key === "2") setSpeed(2);
+      else if (e.key === "4") setSpeed(4);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [phase, ftReached, adjusting, clock, live]);
+
   if (!live) return null;
 
   const phaseLabel =
@@ -211,12 +246,6 @@ export function LiveMatchCenter({
   const canAdjust = phase === "live" && !ftReached && clock < 90;
   const boardOpen = phase === "halftime" || adjusting;
   const feed = buildFeed(live, clock, ftReached);
-
-  // signature of the manager's setup, so resuming only re-simulates the rest of
-  // the half when something genuinely changed (no free re-rolls on a peek).
-  const setupSig = (l: NonNullable<CareerState["live"]>) =>
-    `${l.subs.map((s) => s.on).join(",")}|${l.formation}|${l.tactics.mentality},${l.tactics.pressing},${l.tactics.pacing}`;
-  const snapRef = useRef("");
 
   const openAdjust = () => {
     snapRef.current = setupSig(live);
@@ -275,6 +304,9 @@ export function LiveMatchCenter({
               {half === 1 ? "Skip to half-time" : "Skip to full-time"}
               <ChevronGlyph />
             </button>
+            <span className="lmc__kbd mono" aria-hidden>
+              Space pause · S subs
+            </span>
           </div>
           <button
             className="btn lmc__adjust"
@@ -589,15 +621,24 @@ function TacticalBoard({
     return arrangeEleven(squad, swapped, live.formation);
   }, [squad, live.start.eleven, live.subs, live.formation]);
 
-  const bench = useMemo(
-    () =>
-      squad.players
-        .filter((p) => !live.start.eleven.includes(p.name) && !broughtOn.has(p.name) && isAvailable(career.playerStates, p.name))
-        .sort((a, b) => b.ability - a.ability),
-    [squad, live.start.eleven, broughtOn, career.playerStates],
-  );
+  // bench split by line (GK / DF / MF / FW), best first within each, so a manager
+  // reads it like a real team sheet rather than one long list.
+  const benchByPos = useMemo(() => {
+    const groups: Record<string, SquadPlayer[]> = { GK: [], DF: [], MF: [], FW: [] };
+    for (const p of squad.players) {
+      if (live.start.eleven.includes(p.name) || broughtOn.has(p.name) || !isAvailable(career.playerStates, p.name)) continue;
+      (groups[p.group] ?? groups.MF!).push(p);
+    }
+    for (const k of POS_ORDER) groups[k]!.sort((a, b) => b.ability - a.ability);
+    return groups;
+  }, [squad, live.start.eleven, broughtOn, career.playerStates]);
+  const benchCount = POS_ORDER.reduce((n, k) => n + benchByPos[k]!.length, 0);
 
   const subsLeft = MAX_SUBS - live.subs.length;
+  // the starter picked to come off, used to read each replacement as an upgrade,
+  // a downgrade, or an out-of-position gamble.
+  const offPlayer = selectedOff ? byName.get(selectedOff) : undefined;
+  const offOvr = offPlayer ? ovr(offPlayer.ability) : null;
   const base = model.teams.find((x) => x.name === team)!;
   const r = managedRatings(model, team, onPitch, live.formation, t, midStates);
   const dAtk = r.atk - base.atk;
@@ -686,20 +727,48 @@ function TacticalBoard({
             <span className="eyebrow">{selectedOff ? `On for ${selectedOff}` : "Bench"}</span>
           </div>
           <div className={`lmc__bench ${selectedOff && subsLeft > 0 ? "armed" : ""}`}>
-            {bench.length === 0 ? (
-              <div className="mono lmc__note">No outfield options available.</div>
+            {benchCount === 0 ? (
+              <div className="mono lmc__note">No players available.</div>
             ) : (
-              bench.map((p) => (
-                <BenchChip
-                  key={p.name}
-                  name={p.name}
-                  pos={p.group}
-                  rating={ovr(p.ability)}
-                  stamina={career.playerStates[p.name]?.stamina ?? 100}
-                  disabled={!selectedOff || subsLeft <= 0}
-                  onClick={() => pickOn(p.name)}
-                />
-              ))
+              POS_ORDER.map((pos) => {
+                const players = benchByPos[pos]!;
+                if (players.length === 0) return null;
+                const match = !!offPlayer && offPlayer.group === pos;
+                return (
+                  <div key={pos} className="lmc__bench-group">
+                    <div className="lmc__bench-pos">
+                      <span>{POS_LABEL[pos]}</span>
+                      {match && <span className="lmc__bench-like mono">like-for-like</span>}
+                    </div>
+                    {players.map((p) => {
+                      let subtitle = p.club;
+                      let tone: "" | "up" | "down" | "warn" = "";
+                      if (offPlayer && offOvr != null) {
+                        if (offPlayer.group !== p.group) {
+                          subtitle = "Out of position";
+                          tone = "warn";
+                        } else {
+                          const d = ovr(p.ability) - offOvr;
+                          subtitle = d > 0 ? `+${d} rating` : d < 0 ? `${d} rating` : "Like for like";
+                          tone = d > 0 ? "up" : d < 0 ? "down" : "";
+                        }
+                      }
+                      return (
+                        <BenchChip
+                          key={p.name}
+                          name={p.name}
+                          subtitle={subtitle}
+                          tone={tone}
+                          rating={ovr(p.ability)}
+                          stamina={career.playerStates[p.name]?.stamina ?? 100}
+                          disabled={!selectedOff || subsLeft <= 0}
+                          onClick={() => pickOn(p.name)}
+                        />
+                      );
+                    })}
+                  </div>
+                );
+              })
             )}
           </div>
         </div>
@@ -825,14 +894,16 @@ function SubPitch({
 
 function BenchChip({
   name,
-  pos,
+  subtitle,
+  tone,
   rating,
   stamina,
   disabled,
   onClick,
 }: {
   name: string;
-  pos: string;
+  subtitle: string;
+  tone: "" | "up" | "down" | "warn";
   rating: number;
   stamina: number;
   disabled: boolean;
@@ -844,7 +915,7 @@ function BenchChip({
       <span className="lmc-bchip__ovr">{rating}</span>
       <span className="lmc-bchip__body">
         <span className="lmc-bchip__name">{lastName(name)}</span>
-        <span className="lmc-bchip__pos mono">{pos}</span>
+        <span className={`lmc-bchip__sub ${tone}`}>{subtitle}</span>
       </span>
       <span className="lmc-bchip__dot" style={{ background: TIER_COLOR[tier] }} aria-hidden />
     </button>

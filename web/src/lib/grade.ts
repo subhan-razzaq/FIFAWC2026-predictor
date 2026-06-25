@@ -6,8 +6,9 @@
 // number of knockout rounds survived (sum of the per-round advance probabilities)
 // and compare it to what the user actually achieved.
 
-import type { EnrichedMatch, GoalEvent, MatchResult, Stage, TeamOdds } from "@weltmeister/sim";
-import { impactSubGoals } from "@weltmeister/sim";
+import type { EnrichedMatch, GoalEvent, MatchResult, Model, Stage, TeamOdds } from "@weltmeister/sim";
+import { extractManagedCards, extractManagedMinutes, impactSubGoals } from "@weltmeister/sim";
+import { ovr } from "./manage";
 
 export type LetterGrade = "A+" | "A" | "B+" | "B" | "C+" | "C" | "D" | "F";
 
@@ -114,4 +115,76 @@ export function impactSubs(enriched: EnrichedMatch[], team: string): ImpactSub[]
   return [...tally.entries()]
     .map(([player, goals]) => ({ player, goals }))
     .sort((a, b) => b.goals - a.goals);
+}
+
+export interface MatchRating {
+  player: string;
+  group: string;
+  rating: number;
+  goals: number;
+  assists: number;
+  mins: number;
+}
+
+/**
+ * Per-player match ratings (≈4.5-10) for the managed team, best first, so the top
+ * entry is the player of the match. Read off the canonical enriched timeline,
+ * minutes, goals, assists and cards, then weighted by the scoreline (clean sheets
+ * lift the back line, a defeat dents everyone) and a light nudge from the player's
+ * own class. Short cameos are pulled back toward a neutral 6.5.
+ */
+export function matchRatings(
+  model: Model,
+  team: string,
+  result: MatchResult,
+  enriched: EnrichedMatch,
+): MatchRating[] {
+  const minutes = extractManagedMinutes(enriched, team, !!result.afterExtraTime);
+  const cards = extractManagedCards(enriched, team);
+  const yellows = new Set(cards.yellows);
+  const reds = new Set(cards.reds);
+  const byName = new Map(model.squads[team]!.players.map((p) => [p.name, p]));
+
+  const goals = new Map<string, number>();
+  const assists = new Map<string, number>();
+  for (const g of result.scorers as GoalEvent[]) {
+    if (g.team !== team) continue;
+    if (g.kind !== "own" && g.player !== "Unattributed") goals.set(g.player, (goals.get(g.player) ?? 0) + 1);
+    if (g.assist) assists.set(g.assist, (assists.get(g.assist) ?? 0) + 1);
+  }
+
+  const teamHome = result.home === team;
+  const tg = teamHome ? result.homeGoals : result.awayGoals;
+  const og = teamHome ? result.awayGoals : result.homeGoals;
+  const won = result.winner ? result.winner === team : tg > og;
+  const drew = !result.winner && tg === og;
+
+  const rows: MatchRating[] = [];
+  for (const [name, mins] of minutes) {
+    if (mins <= 0) continue;
+    const p = byName.get(name);
+    if (!p) continue;
+    const g = goals.get(name) ?? 0;
+    const a = assists.get(name) ?? 0;
+    let r = 6.3 + g * 1.05 + a * 0.6;
+    const back = p.group === "GK" || p.group === "DF";
+    if (back) r += og === 0 && mins >= 60 ? 0.9 : -og * 0.22;
+    if (p.group === "GK" && og >= 3) r -= 0.3;
+    if (p.group === "FW" && g === 0 && mins >= 60) r -= 0.25;
+    r += won ? 0.4 : drew ? 0.05 : -0.25;
+    if (yellows.has(name)) r -= 0.3;
+    if (reds.has(name)) r -= 1.3;
+    r += (ovr(p.ability) - 76) * 0.01;
+    if (mins < 30) r = 6.5 + (r - 6.5) * (mins / 30);
+    rows.push({
+      player: name,
+      group: p.group,
+      rating: Math.round(Math.max(4.5, Math.min(10, r)) * 10) / 10,
+      goals: g,
+      assists: a,
+      mins,
+    });
+  }
+  rows.sort((x, y) => y.rating - x.rating || y.goals - x.goals || y.mins - x.mins);
+  return rows;
 }
