@@ -82,7 +82,6 @@
   width: max-content;
   animation: flag-scroll 80s linear infinite;
 }
-.flag-ticker:hover .flag-ticker__track { animation-play-state: paused; }
 .flag-ticker__flag {
   width: 34px;
   height: 23px;
