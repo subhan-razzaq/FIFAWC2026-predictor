@@ -43,6 +43,11 @@ Thumbs.db
 .idea/
 .vscode/
 
+# Local agent / assistant tooling
+.claude/
+.cursor/
+.aider*
+
 # Local notes
 *.local.md
 
