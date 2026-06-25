@@ -13,7 +13,7 @@
 .method-prose h3 {
   font-size: 1.3rem;
   margin: var(--s-5) 0 var(--s-2);
-  color: var(--ink);
+  color: var(--text);
 }
 .method-prose h3:first-child {
   margin-top: 0;
@@ -52,7 +52,7 @@
 }
 .method-verdict .anton {
   font-size: 2.6rem;
-  color: var(--mex-green-deep);
+  color: var(--win);
   line-height: 1;
 }
 .method-verdict p {
@@ -84,7 +84,7 @@
 }
 .method-table tr.win td,
 .method-table td.win {
-  color: var(--mex-green-deep);
+  color: var(--win);
   font-weight: 700;
 }
 .method-note {
