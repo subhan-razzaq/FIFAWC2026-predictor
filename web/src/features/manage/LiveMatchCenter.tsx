@@ -12,7 +12,7 @@ import { useStore } from "../../store/store";
 import type { CareerState, LiveSub } from "../../store/store";
 import { MAX_SUBS } from "../../store/store";
 import { TeamBadge } from "../../components/TeamBadge";
-import { BallIcon, SubIcon } from "../../components/icons";
+import { BallIcon, CardIcon, SubIcon } from "../../components/icons";
 import { FORMATIONS, managedRatings, ovr } from "../../lib/manage";
 import { mentalityLabel, pacingLabel, pressingLabel, type Tactics } from "../../lib/tactics";
 import { isAvailable, type PlayerStates } from "../../lib/cards";
@@ -69,7 +69,7 @@ function setupSig(l: NonNullable<CareerState["live"]>): string {
 
 interface FeedItem {
   minute: number;
-  kind: "period" | "goal" | "sub";
+  kind: "period" | "goal" | "sub" | "card";
   side?: "home" | "away";
   // goal payload
   scorer?: string;
@@ -78,6 +78,9 @@ interface FeedItem {
   // sub payload
   on?: string;
   off?: string;
+  // card payload
+  player?: string;
+  cardType?: "yellow" | "red";
   // period label
   text?: string;
 }
@@ -136,9 +139,10 @@ export function LiveMatchCenter({
   const [speed, setSpeed] = useState(1);
   const [ftReached, setFtReached] = useState(false);
   const [adjusting, setAdjusting] = useState(false);
-  const [flash, setFlash] = useState<{ side: "home" | "away"; text: string } | null>(null);
+  const [flash, setFlash] = useState<{ side: "home" | "away"; text: string; kind: "goal" | "yellow" | "red" } | null>(null);
   const minuteRef = useRef(0);
   const prevGoalsRef = useRef(0);
+  const prevCardsRef = useRef(0);
   const snapRef = useRef("");
 
   const half = live?.half ?? 1;
@@ -195,7 +199,7 @@ export function LiveMatchCenter({
     if (!live) return;
     if (total > prevGoalsRef.current && total > 0) {
       const last = revealed.reduce((a, b) => (b.minute >= a.minute ? b : a), revealed[0]!);
-      setFlash({ side: last.side ?? "home", text: last.player });
+      setFlash({ side: last.side ?? "home", text: last.player, kind: "goal" });
       const id = window.setTimeout(() => setFlash(null), 1500);
       prevGoalsRef.current = total;
       return () => window.clearTimeout(id);
@@ -203,6 +207,21 @@ export function LiveMatchCenter({
     prevGoalsRef.current = total;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [total]);
+
+  // bookings flash onto the board the same way goals do, as the clock reaches them
+  const revealedCards = live ? live.cards.filter((c) => c.minute <= clock) : [];
+  useEffect(() => {
+    if (!live) return;
+    if (revealedCards.length > prevCardsRef.current && revealedCards.length > 0) {
+      const last = revealedCards.reduce((a, b) => (b.minute >= a.minute ? b : a), revealedCards[0]!);
+      setFlash({ side: last.side ?? "home", text: last.player, kind: last.type === "red" ? "red" : "yellow" });
+      const id = window.setTimeout(() => setFlash(null), 1400);
+      prevCardsRef.current = revealedCards.length;
+      return () => window.clearTimeout(id);
+    }
+    prevCardsRef.current = revealedCards.length;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [revealedCards.length]);
 
   // keyboard shortcuts during live play: Space pauses, S opens the board, 1/2/4 set
   // the speed. Ignored while typing in a control or once the board/full-time is up.
@@ -334,7 +353,7 @@ export function LiveMatchCenter({
               career={career}
               live={live}
               minute={phase === "halftime" ? 45 : clock}
-              title={phase === "halftime" ? "Half-time team talk" : `${clock}′ — Subs & tactics`}
+              title={phase === "halftime" ? "Half-time team talk" : `${clock}′ · Subs & tactics`}
               primaryLabel={phase === "halftime" ? "Start the second half →" : "Back to the match →"}
               onPrimary={phase === "halftime" ? resumeSecondHalf : closeAdjust}
             />
@@ -351,7 +370,7 @@ export function LiveMatchCenter({
             <CommentaryFeed feed={feed} />
             {ftReached && (
               <button className="btn lmc__finish" onClick={finishMatch}>
-                Full-time — see the result →
+                Full-time · see the result →
               </button>
             )}
           </motion.div>
@@ -395,7 +414,7 @@ function Scoreboard({
   awayScore: number;
   clock: number;
   phaseLabel: string;
-  flash: { side: "home" | "away"; text: string } | null;
+  flash: { side: "home" | "away"; text: string; kind: "goal" | "yellow" | "red" } | null;
 }) {
   const goals = live.goals.filter((g) => g.minute <= clock);
   const homeScorers = goals.filter((g) => g.side === "home");
@@ -433,15 +452,17 @@ function Scoreboard({
       <AnimatePresence>
         {flash && (
           <motion.div
-            key={flash.text + flash.side}
-            className={`lmc__flash ${flash.side === "home" ? "left" : "right"}`}
+            key={flash.text + flash.side + flash.kind}
+            className={`lmc__flash lmc__flash--${flash.kind} ${flash.side === "home" ? "left" : "right"}`}
             initial={{ opacity: 0, scale: 0.6, y: 6 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 1.1 }}
             transition={{ type: "spring", stiffness: 360, damping: 18 }}
           >
-            <BallIcon size={15} />
-            <span className="lmc__flash-word anton">Goal</span>
+            {flash.kind === "goal" ? <BallIcon size={15} /> : <CardIcon kind={flash.kind} size={16} />}
+            <span className="lmc__flash-word anton">
+              {flash.kind === "goal" ? "Goal" : flash.kind === "red" ? "Red card" : "Booked"}
+            </span>
             <span className="lmc__flash-who mono">{flash.text}</span>
           </motion.div>
         )}
@@ -537,6 +558,18 @@ function EventContent({ f, side }: { f: FeedItem; side: "home" | "away" }) {
     icon = (
       <span className="lmc__ev-ic lmc__ev-ic--goal">
         <BallIcon size={14} />
+      </span>
+    );
+  } else if (f.kind === "card") {
+    body = (
+      <span className="lmc__ev-txt">
+        <span className="lmc__ev-name">{f.player}</span>
+        <span className="lmc__ev-assist">{f.cardType === "red" ? "Sent off" : "Booked"}</span>
+      </span>
+    );
+    icon = (
+      <span className="lmc__ev-ic">
+        <CardIcon kind={f.cardType ?? "yellow"} size={15} />
       </span>
     );
   } else {
@@ -695,7 +728,7 @@ function TacticalBoard({
       <div className="lmc__ht-grid">
         <div className="lmc__pitchcol">
           <div className="lmc__col-head">
-            <span className="eyebrow">{selectedOff ? "Now pick who comes on ▸" : "Your XI — tap a player to take off"}</span>
+            <span className="eyebrow">{selectedOff ? "Now pick who comes on ▸" : "Your XI · tap a player to take off"}</span>
             <span className="mono lmc__subs-left">{subsLeft} sub{subsLeft === 1 ? "" : "s"} left</span>
           </div>
           <SubPitch
@@ -1012,6 +1045,10 @@ function buildFeed(
     if (s.minute > clock) continue;
     items.push({ minute: s.minute, kind: "sub", side: live.managedSide, on: s.on, off: s.off });
   }
+  for (const cd of live.cards) {
+    if (cd.minute > clock) continue;
+    items.push({ minute: cd.minute, kind: "card", side: cd.side, player: cd.player, cardType: cd.type === "red" ? "red" : "yellow" });
+  }
   if (clock >= 45) items.push({ minute: 45, kind: "period", text: "Half-time" });
   if (live.afterExtraTime && clock >= 90) items.push({ minute: 90, kind: "period", text: "Into extra time" });
   if (ftReached) {
@@ -1028,5 +1065,5 @@ function buildFeed(
 }
 
 function rank(f: FeedItem): number {
-  return f.kind === "goal" ? 2 : f.kind === "sub" ? 1 : 0;
+  return f.kind === "goal" ? 3 : f.kind === "card" ? 2 : f.kind === "sub" ? 1 : 0;
 }

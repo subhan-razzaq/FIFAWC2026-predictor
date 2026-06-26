@@ -69,7 +69,7 @@ export interface EnrichOptions {
   penaltyOverride?: Record<string, string>;
   /**
    * Pre-placed goal events (manage-mode live match). When given, these goals are
-   * used verbatim — minutes included — instead of being re-scattered, so the
+   * used verbatim (minutes included) instead of being re-scattered, so the
    * post-match timeline matches exactly what played out minute by minute.
    */
   providedGoalEvents?: MatchEvent[];
@@ -323,6 +323,68 @@ function publicLineup(
 function eventRank(e: MatchEvent): number {
   // when minutes tie, show goals first, then reds, yellows, subs
   return e.type === "goal" ? 0 : e.type === "red" ? 1 : e.type === "yellow" ? 2 : 3;
+}
+
+/**
+ * Bookings for a live, in-progress match, generated up front so the Live Match
+ * Center can drop yellow and red cards onto the feed as the clock reaches them,
+ * exactly like goals. Deterministic for a seed and independent of the goal
+ * re-simulation, since a booking is flavour and should not shift when the manager
+ * makes a change. A second yellow is shown as a sending-off.
+ */
+export function liveCards(
+  model: Model,
+  home: string,
+  away: string,
+  homeEleven: string[],
+  awayEleven: string[],
+  seed: number,
+  maxMin = 90,
+): MatchEvent[] {
+  const rng = new Rng(hashSeed(`${seed}|cards|${home}|${away}`));
+  const out: MatchEvent[] = [];
+
+  const side = (team: string, eleven: string[], which: "home" | "away") => {
+    const squad = model.squads[team];
+    if (!squad) return;
+    const players = eleven.map((n) => ({
+      name: n,
+      pos: squad.players.find((p) => p.name === n)?.group ?? "MF",
+    }));
+    const pick = (): string => {
+      let total = 0;
+      for (const p of players) total += CARD_WEIGHT[p.pos] ?? 1;
+      let u = rng.next() * total;
+      for (const p of players) {
+        u -= CARD_WEIGHT[p.pos] ?? 1;
+        if (u <= 0) return p.name;
+      }
+      return players[players.length - 1]?.name ?? "";
+    };
+    const yellows = Math.min(5, samplePoisson(rng, 1.6));
+    const bookedAt = new Map<string, number>();
+    for (let i = 0; i < yellows; i++) {
+      const name = pick();
+      if (!name) continue;
+      const first = bookedAt.get(name);
+      if (first !== undefined) {
+        const minute = Math.min(maxMin, first + 5 + rng.int(Math.max(1, maxMin - first - 4)));
+        out.push({ minute, type: "red", side: which, team, player: name });
+      } else {
+        const minute = 8 + rng.int(Math.max(1, maxMin - 8));
+        out.push({ minute, type: "yellow", side: which, team, player: name });
+        bookedAt.set(name, minute);
+      }
+    }
+    if (rng.chance(0.04)) {
+      const name = pick();
+      if (name) out.push({ minute: 30 + rng.int(Math.max(1, maxMin - 30)), type: "red", side: which, team, player: name });
+    }
+  };
+
+  side(home, homeEleven, "home");
+  side(away, awayEleven, "away");
+  return out.sort((a, b) => a.minute - b.minute);
 }
 
 /** Build the broadcast timeline and lineups for a single finished match. */

@@ -11,6 +11,7 @@ import {
   extractManagedCards,
   extractManagedMinutes,
   hashSeed,
+  liveCards,
   managedGroupSchedule,
   resolveBracketForManaged,
   resolveGroupStage,
@@ -89,6 +90,7 @@ export interface LiveMatchState {
   home: string;
   away: string;
   goals: MatchEvent[]; // accumulated goal events (both sides), minute-stamped
+  cards: MatchEvent[]; // yellow / red bookings, minute-stamped, revealed by the clock
   homeGoals: number;
   awayGoals: number;
   half: 1 | 2;
@@ -492,6 +494,12 @@ export const useStore = create<StoreState>((set, get) => ({
     );
     const h1 = simulateLiveSegment(model, ov, deriveSeed(base, 11), spec, 0, 45);
 
+    // bookings for the whole match, generated once and revealed by the clock. They
+    // are flavour, so they stay fixed even when the manager re-rolls the half.
+    const homeEleven = info.isHome ? c.draft.eleven : model.squads[info.opponent]!.projected_eleven;
+    const awayEleven = info.isHome ? model.squads[info.opponent]!.projected_eleven : c.draft.eleven;
+    const cards = liveCards(model, home, away, homeEleven, awayEleven, base, 90);
+
     set({
       career: {
         ...c,
@@ -503,6 +511,7 @@ export const useStore = create<StoreState>((set, get) => ({
           home,
           away,
           goals: h1.goals,
+          cards,
           homeGoals: h1.homeGoals,
           awayGoals: h1.awayGoals,
           half: 1,

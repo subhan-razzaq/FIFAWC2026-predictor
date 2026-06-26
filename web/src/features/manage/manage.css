@@ -1250,3 +1250,10 @@
   .lmc__team { font-size: 1rem; }
   .lmc-pc { width: 140px; }
 }
+
+/* card events + flash in the live match center */
+.lmc__flash--yellow { background: #e6c130; color: var(--ink); }
+.lmc__flash--red { background: var(--fifa-red); color: #fff; }
+.lmc__ev--card { display: grid; grid-template-columns: 1fr 40px 1fr; align-items: center; gap: var(--s-2); }
+.lmc__ev--card.is-home { background: linear-gradient(90deg, color-mix(in srgb, var(--fifa-yellow) 15%, transparent), transparent 62%); }
+.lmc__ev--card.is-away { background: linear-gradient(270deg, color-mix(in srgb, var(--fifa-yellow) 15%, transparent), transparent 62%); }
