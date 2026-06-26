@@ -168,6 +168,95 @@ def club_score(club: str) -> float:
     return CLUB_TIER.get(club, 0.42)
 
 
+# --- 2026 ratings -------------------------------------------------------------
+
+# The OVR display curve from the web app (web/src/lib/manage.ts). Kept in lockstep
+# so a curated overall here lands on the same number the badge shows.
+_OVR_ANCHORS: list[tuple[float, int]] = [
+    (0.25, 58), (0.32, 67), (0.42, 73), (0.55, 78),
+    (0.7, 82), (0.82, 85), (0.92, 88), (1.0, 91),
+]
+
+
+def _ability_for_ovr(ovr: int) -> float:
+    """Inverse of the web OVR curve: the ability that displays as ``ovr``."""
+    if ovr <= _OVR_ANCHORS[0][1]:
+        return _OVR_ANCHORS[0][0]
+    if ovr >= _OVR_ANCHORS[-1][1]:
+        return 1.0
+    for i in range(1, len(_OVR_ANCHORS)):
+        a1, o1 = _OVR_ANCHORS[i]
+        if ovr <= o1:
+            a0, o0 = _OVR_ANCHORS[i - 1]
+            return round(a0 + (a1 - a0) * (ovr - o0) / (o1 - o0), 4)
+    return 1.0
+
+
+# Curated overalls for the players who define the 2026 tournament, cross-referenced
+# against the EA Sports FC 26 ratings reveal and 2025/26 club form. These override
+# the club+caps heuristic, which underrates young stars (Yamal, Olise) who have not
+# yet piled up international caps and over-rates well-capped squad players. Names
+# match accent-insensitively. Non-listed players are held below the star floor so
+# the named elite stand clear of the field.
+STAR_OVR: dict[str, int] = {
+    # 91: the best players in the world
+    "kylian mbappe": 91, "mohamed salah": 91,
+    # 90
+    "ousmane dembele": 90, "erling haaland": 90, "jude bellingham": 90,
+    "virgil van dijk": 90, "rodri": 90,
+    # 89
+    "lamine yamal": 89, "harry kane": 89, "vinicius junior": 89, "raphinha": 89,
+    "achraf hakimi": 89, "vitinha": 89, "federico valverde": 89, "florian wirtz": 89,
+    "pedri": 89, "joshua kimmich": 89, "alisson": 89, "thibaut courtois": 89,
+    "gianluigi donnarumma": 89,
+    # 88
+    "jamal musiala": 88, "lautaro martinez": 88, "victor osimhen": 88,
+    "bruno fernandes": 88, "kevin de bruyne": 88, "bukayo saka": 88,
+    "ruben dias": 88, "trent alexander-arnold": 88,
+    # 87
+    "robert lewandowski": 87, "julian alvarez": 87, "phil foden": 87,
+    "cole palmer": 87, "declan rice": 87, "william saliba": 87, "marquinhos": 87,
+    "nuno mendes": 87, "alexis mac allister": 87, "cristian romero": 87,
+    "son heung-min": 87, "heung-min son": 87, "khvicha kvaratskhelia": 87,
+    "michael olise": 87, "rodrygo": 87, "martin odegaard": 87,
+    "emiliano martinez": 87,
+    # 86
+    "bernardo silva": 86, "frenkie de jong": 86, "nicolo barella": 86,
+    "gabriel magalhaes": 86, "antonio rudiger": 86, "josko gvardiol": 86,
+    "alexander isak": 86, "viktor gyokeres": 86, "ademola lookman": 86,
+    "mike maignan": 86, "marc-andre ter stegen": 86, "ederson": 86,
+    "jan oblak": 86, "aurelien tchouameni": 86, "dani olmo": 86,
+    "jules kounde": 86, "ronald araujo": 86, "dayot upamecano": 86,
+    "moises caicedo": 86, "bruno guimaraes": 86, "antoine griezmann": 86,
+    "enzo fernandez": 86, "gabriel jesus": 84, "diogo costa": 86,
+    # 85
+    "theo hernandez": 85, "matthijs de ligt": 85, "manuel akanji": 85,
+    "fabian ruiz": 85, "joao neves": 85, "cody gakpo": 85, "rafael leao": 85,
+    "nico williams": 85, "david raya": 85, "ederson moraes": 85,
+    "gregor kobel": 85, "unai simon": 85, "eder militao": 85, "gabriel dos santos": 84,
+    "tijjani reijnders": 85, "dominik szoboszlai": 85, "ousmane diomande": 82,
+    "cristiano ronaldo": 85, "andre onana": 84, "ryan gravenberch": 85,
+    "alphonso davies": 84, "inigo martinez": 84, "john stones": 84,
+    # 84
+    "eduardo camavinga": 84, "gavi": 84, "mikel merino": 84, "xavi simons": 84,
+    "desire doue": 84, "bradley barcola": 84, "marcus rashford": 84,
+    "dusan vlahovic": 84, "kenan yildiz": 84, "federico chiesa": 84,
+    "yann sommer": 84, "jordan pickford": 84, "denzel dumfries": 84,
+    "pau cubarsi": 84, "kobbie mainoo": 83, "arda guler": 84, "nico paz": 84,
+    "mohammed kudus": 84, "randal kolo muani": 83, "christopher nkunku": 83,
+    "weston mckennie": 81, "tyler adams": 80, "christian pulisic": 84,
+}
+
+# Non-curated players are capped just below the curated star floor so the modern
+# elite list above is clearly the top of every squad.
+GENERIC_CAP = 0.86
+
+
+def _star_ability(name: str) -> float | None:
+    ov = STAR_OVR.get(_ascii(name).lower())
+    return _ability_for_ovr(ov) if ov is not None else None
+
+
 def _ability(p: dict) -> float:
     """Blend club skill with international experience.
 
@@ -213,7 +302,8 @@ def _rates(pos: str, ability: float, caps: int, goals: int) -> tuple[float, floa
 
 
 def _to_player(p: dict) -> dict:
-    ability = _ability(p)
+    override = _star_ability(p["name"])
+    ability = override if override is not None else min(GENERIC_CAP, _ability(p))
     npxg, xa = _rates(p["pos"], ability, p["caps"], p["goals"])
     return {
         "name": p["name"],
