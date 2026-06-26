@@ -12,7 +12,7 @@ Predict every match. Simulate the whole tournament tens of thousands of times. W
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
 ![React](https://img.shields.io/badge/React-18-149ECA?logo=react&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white)
-![Vitest](https://img.shields.io/badge/tests-40%20passing-2c9e4f)
+![Tests](https://img.shields.io/badge/tests-51%20passing-2c9e4f)
 ![Vercel](https://img.shields.io/badge/Deployed-Vercel-000000?logo=vercel&logoColor=white)
 
 **Built by Subhan Razzaq and Youssef Khafagy**
@@ -30,10 +30,10 @@ It is built to be defensible and genuinely usable, not a demo. Every number trac
 ## At a glance
 
 - **Beats an Elo-only baseline** on Ranked Probability Score across the 2018 and 2022 World Cups, and is calibrated to an expected calibration error of **0.040**.
-- **1248 real players** from the official 2026 squads, with projected elevens, a goalscorer model, and per-game player ratings.
+- **1248 real players** from the official 2026 squads, with projected elevens, overalls calibrated to current form, a goalscorer model, and per-game player ratings.
 - **48 teams, 12 groups, 104 matches**, the real Round of 32 bracket, extra time, and penalty shootouts.
 - **Tens of thousands of tournaments per run**, aggregated into title odds, per-round survival odds, and a Golden Boot race.
-- **40 unit tests** plus continuous integration, an analytic-gradient check on the model fit, and a hand-checked bracket reproduced from a fixed seed.
+- **51 unit tests** plus continuous integration, an analytic-gradient check on the model fit, and a hand-checked bracket reproduced from a fixed seed.
 - **Static and instant.** The heavy fit runs offline, the runtime is a seeded Web Worker, and manage-mode re-sims feel immediate.
 
 ## What you can do
@@ -44,8 +44,8 @@ This is a full product, not a single chart. Each view is driven by the same engi
 - **Match Center.** Browse the actual result of a simulated run game by game, group stage included. Open any match for a broadcast detail: the model's pre-match scoreline odds with the real result marked, a two-sided timeline of goals, assists, bookings and substitutions with minutes, and a FotMob-style lineup pitch where every player lines up in the team's real shape and position with a jersey number, a colour-graded match rating, and the man of the match. Each side uses the formations it actually plays, weighted, so the shape varies between games.
 - **Live bracket.** The 48-to-1 knockout reduction rendered as a broadcast reveal, round by round, with a gold trophy locking onto the champion. It never runs on its own: the page waits in a pristine, unsimulated state until you start a run, so the bracket you see is always one you asked for. Share it as a seeded link or export it as a poster image.
 - **Stats.** The Golden Boot race, top assists, and clean sheets, projected as expected values across the whole Monte Carlo run.
-- **Manager mode.** Take charge of any of the 48 nations for the whole tournament, one match at a time. Choose your challenge from the full field on the landing screen, from the favourites down to a survival run with a minnow, then pick the shape, drag your eleven onto the pitch, set the mentality, pressing and pacing, and scout every opponent. Live win, draw and loss odds for the fixture update as you change the plan, a one-tap rotation rests tiring legs, and the team news flags who is suspended or a booking away from a ban. Every one of those choices feeds the same Dixon-Coles engine: the formation leans the attack/defence split, a player fielded out of position is docked, the tactical sliders shift expected goals, going all-out attack lifts your xG but hands the opponent the counter, a stronger eleven than your projected one lifts the side while a weaker one dents it, and stamina drains with minutes played — fall below half and the penalty turns steep, forcing a rotation. Player ratings sit on a calibrated overall scale, so a higher-rated pick genuinely plays better. Nothing is pre-decided: the group tables read zero games played until you kick off, then fill in matchday by matchday, and your whole run is saved so you can pick it up again later.
-- **Live Match Center.** Matches are not revealed as a final score — they are played out. A clock ticks from kick-off, goals drop onto a commentary feed as they happen, and you can pause at any stoppage, or at half-time, to study the game, make up to five substitutions and re-set the shape and tactics. The bench is grouped by position and, once you pick who comes off, every replacement is read as an upgrade, a downgrade or an out-of-position gamble; keyboard shortcuts drive the whole thing. The remaining minutes are then simulated with those exact choices, so a switch genuinely changes how the game ends, through to extra time and penalties. A live tracker shows your group table, the qualification race and your knockout path, and each game closes with player ratings and a player of the match. At the final whistle your run is graded against the model's own expectation for the team, with a shareable poster of the campaign.
+- **Manager mode.** Take charge of any of the 48 nations for the whole tournament, one match at a time. Choose your challenge from the full field on the landing screen, from the favourites down to a survival run with a minnow, then pick the shape, drag your eleven onto the pitch, set the mentality, pressing and pacing, and scout every opponent. Live win, draw and loss odds for the fixture update as you change the plan, a one-tap rotation rests tiring legs, and the team news flags who is suspended or a booking away from a ban. Every one of those choices feeds the same Dixon-Coles engine: the formation leans the attack/defence split, a player fielded out of position is docked, the tactical sliders shift expected goals, going all-out attack lifts your xG but hands the opponent the counter, a stronger eleven than your projected one lifts the side while a weaker one dents it, and stamina drains with minutes played; fall below half and the penalty turns steep, forcing a rotation. Player ratings sit on a calibrated overall scale tuned to current 2026 form, so the modern elite (Dembele, Yamal, Mbappe, Kane, Salah, Olise) sit at the top and a higher-rated pick genuinely plays better. Nothing is pre-decided: the group tables read zero games played until you kick off, then fill in matchday by matchday, and your whole run is saved so you can pick it up again later.
+- **Live Match Center.** Matches are not revealed as a final score; they are played out. A clock ticks from kick-off, and as the minutes count up goals, yellow cards and red cards surface live, flashing onto the scoreboard and dropping onto a commentary feed the moment they happen rather than waiting for the post-match timeline. You can pause at any stoppage, or at half-time, to study the game, make up to five substitutions and re-set the shape and tactics. The bench is grouped by position and, once you pick who comes off, every replacement is read as an upgrade, a downgrade or an out-of-position gamble; keyboard shortcuts drive the whole thing. The remaining minutes are then simulated with those exact choices, so a switch genuinely changes how the game ends, through to extra time and penalties. A live tracker shows your group table, the qualification race and your knockout path, and each game closes with player ratings and a player of the match. At the final whistle your run is graded against the model's own expectation for the team, with a shareable poster of the campaign.
 - **Methodology.** The data, the model, the metrics, the baselines beaten, and the calibration reliability diagram, all on one recruiter-facing page.
 
 Light and dark themes, keyboard navigation, visible focus, reduced-motion fallbacks, and a responsive layout are built in.
@@ -110,7 +110,7 @@ weltmeister/
 
 - **Type safe.** TypeScript strict across the simulation and the app, Python typed where it helps.
 - **Reproducible.** Every simulation is seeded, so any run can be shared by URL and reproduced exactly, down to the goal minutes.
-- **Tested.** 40 unit tests covering the analytic-gradient fit, the scoring-rule metrics, hand-checked group tables, a hand-checked bracket on a fixed seed, and the third-place allocation verified across all 495 qualifying combinations.
+- **Tested.** 51 unit tests covering the analytic-gradient fit, the scoring-rule metrics, hand-checked group tables, a hand-checked bracket on a fixed seed, the live match playback, and the third-place allocation verified across all 495 qualifying combinations.
 - **CI.** Continuous integration runs the engine validation and the simulation tests on every push.
 - **Performant.** The Monte Carlo runs off the main thread with a cached scoreline distribution, so re-sims stay responsive even at tens of thousands of runs.
 - **Accessible.** Keyboard navigable, visible focus, light and dark themes, reduced-motion fallbacks, and a mobile-friendly layout.
@@ -150,7 +150,7 @@ uv venv && uv pip install numpy pandas scipy requests matplotlib pytest ruff
 
 - The martj42 international results dataset, 1872 to present, the backbone for the goals fit.
 - World Football Elo, computed in repo from those results, used as a prior and as the baseline.
-- The official 2026 squad lists, for the projected elevens, the scorer model, and jersey numbers.
+- The official 2026 squad lists, for the projected elevens, the scorer model, and jersey numbers. Player overalls are hand-tuned to 2025/26 club form and cross-referenced against current public rating sets, so young stars who have yet to pile up international caps are not underrated.
 
 Everything is pulled once, cached locally, and frozen into the committed artifact. Nothing is fetched from a model source at page load.
 
