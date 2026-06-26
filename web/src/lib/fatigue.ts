@@ -4,7 +4,7 @@
 // (forwards and midfielders harder than defenders, keepers least); rest between
 // matches recovers some. A tired player is worth less: their effective output is
 // scaled by `fatigueMult`. Above half stamina the wear is gentle, but BELOW 50%
-// the penalty turns steep — a player run into the ground falls off a cliff, which
+// the penalty turns steep: a player run into the ground falls off a cliff, which
 // is what forces the user to rotate and to use the half-time window rather than
 // riding their best XI through the whole month.
 

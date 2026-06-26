@@ -179,7 +179,7 @@ export async function exportManagerPoster(d: ManagerPosterData): Promise<void> {
   await document.fonts.ready;
   await chrome(ctx, "MANAGER MODE · MY WORLD CUP");
 
-  // grade chip — drawn centred in its box and scaled to fit, so two-character
+  // grade chip, drawn centred in its box and scaled to fit, so two-character
   // grades like "A+" stay inside the chip instead of clipping its edge.
   const CHIP_X = 64;
   const CHIP_Y = 210;

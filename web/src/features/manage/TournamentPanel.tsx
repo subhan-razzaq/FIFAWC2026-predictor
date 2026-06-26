@@ -98,7 +98,7 @@ export function TournamentPanel({
           ))}
         </div>
       )}
-      <p className="tpanel__note mono">The table fills in matchday by matchday — only rounds that have been played count.</p>
+      <p className="tpanel__note mono">The table fills in matchday by matchday, so only rounds that have been played count.</p>
     </div>
   );
 }

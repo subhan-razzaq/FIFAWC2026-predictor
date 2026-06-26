@@ -304,7 +304,7 @@ function ProofItem({
   return (
     <div className="proof__item">
       <div className="proof__value anton">
-        {value === null ? "—" : <CountUp value={value} format={format} />}
+        {value === null ? "-" : <CountUp value={value} format={format} />}
       </div>
       <div className="proof__label">{label}</div>
       <div className="proof__note mono">{note}</div>

@@ -168,7 +168,7 @@ export function resolveGroupStage(
  * Live, chronological group standings for the managed run. Only the matchdays the
  * managed team has actually completed are counted, so before kick-off every team
  * reads zero games played and the tables fill in matchday by matchday as the
- * tournament advances alongside the managed games — nothing is pre-evaluated.
+ * tournament advances alongside the managed games, with nothing pre-evaluated.
  */
 export function liveGroupStandings(
   model: Model,

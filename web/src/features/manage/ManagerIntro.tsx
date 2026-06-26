@@ -133,7 +133,7 @@ export function ManagerIntro({ model, onPick }: Props) {
               variants={itemVar}
               transition={{ duration: 0.4, ease: EASE_OUT }}
               onClick={() => onPick(t.name)}
-              title={`${t.name} — Group ${t.group}, FIFA #${t.fifa_rank}`}
+              title={`${t.name} · Group ${t.group}, FIFA #${t.fifa_rank}`}
             >
               <span className="mteam__top">
                 <TeamBadge team={t.name} group={t.group} size={30} />
