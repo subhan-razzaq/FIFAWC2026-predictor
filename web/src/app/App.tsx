@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 
 import { useStore } from "../store/store";
 import { Header } from "./Header";
@@ -9,9 +9,22 @@ import { ResultsView } from "../features/results/ResultsView";
 import { BracketView } from "../features/bracket/BracketView";
 import { ScorersView } from "../features/scorers/ScorersView";
 import { ManageView } from "../features/manage/ManageView";
+import { PredictView } from "../features/predict/PredictView";
 import { MethodologyView } from "../features/methodology/MethodologyView";
 import { AboutView } from "../features/about/AboutView";
 import "./app.css";
+
+const DEFAULT_TITLE = "WELTMEISTER · World Cup 2026 predictor";
+const ROUTE_TITLES: Record<string, string> = {
+  "/": DEFAULT_TITLE,
+  "/manage": "Manager Mode · WELTMEISTER",
+  "/predict": "Predict · WELTMEISTER",
+  "/results": "Match Center · WELTMEISTER",
+  "/bracket": "Bracket · WELTMEISTER",
+  "/scorers": "Stats · WELTMEISTER",
+  "/methodology": "Method · WELTMEISTER",
+  "/about": "About · WELTMEISTER",
+};
 
 export function App() {
   const status = useStore((s) => s.status);
@@ -19,10 +32,18 @@ export function App() {
   const init = useStore((s) => s.init);
   const run = useStore((s) => s.run);
   const theme = useStore((s) => s.theme);
+  const location = useLocation();
 
   useEffect(() => {
     void init();
   }, [init]);
+
+  // keep the browser tab honest and land every route at the top (a long
+  // results table shouldn't leave the next page scrolled into its middle)
+  useEffect(() => {
+    document.title = ROUTE_TITLES[location.pathname] ?? DEFAULT_TITLE;
+    if (!location.hash) window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [location.pathname, location.hash]);
 
   // apply the theme at the document level so the page background adapts too
   useEffect(() => {
@@ -59,6 +80,7 @@ export function App() {
           <Route path="/bracket" element={<BracketView />} />
           <Route path="/scorers" element={<ScorersView />} />
           <Route path="/manage" element={<ManageView />} />
+          <Route path="/predict" element={<PredictView />} />
           <Route path="/methodology" element={<MethodologyView />} />
           <Route path="/about" element={<AboutView />} />
           <Route path="*" element={<Navigate to="/" replace />} />

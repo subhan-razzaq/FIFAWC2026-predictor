@@ -2,6 +2,8 @@
 // request id so several calls can be in flight, and forwards progress.
 
 import type {
+  BracketGrade,
+  BracketPrediction,
   Model,
   MonteCarloResult,
   Overrides,
@@ -36,6 +38,9 @@ export class SimRunner {
       } else if (msg.type === "single") {
         this.pending.delete(id);
         p.resolve(msg.result);
+      } else if (msg.type === "grade") {
+        this.pending.delete(id);
+        p.resolve(msg.result);
       } else if (msg.type === "error") {
         this.pending.delete(id);
         p.reject(new Error(msg.message));
@@ -63,6 +68,21 @@ export class SimRunner {
     const req: WorkerRequest = { type: "single", model, seed, overrides, id };
     return new Promise((resolve, reject) => {
       this.pending.set(id, { resolve: resolve as (v: unknown) => void, reject });
+      this.worker.postMessage(req);
+    });
+  }
+
+  gradeBracket(
+    model: Model,
+    prediction: BracketPrediction,
+    runs: number,
+    seed: number,
+    onProgress?: (done: number, total: number) => void,
+  ): Promise<BracketGrade> {
+    const id = ++this.id;
+    const req: WorkerRequest = { type: "gradebracket", model, prediction, runs, seed, id };
+    return new Promise((resolve, reject) => {
+      this.pending.set(id, { resolve: resolve as (v: unknown) => void, reject, onProgress });
       this.worker.postMessage(req);
     });
   }

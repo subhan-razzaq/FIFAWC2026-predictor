@@ -16,6 +16,7 @@ export * from "./thirds";
 export * from "./bracket";
 export * from "./tournament";
 export * from "./montecarlo";
+export * from "./grade";
 export * from "./playthrough";
 export { runSingle, handleRequest } from "./worker";
 export type { WorkerRequest, WorkerResponse } from "./worker";

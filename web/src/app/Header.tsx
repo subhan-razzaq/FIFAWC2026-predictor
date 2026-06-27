@@ -4,6 +4,7 @@ import { useStore } from "../store/store";
 const LINKS = [
   { to: "/", label: "Dashboard", end: true },
   { to: "/manage", label: "Manager", primary: true },
+  { to: "/predict", label: "Predict" },
   { to: "/results", label: "Match Center" },
   { to: "/bracket", label: "Bracket" },
   { to: "/scorers", label: "Stats" },
