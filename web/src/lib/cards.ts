@@ -6,7 +6,8 @@
 // that. Suspended players cannot be selected for the next match; sitting it out
 // serves the ban.
 
-/** Per-player career condition, shared by the fatigue and card systems. */
+/** Per-player career condition, shared by the fatigue, card, form and morale and
+ * injury systems. New fields are optional so older saved careers still load. */
 export interface PlayerCondition {
   /** 0..100, drives the fatigue multiplier. */
   stamina: number;
@@ -14,12 +15,20 @@ export interface PlayerCondition {
   yellows: number;
   /** banned from the next match. */
   suspendedNext: boolean;
+  /** -5..+5 rolling form, nudged by performances. Shifts the displayed overall. */
+  form?: number;
+  /** 0..100 happiness, moved by results, minutes and press answers. */
+  morale?: number;
+  /** matches remaining on an injury or illness lay-off (0 or undefined = fit). */
+  injuredFor?: number;
+  /** what is keeping them out, for the inbox and team news. */
+  injury?: string;
 }
 
 export type PlayerStates = Record<string, PlayerCondition>;
 
 export function freshCondition(): PlayerCondition {
-  return { stamina: 100, yellows: 0, suspendedNext: false };
+  return { stamina: 100, yellows: 0, suspendedNext: false, form: 0, morale: 70 };
 }
 
 /** Fold a played match's cards into the condition map (mutates a copy is the
@@ -66,5 +75,14 @@ export function wipeYellows(states: PlayerStates): PlayerStates {
 }
 
 export function isAvailable(states: PlayerStates, name: string): boolean {
-  return !states[name]?.suspendedNext;
+  const c = states[name];
+  return !c?.suspendedNext && !(c?.injuredFor && c.injuredFor > 0);
+}
+
+/** Why a player cannot be picked, for the team-news and bench labels. */
+export function unavailableReason(states: PlayerStates, name: string): string | null {
+  const c = states[name];
+  if (c?.injuredFor && c.injuredFor > 0) return c.injury ?? "Injured";
+  if (c?.suspendedNext) return "Suspended";
+  return null;
 }

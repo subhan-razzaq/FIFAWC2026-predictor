@@ -10,6 +10,7 @@ import { arrangeEleven, outcomeProbs, type Model, type ScorerModel, type Squad, 
 import { counterAttackRisk, type Tactics, tacticalShift } from "./tactics";
 import { outOfPositionPenalty } from "./lineup";
 import { fatigueMult } from "./fatigue";
+import { chemistryMult, formMoraleMult, teamMorale } from "./morale";
 import type { PlayerStates } from "./cards";
 
 export interface Formation {
@@ -144,13 +145,23 @@ function squadQuality(
     const slotPos = f.slots[i]?.pos ?? p.group;
     const oop = outOfPositionPenalty(p.group, slotPos);
     if (oop.contrib < 1) mismatches.push(name);
-    const fm = states ? fatigueMult(states[name]?.stamina ?? 100) : 1;
-    const eff = oop.contrib * fm;
+    const cond = states?.[name];
+    const fm = states ? fatigueMult(cond?.stamina ?? 100) : 1;
+    // a player's form and morale nudge their effective output alongside fatigue
+    const fmm = states ? formMoraleMult(cond?.form, cond?.morale) : 1;
+    const eff = oop.contrib * fm * fmm;
     const mins = minutes.get(name)!;
     attack += (p.npxg90 * p.position_factor + 0.4 * p.xa90) * p.club_strength * mins * eff;
     defence += p.defense_factor * (0.6 + 0.4 * p.ability) * p.club_strength * mins * eff;
     concedePenalty += oop.concede;
   });
+  // a settled, high-morale squad carries a small chemistry bonus, an unhappy one a
+  // penalty, applied to the whole side like the fatigue and form factors above
+  if (states) {
+    const cm = chemistryMult(teamMorale(states, eleven));
+    attack *= cm;
+    defence *= cm;
+  }
   return { attack, defence, concedePenalty: Math.min(0.15, concedePenalty), mismatches };
 }
 
@@ -249,6 +260,12 @@ export function ovr(ability: number): number {
     }
   }
   return 91;
+}
+
+/** The displayed overall including a player's current form swing (+/- a couple of
+ * points), clamped to a sane range. */
+export function ovrWithForm(ability: number, formDelta: number): number {
+  return Math.max(40, Math.min(99, ovr(ability) + formDelta));
 }
 
 /** Rebuild the scorer model for a custom eleven so attribution tracks the lineup
