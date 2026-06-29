@@ -750,8 +750,18 @@
   position: relative;
   display: grid;
   gap: var(--s-3);
-  max-width: 560px;
-  margin: 0 auto;
+}
+/* the headline result card, the news bar and the per-match detail stay a readable
+   column; the tournament tracker and stats below break out to the full width */
+.manage-result > .manage-result__banner,
+.manage-result > .headline-bar,
+.manage-result > .mrc,
+.manage-result > .mrating,
+.manage-result > .manage-continue {
+  max-width: 620px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
 }
 .manage-result__banner {
   position: relative;
@@ -1052,7 +1062,7 @@
 .tpanel__head { display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); margin-bottom: var(--s-3); flex-wrap: wrap; }
 .tpanel__tabs { display: flex; gap: 2px; }
 .tpanel__mine { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: var(--s-4); align-items: start; }
-.tpanel__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-3); }
+.tpanel__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--s-3); }
 .tpanel__note { margin-top: var(--s-3); font-size: var(--t-xs); color: var(--text-faint); }
 .tgtable { background: var(--surface); border: var(--border); }
 .tgtable__head, .tgtable__row { display: grid; grid-template-columns: 1fr 28px 38px 30px; align-items: center; gap: var(--s-2); padding: 7px var(--s-3); }

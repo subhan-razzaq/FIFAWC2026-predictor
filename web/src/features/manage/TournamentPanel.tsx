@@ -6,6 +6,7 @@
 import { useMemo, useState } from "react";
 import { liveGroupStandings, type GroupStanding } from "@weltmeister/sim";
 import { TeamBadge } from "../../components/TeamBadge";
+import { teamCode } from "../../lib/teamCode";
 import type { CareerState } from "../../store/store";
 import type { Model } from "@weltmeister/sim";
 
@@ -130,7 +131,7 @@ function GroupTable({
           <span className="tgtable__team">
             <span className="mono tgtable__pos">{s.rank}</span>
             <TeamBadge team={s.team} group={group} size={compact ? 16 : 20} />
-            <span className="tgtable__name">{s.team}</span>
+            <span className="tgtable__name" title={s.team}>{compact ? teamCode(s.team) : s.team}</span>
           </span>
           <span className="mono">{s.played}</span>
           <span className="mono">{s.gd > 0 ? `+${s.gd}` : s.gd}</span>
