@@ -14,6 +14,7 @@ import { MatchRatings } from "./MatchRatings";
 import { ManagerIntro } from "./ManagerIntro";
 import { GradeScreen } from "./GradeScreen";
 import { TournamentPanel } from "./TournamentPanel";
+import { TournamentStats } from "./TournamentStats";
 import { LiveMatchCenter } from "./LiveMatchCenter";
 import { MatchResultCard } from "../../components/MatchResultCard";
 import { TeamBadge } from "../../components/TeamBadge";
@@ -106,6 +107,7 @@ export function ManageView() {
         <ManagerIntro model={model} onPick={startCareer} />
       ) : career.phase === "ended" && career.outcome ? (
         <GradeScreen
+          model={model}
           team={career.team}
           group={groupOf.get(career.team)}
           reached={career.outcome.reached}
@@ -154,6 +156,7 @@ function Active({
         <LiveMatchCenter model={model} career={career} groupOf={groupOf} />
         <Journey career={career} team={team} />
         <TournamentPanel model={model} seed={seed} career={career} groupOf={groupOf} />
+        <TournamentStats model={model} team={team} played={career.played} />
       </div>
     );
   }
@@ -201,6 +204,7 @@ function Active({
         </button>
         <Journey career={career} team={team} />
         <TournamentPanel model={model} seed={seed} career={career} groupOf={groupOf} />
+        <TournamentStats model={model} team={team} played={career.played} />
       </div>
     );
   }

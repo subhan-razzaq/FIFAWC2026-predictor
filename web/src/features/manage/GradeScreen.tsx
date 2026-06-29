@@ -2,8 +2,9 @@
 // expectations, plus top scorer, impact subs and a game-by-game recap.
 
 import { motion } from "framer-motion";
-import type { EnrichedMatch, MatchResult, TeamOdds } from "@weltmeister/sim";
+import type { EnrichedMatch, MatchResult, Model, TeamOdds } from "@weltmeister/sim";
 import { gradeRun, impactSubs, tournamentScorers } from "../../lib/grade";
+import { TournamentStats } from "./TournamentStats";
 import { TeamBadge } from "../../components/TeamBadge";
 import { Confetti } from "../../components/Confetti";
 import { Trophy } from "../bracket/Trophy";
@@ -18,6 +19,7 @@ const STAT_VARIANT = {
 };
 
 interface Props {
+  model: Model;
   team: string;
   group?: string;
   reached: "group" | "R32" | "R16" | "QF" | "SF" | "third_place" | "final";
@@ -27,7 +29,7 @@ interface Props {
   onRestart: () => void;
 }
 
-export function GradeScreen({ team, group, reached, isChampion, projection, played, onRestart }: Props) {
+export function GradeScreen({ model, team, group, reached, isChampion, projection, played, onRestart }: Props) {
   const seedLabel = useStore((s) => s.seedLabel);
   const grade = gradeRun(reached, isChampion, projection ?? undefined);
   const results: MatchResult[] = played.map((p) => p.result);
@@ -124,17 +126,7 @@ export function GradeScreen({ team, group, reached, isChampion, projection, play
         </motion.div>
       </motion.div>
 
-      {scorers.length > 1 && (
-        <div className="grade__scorers">
-          <div className="eyebrow">Your scorers</div>
-          {scorers.map((s) => (
-            <div key={s.player} className="grade__scorer-row mono">
-              <span>{s.player}</span>
-              <span>{s.goals}</span>
-            </div>
-          ))}
-        </div>
-      )}
+      <TournamentStats model={model} team={team} played={played} />
 
       <div className="grade__recap">
         <div className="eyebrow">The road</div>
