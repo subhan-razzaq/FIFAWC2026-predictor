@@ -352,7 +352,8 @@
 .pitch__name {
   font-size: 14px;
   text-align: center;
-  line-height: 1.05;
+  line-height: 1.3;
+  padding-bottom: 2px;
   color: #f3f1ec;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
   max-width: 102px;
@@ -1216,7 +1217,14 @@
 .lmc__insight.neutral .lmc__insight-dot { background: var(--gold); }
 
 /* the XI on a real pitch, same visual as the pre-match sheet */
-.lmc__subpitch { width: 100%; max-width: 340px; margin: 0 auto; aspect-ratio: 3 / 4; }
+.lmc__subpitch { width: 100%; max-width: 360px; margin: 0 auto; aspect-ratio: 3 / 4; }
+/* the in-match sub and half-time pitch is smaller than the pre-match team sheet,
+   so its tokens get their own, tighter sizing rather than the full-size ones */
+.lmc__subpitch .pitch__player { width: 62px; gap: 3px; }
+.lmc__subpitch .pitch__dot { width: 46px; height: 46px; }
+.lmc__subpitch .pitch__name { font-size: 11px; max-width: 68px; }
+.lmc__subpitch .lmc-pp__ovr { font-size: 12px; padding: 1px 4px; bottom: -3px; right: -7px; }
+.lmc__subpitch .pitch__cap, .lmc__subpitch .pitch__pk { font-size: 8px; }
 .lmc-pp {
   background: none;
   border: none;
