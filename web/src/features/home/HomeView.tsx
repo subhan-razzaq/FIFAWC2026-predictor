@@ -68,8 +68,8 @@ export function HomeView() {
               <span className="hero__hosts">CAN · MEX · USA</span>
               FIFA World Cup 26 · 48 nations · 104 matches
             </div>
-            <h1 className="hero__title anton" aria-label="Who wins the World Cup">
-              {["WHO WINS", "THE WORLD CUP"].map((line, i) => (
+            <h1 className="hero__title anton" aria-label="Take the World Cup">
+              {["TAKE THE", "WORLD CUP"].map((line, i) => (
                 <span key={line} className="hero__title-line" aria-hidden>
                   <motion.span
                     className="hero__title-word"
@@ -88,8 +88,10 @@ export function HomeView() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: EASE_OUT, delay: 0.3 }}
             >
-              A calibrated statistical model predicts every match, simulates the whole tournament
-              tens of thousands of times, and lets you take over a squad and change the outcome.
+              Take charge of any nation and live the whole World Cup: pick your eleven, read the
+              dossier on the next side, face the press, ride the highs and the injuries, and play
+              every match out. All on a calibrated model that simulates the tournament tens of
+              thousands of times.
             </motion.p>
             <motion.div
               className="hero__cta"
@@ -98,7 +100,7 @@ export function HomeView() {
               transition={{ duration: 0.6, ease: EASE_OUT, delay: 0.42 }}
             >
               <Link to="/manage" className="btn hero__cta-primary">
-                Manage a nation →
+                Start your career →
               </Link>
               <button className="btn btn--ghost" onClick={() => void run(true)} disabled={status === "running"}>
                 {status === "running" ? "Running simulation" : result ? "Run it again" : "Run simulation"}
@@ -193,11 +195,18 @@ export function HomeView() {
             <div className="eyebrow">The main event · Manager mode</div>
             <h2 className="anton">Take charge of a nation</h2>
             <p>
-              Pick your XI on a drag-and-drop pitch and play every match live. Pause whenever you want
-              to make subs, switch shape and read the game, and the result bends to your calls. One
-              nation, one month, graded against what the model expected of your squad.
+              Pick your XI on a drag-and-drop pitch and play every match live. Read the assistant's
+              dossier in your inbox, face the press, juggle injuries, form and dressing-room morale,
+              and steer your nation through the World Cup. One squad, one month, graded against what
+              the model expected, then handed its awards.
             </p>
-            <span className="manage-cta__go">Play the World Cup →</span>
+            <ul className="manage-cta__feats">
+              <li>Manager inbox &amp; dossiers</li>
+              <li>Press conferences</li>
+              <li>Injuries, form &amp; morale</li>
+              <li>News, awards &amp; more</li>
+            </ul>
+            <span className="manage-cta__go">Start your career →</span>
           </div>
           <div className="manage-cta__pitch" aria-hidden>
             <svg viewBox="0 0 60 80" preserveAspectRatio="none">

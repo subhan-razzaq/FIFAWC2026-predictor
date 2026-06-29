@@ -362,6 +362,20 @@
   color: var(--text-dim);
   line-height: 1.6;
 }
+.manage-cta__feats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: var(--s-3);
+}
+.manage-cta__feats li {
+  font-family: var(--font-mono);
+  font-size: var(--t-xs);
+  color: var(--text);
+  background: color-mix(in srgb, var(--gold) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--gold) 35%, transparent);
+  padding: 3px 8px;
+}
 .manage-cta__go {
   display: inline-block;
   margin-top: var(--s-4);
