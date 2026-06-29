@@ -41,7 +41,11 @@ export function ManagerInbox({ model, group }: { model: Model; group?: string })
     <div className="inbox">
       <div className="inbox__head">
         <span className="eyebrow">Inbox</span>
-        {unread > 0 && <span className="inbox__unread mono">{unread} new</span>}
+        {unread > 0 && (
+          <motion.span key={unread} className="inbox__unread mono" initial={{ scale: 1.3 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 360, damping: 16 }}>
+            {unread} new
+          </motion.span>
+        )}
       </div>
       <div className="inbox__grid">
         <ul className="inbox__list">
@@ -52,9 +56,13 @@ export function ManagerInbox({ model, group }: { model: Model; group?: string })
                 className={`inbox__item ${m.id === open.id ? "is-open" : ""} ${m.read ? "" : "is-unread"}`}
                 onClick={() => select(m)}
               >
+                {!m.read && <span className="inbox__new-dot" aria-label="new" />}
                 <span className={`inbox__tag inbox__tag--${m.kind}`}>{KIND_LABEL[m.kind] ?? m.kind}</span>
                 <span className="inbox__item-body">
-                  <span className="inbox__from">{m.from}</span>
+                  <span className="inbox__from">
+                    {m.from}
+                    {!m.read && <span className="inbox__new-badge mono">NEW</span>}
+                  </span>
                   <span className="inbox__subject">{m.subject}</span>
                   <span className="inbox__preview">{m.preview}</span>
                 </span>
