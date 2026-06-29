@@ -6,10 +6,11 @@
 
 import { useRef, useState } from "react";
 import type { Squad, SquadPlayer } from "@weltmeister/sim";
-import { FORMATIONS } from "../../lib/manage";
+import { FORMATIONS, ovr } from "../../lib/manage";
 import { isOutOfPosition } from "../../lib/lineup";
 import { staminaTier } from "../../lib/fatigue";
 import { isAvailable, type PlayerStates } from "../../lib/cards";
+import { PlayerAvatar } from "../../components/PlayerAvatar";
 
 interface Props {
   squad: Squad;
@@ -126,11 +127,9 @@ export function DragPitch({ squad, eleven, formation, captain, penaltyTaker, sta
             >
               <span className="pitch__avatar-wrap">
                 <span className="pitch__dot" style={{ borderColor: RING[p?.group ?? "MF"] ?? "var(--steel)" }}>
-                  <svg className="pitch__sil" viewBox="0 0 40 40" aria-hidden>
-                    <circle cx="20" cy="15.5" r="7" fill="rgba(246,244,239,0.86)" />
-                    <path d="M7 39 a13 13 0 0 1 26 0 Z" fill="rgba(246,244,239,0.86)" />
-                  </svg>
+                  <PlayerAvatar photo={p?.photo} name={name} />
                 </span>
+                {p && <em className="pitch__ovr mono" aria-label={`overall ${ovr(p.ability)}`}>{ovr(p.ability)}</em>}
                 {name === captain && <em className="pitch__cap">C</em>}
                 {name === penaltyTaker && <em className="pitch__pk">P</em>}
                 {yellows > 0 && <em className="pitch__yc" aria-label="booked" />}
@@ -166,8 +165,12 @@ export function DragPitch({ squad, eleven, formation, captain, penaltyTaker, sta
                     onPointerUp={endDrag}
                     title={`${p.name}, ${p.club}`}
                   >
-                    <span className={`dpitch-chip__dot tier-${tier}`} />
-                    {lastName(p.name)}
+                    <span className="dpitch-chip__face" style={{ borderColor: RING[p.group] ?? "var(--steel)" }}>
+                      <PlayerAvatar photo={p.photo} name={p.name} />
+                    </span>
+                    <span className="dpitch-chip__label">{lastName(p.name)}</span>
+                    <span className={`dpitch-chip__stamina tier-${tier}`} aria-hidden />
+                    <span className="dpitch-chip__ovr mono">{ovr(p.ability)}</span>
                   </button>
                 );
               })}

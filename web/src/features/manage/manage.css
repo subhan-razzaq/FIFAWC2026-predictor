@@ -404,10 +404,52 @@
 .dpitch-chip:active {
   cursor: grabbing;
 }
-.dpitch-chip__dot {
-  width: 8px;
-  height: 8px;
+.dpitch-chip__face {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--steel);
+  background: #13241b;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+}
+.dpitch-chip__label {
+  flex: 1 1 auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dpitch-chip__stamina {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
   background: var(--mex-green);
+}
+.dpitch-chip__ovr {
+  flex: 0 0 auto;
+  font-weight: 700;
+  font-size: var(--t-xs);
+  color: var(--text);
+  background: var(--surface-2, rgba(246, 244, 239, 0.08));
+  padding: 1px 5px;
+}
+
+/* overall badge on a pitch token, pre-match team sheet */
+.pitch__ovr {
+  position: absolute;
+  bottom: -3px;
+  left: -7px;
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 10px;
+  line-height: 1;
+  padding: 1px 3px;
+  background: var(--ink);
+  color: var(--paper);
+  border: 1px solid color-mix(in srgb, var(--paper) 25%, transparent);
 }
 .dpitch-chip__dot.tier-ok {
   background: var(--gold-bright);
@@ -1222,6 +1264,7 @@
 }
 .lmc-bchip:not(:disabled):hover { transform: translateY(-1px); border-color: var(--gold); }
 .lmc-bchip:disabled { opacity: 0.45; cursor: not-allowed; }
+.lmc-bchip__face { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--steel); background: #13241b; overflow: hidden; display: grid; place-items: center; flex: 0 0 auto; }
 .lmc-bchip__ovr { min-width: 28px; text-align: center; font-family: var(--font-mono); font-weight: 700; font-size: 1.05rem; color: var(--gold); }
 .lmc-bchip__body { display: grid; gap: 1px; flex: 1; min-width: 0; }
 .lmc-bchip__name { font-size: var(--t-sm); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -1257,3 +1300,29 @@
 .lmc__ev--card { display: grid; grid-template-columns: 1fr 40px 1fr; align-items: center; gap: var(--s-2); }
 .lmc__ev--card.is-home { background: linear-gradient(90deg, color-mix(in srgb, var(--fifa-yellow) 15%, transparent), transparent 62%); }
 .lmc__ev--card.is-away { background: linear-gradient(270deg, color-mix(in srgb, var(--fifa-yellow) 15%, transparent), transparent 62%); }
+
+/* whole-tournament stats for a manager's run */
+.tstats { margin-top: var(--s-5); display: grid; gap: var(--s-3); }
+.tstats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: var(--s-2);
+}
+.tstats-cell { display: grid; gap: 2px; padding: var(--s-3); align-content: center; }
+.tstats-cell__val { font-size: 1.6rem; line-height: 1; }
+.tstats-cell__label { font-size: var(--t-xs); color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.06em; }
+.tstats-boards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--s-3);
+}
+.tstats-board { padding: var(--s-3) var(--s-4); display: grid; gap: var(--s-2); }
+.tstats-leaders { display: grid; gap: 4px; }
+.tstats-leader { display: flex; align-items: center; gap: var(--s-2); }
+.tstats-leader__rank { width: 16px; color: var(--text-faint); flex: 0 0 auto; }
+.tstats-leader__face {
+  width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--steel);
+  background: #13241b; overflow: hidden; display: grid; place-items: center; flex: 0 0 auto;
+}
+.tstats-leader__name { flex: 1 1 auto; min-width: 0; font-weight: 700; font-size: var(--t-sm); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tstats-leader__val { flex: 0 0 auto; color: var(--gold); font-weight: 700; }

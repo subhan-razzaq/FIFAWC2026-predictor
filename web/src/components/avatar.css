@@ -1,0 +1,15 @@
+/* Shared player headshot. The parent token supplies the circular clip, ring and
+   size, so the photo just fills it and the silhouette sits centred. */
+
+.pavatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+}
+
+.pavatar-sil {
+  width: 100%;
+  height: 100%;
+}

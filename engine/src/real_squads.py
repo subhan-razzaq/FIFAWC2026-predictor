@@ -23,6 +23,23 @@ from src.teams import TEAMS
 # committed real-squad source so the build reproduces without re-fetching
 WIKITEXT = STATIC_DIR / "squads_wikitext.json"
 
+# committed map of Wikipedia article title -> Commons photo URL, resolved offline
+# by photos.py. Absent or partial is fine: a missing player just renders the
+# fallback avatar in the app.
+PHOTOS_FILE = STATIC_DIR / "player_photos.json"
+
+
+def _load_photos() -> dict[str, str]:
+    if PHOTOS_FILE.exists():
+        try:
+            return json.loads(PHOTOS_FILE.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            return {}
+    return {}
+
+
+_PHOTOS = _load_photos()
+
 # wikitext heading -> our canonical (martj42) team name
 TEAM_ALIASES = {
     "Curacao": "Curacao",
@@ -61,6 +78,16 @@ def _clean_link(value: str) -> str:
         inner = m.group(1)
         return inner.split("|")[-1].strip()
     return value.strip()
+
+
+def _link_target(value: str) -> str | None:
+    """The Wikipedia article title a player's name links to (the part before any
+    pipe in [[Target|Display]]), used to look up the player's photo. Returns None
+    for a plain-text name with no article link."""
+    m = re.search(r"\[\[([^\]]+)\]\]", value)
+    if not m:
+        return None
+    return m.group(1).split("|")[0].strip()
 
 
 _PLAYER_RE = re.compile(r"\{\{nat fs g player\|([^{}]*(?:\{\{[^{}]*\}\}[^{}]*)*)\}\}")
@@ -112,11 +139,13 @@ def parse_squads() -> dict[str, list[dict]]:
         for m in _PLAYER_RE.finditer(block):
             params = _parse_params(m.group(1))
             pos = params.get("pos", "").upper()
-            name = _clean_link(params.get("name", ""))
+            raw_name = params.get("name", "")
+            name = _clean_link(raw_name)
             if not name or pos not in ("GK", "DF", "MF", "FW"):
                 continue
             players.append({
                 "name": name,
+                "wiki": _link_target(raw_name),
                 "pos": pos,
                 "club": _clean_link(params.get("club", "")),
                 "number": int(re.sub(r"\D", "", params.get("no", "0") or "0") or 0),
@@ -311,6 +340,7 @@ def _to_player(p: dict) -> dict:
         "group": p["pos"],
         "club": p["club"],
         "number": p.get("number", 0),
+        "photo": _PHOTOS.get(p.get("wiki") or ""),
         "tier": _tier(ability),
         "real": True,
         "caps": p["caps"],

@@ -12,6 +12,7 @@ import { useStore } from "../../store/store";
 import type { CareerState, LiveSub } from "../../store/store";
 import { MAX_SUBS } from "../../store/store";
 import { TeamBadge } from "../../components/TeamBadge";
+import { PlayerAvatar } from "../../components/PlayerAvatar";
 import { BallIcon, CardIcon, SubIcon } from "../../components/icons";
 import { FORMATIONS, managedRatings, ovr } from "../../lib/manage";
 import { mentalityLabel, pacingLabel, pressingLabel, type Tactics } from "../../lib/tactics";
@@ -790,6 +791,7 @@ function TacticalBoard({
                         <BenchChip
                           key={p.name}
                           name={p.name}
+                          photo={p.photo}
                           subtitle={subtitle}
                           tone={tone}
                           rating={ovr(p.ability)}
@@ -872,7 +874,7 @@ function SubPitch({
 }: {
   onPitch: string[];
   formation: string;
-  byName: Map<string, { group: string; number?: number; ability: number }>;
+  byName: Map<string, { group: string; number?: number; ability: number; photo?: string | null }>;
   midStates: PlayerStates;
   broughtOn: Set<string>;
   selectedOff: string | null;
@@ -907,10 +909,7 @@ function SubPitch({
           >
             <span className="pitch__avatar-wrap">
               <span className="pitch__dot" style={{ borderColor: RING[p?.group ?? "MF"] ?? "var(--steel)" }}>
-                <svg className="pitch__sil" viewBox="0 0 40 40" aria-hidden>
-                  <circle cx="20" cy="15.5" r="7" fill="rgba(246,244,239,0.86)" />
-                  <path d="M7 39 a13 13 0 0 1 26 0 Z" fill="rgba(246,244,239,0.86)" />
-                </svg>
+                <PlayerAvatar photo={p?.photo} name={name} />
               </span>
               <em className="lmc-pp__ovr">{ovr(p?.ability ?? 0.5)}</em>
             </span>
@@ -927,6 +926,7 @@ function SubPitch({
 
 function BenchChip({
   name,
+  photo,
   subtitle,
   tone,
   rating,
@@ -935,6 +935,7 @@ function BenchChip({
   onClick,
 }: {
   name: string;
+  photo?: string | null;
   subtitle: string;
   tone: "" | "up" | "down" | "warn";
   rating: number;
@@ -945,6 +946,9 @@ function BenchChip({
   const tier = staminaTier(stamina);
   return (
     <button type="button" className="lmc-bchip" disabled={disabled} onClick={onClick} title={name}>
+      <span className="lmc-bchip__face">
+        <PlayerAvatar photo={photo} name={name} />
+      </span>
       <span className="lmc-bchip__ovr">{rating}</span>
       <span className="lmc-bchip__body">
         <span className="lmc-bchip__name">{lastName(name)}</span>

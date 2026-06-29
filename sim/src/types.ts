@@ -68,6 +68,7 @@ export interface SquadPlayer {
   caps?: number;
   intl_goals?: number;
   number?: number;
+  photo?: string | null; // Wikimedia Commons headshot URL, when one is available
 }
 
 export interface Squad {

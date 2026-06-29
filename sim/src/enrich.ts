@@ -36,6 +36,8 @@ export interface LineupSlot {
   rating: number;
   /** the single best-rated player across both teams. */
   motm: boolean;
+  /** Wikimedia Commons headshot URL, when one is available. */
+  photo: string | null;
 }
 
 export interface MatchLineup {
@@ -88,6 +90,7 @@ interface Starter {
   pos: "GK" | "DF" | "MF" | "FW";
   ability: number;
   number: number;
+  photo: string | null;
 }
 
 interface InternalLineup {
@@ -121,12 +124,14 @@ function buildLineup(
   const startSet = new Set(xi0);
   const ability = new Map(squad.players.map((p) => [p.name, p.ability]));
   const numbers = new Map(squad.players.map((p) => [p.name, p.number ?? 0]));
+  const photos = new Map(squad.players.map((p) => [p.name, p.photo ?? null]));
   // arrange the eleven into the formation's slots by role (striker central, etc.)
   const starters = arrangeEleven(squad, xi0, form).map((name) => ({
     name,
     pos: posOf(squad, name),
     ability: ability.get(name) ?? 0.5,
     number: numbers.get(name) ?? 0,
+    photo: photos.get(name) ?? null,
   }));
   const bench = squad.players
     .filter((p) => !startSet.has(p.name))
@@ -316,6 +321,7 @@ function publicLineup(
       penalty: s.name === lu.penalty,
       rating: ratings.get(s.name) ?? 6.0,
       motm: `${side}|${s.name}` === motmKey,
+      photo: s.photo,
     })),
   };
 }

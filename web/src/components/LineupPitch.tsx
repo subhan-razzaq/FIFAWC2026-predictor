@@ -7,6 +7,7 @@ import type { MatchEvent, MatchLineup } from "@weltmeister/sim";
 import { FORMATIONS } from "../lib/manage";
 import { flagUrl } from "../lib/flag";
 import { BallIcon, BootIcon, CardIcon } from "./icons";
+import { PlayerAvatar } from "./PlayerAvatar";
 import "./lineup.css";
 
 interface Props {
@@ -91,10 +92,7 @@ export function LineupPitch({ lineup, events, side, team }: Props) {
             <div key={p.name} className="lp__player" style={{ left: `${slot.x}%`, top: `${slot.y}%` }}>
               <div className="lp__avatar-wrap">
                 <div className="lp__avatar" style={{ borderColor: RING[p.pos] ?? "var(--steel)" }}>
-                  <svg viewBox="0 0 40 40" aria-hidden>
-                    <circle cx="20" cy="15.5" r="7" fill="rgba(246,244,239,0.82)" />
-                    <path d="M7 39 a13 13 0 0 1 26 0 Z" fill="rgba(246,244,239,0.82)" />
-                  </svg>
+                  <PlayerAvatar photo={p.photo} name={p.name} />
                 </div>
                 <span className="lp__rating mono" style={{ background: ratingColor(p.rating, p.motm) }}>
                   {p.motm && <i className="lp__star">★</i>}
