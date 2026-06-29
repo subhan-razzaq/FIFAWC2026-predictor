@@ -242,7 +242,7 @@
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  width: 70px;
+  width: 76px;
   cursor: grab;
   user-select: none;
   animation: dpop 0.18s var(--ease-broadcast, ease-out);
@@ -270,8 +270,8 @@
   line-height: 0;
 }
 .pitch__dot {
-  width: 50px;
-  height: 50px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   background: #13241b;
   border: 2px solid var(--steel);
@@ -355,7 +355,7 @@
   line-height: 1.05;
   color: #f3f1ec;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
-  max-width: 76px;
+  max-width: 82px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
