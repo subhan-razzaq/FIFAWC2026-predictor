@@ -76,6 +76,12 @@ export interface EnrichOptions {
    */
   providedGoalEvents?: MatchEvent[];
   /**
+   * Pre-placed card events (manage-mode live match). When given, these yellow and
+   * red cards are used verbatim instead of being re-generated, so the post-match
+   * timeline shows exactly the bookings that flashed up during play.
+   */
+  providedCardEvents?: MatchEvent[];
+  /**
    * Explicit substitutions per team (manage-mode live match). When given for a
    * side, the manager's actual subs are used instead of auto-generated ones.
    */
@@ -369,13 +375,16 @@ export function liveCards(
     };
     const yellows = Math.min(5, samplePoisson(rng, 1.6));
     const bookedAt = new Map<string, number>();
+    const sentOff = new Set<string>();
     for (let i = 0; i < yellows; i++) {
       const name = pick();
-      if (!name) continue;
+      if (!name || sentOff.has(name)) continue;
       const first = bookedAt.get(name);
       if (first !== undefined) {
+        // a second booking is a sending-off (second yellow), shown after the first
         const minute = Math.min(maxMin, first + 5 + rng.int(Math.max(1, maxMin - first - 4)));
         out.push({ minute, type: "red", side: which, team, player: name });
+        sentOff.add(name);
       } else {
         const minute = 8 + rng.int(Math.max(1, maxMin - 8));
         out.push({ minute, type: "yellow", side: which, team, player: name });
@@ -384,7 +393,7 @@ export function liveCards(
     }
     if (rng.chance(0.04)) {
       const name = pick();
-      if (name) out.push({ minute: 30 + rng.int(Math.max(1, maxMin - 30)), type: "red", side: which, team, player: name });
+      if (name && !sentOff.has(name)) out.push({ minute: 30 + rng.int(Math.max(1, maxMin - 30)), type: "red", side: which, team, player: name });
     }
   };
 
@@ -453,8 +462,13 @@ export function enrichMatch(opts: EnrichOptions): EnrichedMatch {
     placeGoals(awayScorers, "away");
   }
 
-  addCards(rng, events, "home", homeLU, maxMin);
-  addCards(rng, events, "away", awayLU, maxMin);
+  if (opts.providedCardEvents) {
+    // Live match: keep exactly the bookings that flashed up during play.
+    for (const e of opts.providedCardEvents) if (e.type === "yellow" || e.type === "red") events.push({ ...e });
+  } else {
+    addCards(rng, events, "home", homeLU, maxMin);
+    addCards(rng, events, "away", awayLU, maxMin);
+  }
   applySubs(rng, events, "home", homeLU, opts.subsOverride?.[match.home]);
   applySubs(rng, events, "away", awayLU, opts.subsOverride?.[match.away]);
 

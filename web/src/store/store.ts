@@ -841,6 +841,7 @@ export const useStore = create<StoreState>((set, get) => ({
       captainOverride: { [team]: live.start.captain },
       penaltyOverride: { [team]: live.start.penaltyTaker },
       providedGoalEvents: live.goals,
+      providedCardEvents: live.cards,
       subsOverride: { [team]: live.subs.map((s) => ({ minute: s.minute, off: s.off, on: s.on })) },
     });
 
@@ -904,7 +905,11 @@ export const useStore = create<StoreState>((set, get) => ({
       states = applyEvents(states, events);
       const draft = defaultSettings(model, c.team, states, c.draft?.formation ?? model.squads[c.team]!.formation, c.draft?.eleven ?? model.squads[c.team]!.projected_eleven);
       const morale = teamMorale(states, draft.eleven).morale;
-      const inbox = buildInbox(model, current.opponent, matchday, events, recovered.returned, suspendedNames(states), c.fans ?? 75, morale);
+      const fresh = buildInbox(model, current.opponent, matchday, events, recovered.returned, suspendedNames(states), c.fans ?? 75, morale);
+      // accumulate: the new build-up messages sit on top, older ones stay (read),
+      // capped so the inbox never grows without bound across a long run
+      const kept = c.inbox.map((m) => (m.read ? m : { ...m, read: true }));
+      const inbox = [...fresh, ...kept].slice(0, 40);
       set({ career: { ...c, phase: "preMatch", current, draft, group: group ?? c.group, playerStates: states, lastResult: null, inbox, pressDone: false } });
     };
 

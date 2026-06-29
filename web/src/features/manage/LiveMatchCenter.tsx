@@ -15,11 +15,12 @@ import { TeamBadge } from "../../components/TeamBadge";
 import { PlayerAvatar } from "../../components/PlayerAvatar";
 import { BallIcon, CardIcon, SubIcon } from "../../components/icons";
 import { FORMATIONS, managedRatings, ovr } from "../../lib/manage";
+import { liveRatings, ratingColor as liveRatingColor, type LiveRating } from "../../lib/liveRatings";
 import { mentalityLabel, pacingLabel, pressingLabel, type Tactics } from "../../lib/tactics";
 import { isAvailable, type PlayerStates } from "../../lib/cards";
 import { depleteStamina, staminaTier } from "../../lib/fatigue";
 
-const BASE_TICK_MS = 130; // real ms per match-minute at 1x
+const BASE_TICK_MS = 240; // real ms per match-minute at 1x (a calmer default pace)
 const SPEEDS = [1, 2, 4];
 
 const TIER_COLOR: Record<string, string> = {
@@ -70,8 +71,10 @@ function setupSig(l: NonNullable<CareerState["live"]>): string {
 
 interface FeedItem {
   minute: number;
-  kind: "period" | "goal" | "sub" | "card" | "commentary";
+  kind: "period" | "goal" | "sub" | "card" | "commentary" | "pen";
   side?: "home" | "away";
+  // tie-break ordering within the same minute (used for the shootout sequence)
+  order?: number;
   // goal payload
   scorer?: string;
   assist?: string;
@@ -82,8 +85,12 @@ interface FeedItem {
   // card payload
   player?: string;
   cardType?: "yellow" | "red";
-  // period label
+  // period label / commentary line
   text?: string;
+  // a descriptive commentary line for a goal or a card
+  note?: string;
+  // penalty shootout payload
+  pen?: { taker: string; scored: boolean; tally: string };
 }
 
 // Small monochrome control glyphs (currentColor), drawn rather than emoji so the
@@ -499,7 +506,7 @@ function CommentaryFeed({ feed }: { feed: FeedItem[] }) {
       ) : (
         <AnimatePresence initial={false}>
           {feed.map((f) => {
-            const key = `${f.minute}-${f.kind}-${f.scorer ?? f.on ?? f.text ?? ""}`;
+            const key = `${f.minute}-${f.kind}-${f.order ?? ""}-${f.scorer ?? f.player ?? f.on ?? f.pen?.taker ?? f.text ?? ""}`;
             if (f.kind === "period" || f.kind === "commentary") {
               return (
                 <motion.div
@@ -515,23 +522,47 @@ function CommentaryFeed({ feed }: { feed: FeedItem[] }) {
                 </motion.div>
               );
             }
+            if (f.kind === "pen" && f.pen) {
+              const fromLeft = f.side === "home";
+              return (
+                <motion.div
+                  key={key}
+                  layout
+                  className={`lmc__ev lmc__ev--pen is-${f.side}`}
+                  initial={{ opacity: 0, x: fromLeft ? -12 : 12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <span className="lmc__ev-cell lmc__ev-cell--home">
+                    {f.side === "home" && <PenContent f={f} side="home" />}
+                  </span>
+                  <span className="lmc__ev-min mono">{f.pen.tally}</span>
+                  <span className="lmc__ev-cell lmc__ev-cell--away">
+                    {f.side === "away" && <PenContent f={f} side="away" />}
+                  </span>
+                </motion.div>
+              );
+            }
             const fromLeft = f.side === "home";
             return (
               <motion.div
                 key={key}
                 layout
-                className={`lmc__ev lmc__ev--${f.kind} is-${f.side}`}
+                className={`lmc__ev-wrap is-${f.side}`}
                 initial={{ opacity: 0, x: fromLeft ? -12 : 12 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
               >
-                <span className="lmc__ev-cell lmc__ev-cell--home">
-                  {f.side === "home" && <EventContent f={f} side="home" />}
-                </span>
-                <span className="lmc__ev-min mono">{f.minute}&prime;</span>
-                <span className="lmc__ev-cell lmc__ev-cell--away">
-                  {f.side === "away" && <EventContent f={f} side="away" />}
-                </span>
+                <div className={`lmc__ev lmc__ev--${f.kind} is-${f.side}`}>
+                  <span className="lmc__ev-cell lmc__ev-cell--home">
+                    {f.side === "home" && <EventContent f={f} side="home" />}
+                  </span>
+                  <span className="lmc__ev-min mono">{f.minute}&prime;</span>
+                  <span className="lmc__ev-cell lmc__ev-cell--away">
+                    {f.side === "away" && <EventContent f={f} side="away" />}
+                  </span>
+                </div>
+                {f.note && <div className="lmc__ev-note">{f.note}</div>}
               </motion.div>
             );
           })}
@@ -586,6 +617,29 @@ function EventContent({ f, side }: { f: FeedItem; side: "home" | "away" }) {
       </span>
     );
   }
+  return side === "home" ? (
+    <>
+      {body}
+      {icon}
+    </>
+  ) : (
+    <>
+      {icon}
+      {body}
+    </>
+  );
+}
+
+// One penalty in a shootout: the taker, and whether it was scored or saved.
+function PenContent({ f, side }: { f: FeedItem; side: "home" | "away" }) {
+  const scored = f.pen?.scored;
+  const body = (
+    <span className="lmc__ev-txt">
+      <span className="lmc__ev-name">{f.pen ? lastName(f.pen.taker) : ""}</span>
+      <span className={`lmc__ev-assist ${scored ? "pen-scored" : "pen-missed"}`}>{scored ? "Scored" : "Saved"}</span>
+    </span>
+  );
+  const icon = <span className={`lmc__ev-ic lmc__pen-ic ${scored ? "is-scored" : "is-missed"}`}>{scored ? "●" : "○"}</span>;
   return side === "home" ? (
     <>
       {body}
@@ -689,6 +743,22 @@ function TacticalBoard({
   const oppGoals = live.managedSide === "home" ? awayAt : homeAt;
   const tips = buildInsights(r.atk, r.def, oppTeam?.atk ?? 1, oppTeam?.def ?? 1, myGoals, oppGoals, tiredCount);
 
+  // live, in-running player ratings so the manager can spot who is struggling
+  const ratings = useMemo(
+    () =>
+      liveRatings({
+        eleven: onPitch,
+        byName,
+        goals: live.goals.filter((g) => g.minute <= minute),
+        cards: live.cards.filter((c) => c.side === live.managedSide && c.minute <= minute),
+        team,
+        teamGoals: myGoals,
+        oppGoals,
+        clock: minute,
+      }),
+    [onPitch, byName, live.goals, live.cards, live.managedSide, team, myGoals, oppGoals, minute],
+  );
+
   const pickOff = (name: string) => {
     if (broughtOn.has(name)) return;
     setSelectedOff((cur) => (cur === name ? null : name));
@@ -740,6 +810,7 @@ function TacticalBoard({
             broughtOn={broughtOn}
             selectedOff={selectedOff}
             onPick={pickOff}
+            ratings={ratings}
           />
           {live.subs.length > 0 && (
             <ul className="lmc__sublist mono">
@@ -871,6 +942,7 @@ function SubPitch({
   broughtOn,
   selectedOff,
   onPick,
+  ratings,
 }: {
   onPitch: string[];
   formation: string;
@@ -879,6 +951,7 @@ function SubPitch({
   broughtOn: Set<string>;
   selectedOff: string | null;
   onPick: (name: string) => void;
+  ratings: Map<string, LiveRating>;
 }) {
   const f = FORMATIONS[formation] ?? FORMATIONS["4-3-3"]!;
   return (
@@ -897,6 +970,7 @@ function SubPitch({
         const tier = staminaTier(stamina);
         const inc = broughtOn.has(name);
         const sel = selectedOff === name;
+        const lr = ratings.get(name);
         return (
           <button
             key={`${name}-${i}`}
@@ -905,13 +979,18 @@ function SubPitch({
             style={{ left: `${slot.x}%`, top: `${slot.y}%` }}
             disabled={inc}
             onClick={() => onPick(name)}
-            title={inc ? `${name} (just came on)` : `Take off ${name}`}
+            title={inc ? `${name} (just came on)` : `Take off ${name}${lr ? ` · rating ${lr.rating.toFixed(1)}` : ""}`}
           >
             <span className="pitch__avatar-wrap">
               <span className="pitch__dot" style={{ borderColor: RING[p?.group ?? "MF"] ?? "var(--steel)" }}>
                 <PlayerAvatar photo={p?.photo} name={name} />
               </span>
               <em className="lmc-pp__ovr">{ovr(p?.ability ?? 0.5)}</em>
+              {lr && (
+                <em className="lmc-pp__rating mono" style={{ background: liveRatingColor(lr.rating) }}>
+                  {lr.rating.toFixed(1)}
+                </em>
+              )}
             </span>
             <span className="pitch__stamina" aria-label={`stamina ${Math.round(stamina)}`}>
               <span className={`pitch__stamina-fill tier-${tier}`} style={{ width: `${stamina}%` }} />
@@ -1036,13 +1115,15 @@ function buildFeed(
   const items: FeedItem[] = [{ minute: 0, kind: "period", text: "Kick-off" }];
   for (const g of live.goals) {
     if (g.minute > clock) continue;
+    const goalKind = g.kind === "own" ? "own" : g.kind === "penalty" ? "penalty" : "open";
     items.push({
       minute: g.minute,
       kind: "goal",
       side: g.side,
       scorer: g.player,
       assist: g.assist,
-      goalKind: g.kind === "own" ? "own" : g.kind === "penalty" ? "penalty" : "open",
+      goalKind,
+      note: goalNote(live, g.player, g.assist, goalKind, g.minute),
     });
   }
   for (const s of live.subs as LiveSub[]) {
@@ -1051,26 +1132,118 @@ function buildFeed(
   }
   for (const cd of live.cards) {
     if (cd.minute > clock) continue;
-    items.push({ minute: cd.minute, kind: "card", side: cd.side, player: cd.player, cardType: cd.type === "red" ? "red" : "yellow" });
+    const cardType = cd.type === "red" ? "red" : "yellow";
+    items.push({
+      minute: cd.minute,
+      kind: "card",
+      side: cd.side,
+      player: cd.player,
+      cardType,
+      note: cardNote(live, cd.player, cardType, cd.minute),
+    });
   }
   for (const c of liveCommentary(live, clock)) items.push(c);
   if (clock >= 45) items.push({ minute: 45, kind: "period", text: "Half-time" });
   if (live.afterExtraTime && clock >= 90) items.push({ minute: 90, kind: "period", text: "Into extra time" });
   if (ftReached) {
     items.push({ minute: live.endClock, kind: "period", text: "Full-time" });
+    // a shootout is played out kick by kick once full time is reached
     if (live.shootout) {
-      items.push({
-        minute: live.endClock,
-        kind: "period",
-        text: `Shootout ${live.shootout.home}–${live.shootout.away}, ${live.winner} advance`,
-      });
+      items.push({ minute: live.endClock, kind: "period", text: "Penalty shootout" });
+      for (const p of shootoutFeed(live)) items.push(p);
+      items.push({ minute: live.endClock, kind: "period", text: `${live.winner} win the shootout ${live.shootout.home}-${live.shootout.away}` });
     }
   }
-  return items.sort((a, b) => b.minute - a.minute || rank(b) - rank(a));
+  return items.sort((a, b) => b.minute - a.minute || rank(b) - rank(a) || (b.order ?? 0) - (a.order ?? 0));
 }
 
 function rank(f: FeedItem): number {
-  return f.kind === "goal" ? 4 : f.kind === "card" ? 3 : f.kind === "sub" ? 2 : f.kind === "commentary" ? 1 : 0;
+  return f.kind === "goal" ? 4 : f.kind === "card" ? 3 : f.kind === "pen" ? 3 : f.kind === "sub" ? 2 : f.kind === "commentary" ? 1 : 0;
+}
+
+// --- descriptive commentary lines (deterministic from the event identity) -----
+
+const GOAL_LINES = [
+  "buries it low into the corner, the keeper had no chance.",
+  "rifles it home from the edge of the box.",
+  "rises highest to power a header past the keeper.",
+  "slots it coolly past the goalkeeper.",
+  "smashes it into the roof of the net.",
+  "turns and fires it into the bottom corner.",
+  "finishes off a flowing move in style.",
+  "steals in at the back post to tap it home.",
+];
+const PEN_GOAL_LINES = ["sends the keeper the wrong way from the spot.", "tucks the penalty away with no fuss.", "blasts the penalty straight down the middle."];
+const OWN_GOAL_LINES = ["turns it into his own net under pressure.", "deflects it past his own keeper, agonising."];
+const YELLOW_LINES = ["goes into the book for a cynical challenge.", "is booked for a late, clumsy tackle.", "picks up a yellow for dissent.", "is cautioned for a tactical foul."];
+const RED_LINES = ["is sent off, down to ten men now.", "sees red and it changes everything.", "gets his marching orders after a reckless lunge.", "is shown a straight red, the bench is furious."];
+
+function pickLine(arr: string[], live: NonNullable<CareerState["live"]>, salt: string): string {
+  const idx = hashSeed(`${live.home}|${live.away}|${live.resimCount}|${salt}`) % arr.length;
+  return arr[idx]!;
+}
+
+function goalNote(live: NonNullable<CareerState["live"]>, scorer: string, assist: string | undefined, kind: "open" | "penalty" | "own", minute: number): string {
+  const who = lastName(scorer);
+  if (kind === "own") return `${who} ${pickLine(OWN_GOAL_LINES, live, `og${minute}`)}`;
+  if (kind === "penalty") return `${who} ${pickLine(PEN_GOAL_LINES, live, `pen${minute}`)}`;
+  const line = pickLine(GOAL_LINES, live, `g${minute}${scorer}`);
+  return assist ? `${who} ${line} Set up by ${lastName(assist)}.` : `${who} ${line}`;
+}
+
+function cardNote(live: NonNullable<CareerState["live"]>, player: string, type: "yellow" | "red", minute: number): string {
+  const who = lastName(player);
+  return `${who} ${pickLine(type === "red" ? RED_LINES : YELLOW_LINES, live, `${type}${minute}${player}`)}`;
+}
+
+// --- penalty shootout, played kick by kick ------------------------------------
+
+/** Reconstruct a plausible, deterministic kick-by-kick shootout that ends on the
+ * recorded final tally, so the feed walks through every penalty. */
+function shootoutFeed(live: NonNullable<CareerState["live"]>): FeedItem[] {
+  const out: FeedItem[] = [];
+  if (!live.shootout) return out;
+  const homeSeq = makeSequence(live, "home", live.shootout.home);
+  const awaySeq = makeSequence(live, "away", live.shootout.away);
+  // our own takers are known; for the opponent we name the kicks by team
+  const ourSide = live.managedSide;
+  const ourTakers = live.start.eleven;
+  let h = 0;
+  let a = 0;
+  const rounds = Math.max(homeSeq.length, awaySeq.length);
+  let order = 0; // later kicks get a higher order so they sort to the top within the minute
+  const endClock = live.endClock;
+  const takerName = (side: "home" | "away", idx: number): string => {
+    if (side === ourSide && ourTakers.length) return ourTakers[(ourTakers.length - 1 - (idx % ourTakers.length))]!;
+    return side === "home" ? live.home : live.away;
+  };
+  for (let i = 0; i < rounds; i++) {
+    if (i < homeSeq.length) {
+      const scored = homeSeq[i]!;
+      if (scored) h += 1;
+      out.push({ minute: endClock, kind: "pen", side: "home", order: ++order, pen: { taker: takerName("home", i), scored, tally: `${h}-${a}` } });
+    }
+    if (i < awaySeq.length) {
+      const scored = awaySeq[i]!;
+      if (scored) a += 1;
+      out.push({ minute: endClock, kind: "pen", side: "away", order: ++order, pen: { taker: takerName("away", i), scored, tally: `${h}-${a}` } });
+    }
+  }
+  return out;
+}
+
+/** A deterministic make/miss sequence that converts exactly `made` of its kicks,
+ * padded with a save or two so the shootout reads realistically. */
+function makeSequence(live: NonNullable<CareerState["live"]>, side: "home" | "away", made: number): boolean[] {
+  const misses = hashSeed(`pens|${live.home}|${live.away}|${side}|${live.resimCount}`) % 2;
+  const seq: boolean[] = [];
+  for (let i = 0; i < made; i++) seq.push(true);
+  for (let i = 0; i < misses; i++) seq.push(false);
+  if (misses > 0 && seq.length > 2) {
+    const pos = 1 + (hashSeed(`pos|${side}|${live.resimCount}`) % (seq.length - 1));
+    seq.splice(pos, 0, seq.pop()!);
+  }
+  return seq;
 }
 
 const ATMOSPHERE = [
