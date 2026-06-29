@@ -510,16 +510,15 @@ export const useStore = create<StoreState>((set, get) => ({
   // --- Manager Mode actions ---------------------------------------------------
 
   startCareer: (team) => {
-    const { model, seed } = get();
+    const { model } = get();
     if (!model) return;
-    let states = initStates(model, team);
+    // start with a fully fit squad: no injuries before a ball has been kicked. Knocks
+    // and illness only strike in the build-up between matches, once you are playing.
+    const states = initStates(model, team);
     const schedule = managedGroupSchedule(model, team);
     const current = schedule[0]!;
-    // opening build-up: a chance of an early injury or illness before a ball is kicked
-    const events = rollSquadEvents(seed, team, 0, model.squads[team]!.players, states);
-    states = applyEvents(states, events);
     const draft = defaultSettings(model, team, states, model.squads[team]!.formation, model.squads[team]!.projected_eleven);
-    const inbox = buildInbox(model, current.opponent, 0, events, [], [], 75, 70);
+    const inbox = buildInbox(model, current.opponent, 0, [], [], [], 75, 70);
     set({
       career: {
         team,
