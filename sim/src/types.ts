@@ -69,6 +69,7 @@ export interface SquadPlayer {
   intl_goals?: number;
   number?: number;
   photo?: string | null; // Wikimedia Commons headshot URL, when one is available
+  age?: number; // from EA Sports FC 26, used for the Best Young Player award
 }
 
 export interface Squad {

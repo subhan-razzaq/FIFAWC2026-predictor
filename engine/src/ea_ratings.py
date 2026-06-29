@@ -65,6 +65,7 @@ def _index_by_nationality(players: list[dict]) -> dict[str, list[dict]]:
     for p in players:
         rec = {
             "overall": int(p["overall"]),
+            "age": int(p["age"]) if p.get("age") else None,
             "long": _asc(p["long_name"]),
             "short": _asc(p["short_name"]),
             "long_tokens": set(_tokens(p["long_name"])),
@@ -107,7 +108,7 @@ def _score(name: str, rec: dict) -> int:
     return 0
 
 
-def _best(name: str, club: str, candidates: list[dict]) -> int | None:
+def _best(name: str, club: str, candidates: list[dict]) -> dict | None:
     best_score = 0
     best: dict | None = None
     for rec in candidates:
@@ -119,10 +120,10 @@ def _best(name: str, club: str, candidates: list[dict]) -> int | None:
             s += 3
         if s > best_score or (s == best_score and best and rec["overall"] > best["overall"]):
             best_score, best = s, rec
-    return best["overall"] if best and best_score >= 55 else None
+    return best if best and best_score >= 55 else None
 
 
-def resolve() -> dict[str, dict[str, int]]:
+def resolve() -> dict[str, dict[str, dict]]:
     players = _fetch_dataset()
     by_nat = _index_by_nationality(players)
     by_long: dict[str, list[dict]] = {}
@@ -131,21 +132,24 @@ def resolve() -> dict[str, dict[str, int]]:
             by_long.setdefault(rec["long"], []).append(rec)
 
     squads = parse_squads()
-    out: dict[str, dict[str, int]] = {}
+    out: dict[str, dict[str, dict]] = {}
     hits = total = 0
     thin_teams: list[str] = []
     for team, roster in squads.items():
         nat = _asc(NAT_ALIAS.get(team, team))
         candidates = by_nat.get(nat, [])
-        team_map: dict[str, int] = {}
+        team_map: dict[str, dict] = {}
         for p in roster:
             total += 1
             name, club = p["name"], p.get("club", "")
-            ovr = _best(name, club, candidates) if candidates else None
-            if ovr is None:  # fall back to a name-only match across the whole set
-                ovr = _best(name, club, by_long.get(_asc(name), []))
-            if ovr is not None:
-                team_map[_asc(name)] = ovr
+            rec = _best(name, club, candidates) if candidates else None
+            if rec is None:  # fall back to a name-only match across the whole set
+                rec = _best(name, club, by_long.get(_asc(name), []))
+            if rec is not None:
+                entry = {"ovr": rec["overall"]}
+                if rec.get("age"):
+                    entry["age"] = rec["age"]
+                team_map[_asc(name)] = entry
                 hits += 1
         out[team] = team_map
         if len(team_map) < len(roster) - 3:

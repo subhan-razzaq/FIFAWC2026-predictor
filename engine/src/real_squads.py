@@ -338,13 +338,17 @@ def _rates(pos: str, ability: float, caps: int, goals: int) -> tuple[float, floa
     return round(npxg, 3), round(xa, 3)
 
 
+def _ea_entry(team: str, name: str) -> dict | None:
+    return _EA_OVERALLS.get(team, {}).get(_ascii(name).lower())
+
+
 def _player_ability(team: str, p: dict) -> float:
     """Resolve a player's ability, in order of trust: their EA Sports FC 26 overall,
     then a hand-curated overall for a defining player, then the club+caps heuristic
     held below the star floor."""
-    ea = _EA_OVERALLS.get(team, {}).get(_ascii(p["name"]).lower())
+    ea = _ea_entry(team, p["name"])
     if ea is not None:
-        return _ability_for_ovr(int(ea))
+        return _ability_for_ovr(int(ea["ovr"]))
     star = _star_ability(p["name"])
     if star is not None:
         return star
@@ -354,7 +358,8 @@ def _player_ability(team: str, p: dict) -> float:
 def _to_player(team: str, p: dict) -> dict:
     ability = _player_ability(team, p)
     npxg, xa = _rates(p["pos"], ability, p["caps"], p["goals"])
-    return {
+    ea = _ea_entry(team, p["name"])
+    out = {
         "name": p["name"],
         "role": p["pos"],
         "group": p["pos"],
@@ -372,6 +377,9 @@ def _to_player(team: str, p: dict) -> dict:
         "position_factor": POS_FACTOR[p["pos"]],
         "defense_factor": DEF_FACTOR[p["pos"]],
     }
+    if ea and ea.get("age"):
+        out["age"] = ea["age"]
+    return out
 
 
 def _project_eleven(players: list[dict]) -> list[str]:

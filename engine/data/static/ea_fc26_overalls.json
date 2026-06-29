@@ -1,1065 +1,3966 @@
 {
   "Algeria": {
-    "aissa mandi": 75,
-    "amine gouiri": 79,
-    "anis hadj moussa": 76,
-    "fares chaibi": 74,
-    "fares ghedjemis": 63,
-    "hicham boudaoui": 77,
-    "houssem aouar": 77,
-    "ibrahim maza": 71,
-    "jaouen hadjam": 69,
-    "mohamed amine tougai": 80,
-    "mohamed amoura": 80,
-    "nabil bentaleb": 77,
-    "rafik belghali": 66,
-    "ramiz zerrouki": 73,
-    "ramy bensebaini": 79,
-    "rayan ait-nouri": 81,
-    "riyad mahrez": 84,
-    "yacine titraoui": 68
+    "aissa mandi": {
+      "age": 33,
+      "ovr": 75
+    },
+    "amine gouiri": {
+      "age": 25,
+      "ovr": 79
+    },
+    "anis hadj moussa": {
+      "age": 23,
+      "ovr": 76
+    },
+    "fares chaibi": {
+      "age": 22,
+      "ovr": 74
+    },
+    "fares ghedjemis": {
+      "age": 22,
+      "ovr": 63
+    },
+    "hicham boudaoui": {
+      "age": 25,
+      "ovr": 77
+    },
+    "houssem aouar": {
+      "age": 27,
+      "ovr": 77
+    },
+    "ibrahim maza": {
+      "age": 19,
+      "ovr": 71
+    },
+    "jaouen hadjam": {
+      "age": 22,
+      "ovr": 69
+    },
+    "mohamed amine tougai": {
+      "age": 25,
+      "ovr": 80
+    },
+    "mohamed amoura": {
+      "age": 25,
+      "ovr": 80
+    },
+    "nabil bentaleb": {
+      "age": 30,
+      "ovr": 77
+    },
+    "rafik belghali": {
+      "age": 23,
+      "ovr": 66
+    },
+    "ramiz zerrouki": {
+      "age": 27,
+      "ovr": 73
+    },
+    "ramy bensebaini": {
+      "age": 30,
+      "ovr": 79
+    },
+    "rayan ait-nouri": {
+      "age": 24,
+      "ovr": 81
+    },
+    "riyad mahrez": {
+      "age": 34,
+      "ovr": 84
+    },
+    "yacine titraoui": {
+      "age": 21,
+      "ovr": 68
+    }
   },
   "Argentina": {
-    "alexis mac allister": 87,
-    "cristian romero": 82,
-    "emiliano martinez": 85,
-    "enzo fernandez": 84,
-    "exequiel palacios": 84,
-    "facundo medina": 79,
-    "geronimo rulli": 82,
-    "giovani lo celso": 82,
-    "giuliano simeone": 81,
-    "gonzalo montiel": 78,
-    "jose manuel lopez": 70,
-    "juan musso": 79,
-    "julian alvarez": 87,
-    "lautaro martinez": 88,
-    "leandro paredes": 78,
-    "lionel messi": 86,
-    "lisandro martinez": 81,
-    "marcos senesi": 78,
-    "nahuel molina": 79,
-    "nico paz": 79,
-    "nicolas gonzalez": 78,
-    "nicolas otamendi": 82,
-    "nicolas tagliafico": 78,
-    "rodrigo de paul": 84,
-    "thiago almada": 79,
-    "valentin barco": 75
+    "alexis mac allister": {
+      "age": 26,
+      "ovr": 87
+    },
+    "cristian romero": {
+      "age": 27,
+      "ovr": 82
+    },
+    "emiliano martinez": {
+      "age": 32,
+      "ovr": 85
+    },
+    "enzo fernandez": {
+      "age": 24,
+      "ovr": 84
+    },
+    "exequiel palacios": {
+      "age": 26,
+      "ovr": 84
+    },
+    "facundo medina": {
+      "age": 26,
+      "ovr": 79
+    },
+    "geronimo rulli": {
+      "age": 33,
+      "ovr": 82
+    },
+    "giovani lo celso": {
+      "age": 29,
+      "ovr": 82
+    },
+    "giuliano simeone": {
+      "age": 22,
+      "ovr": 81
+    },
+    "gonzalo montiel": {
+      "age": 28,
+      "ovr": 78
+    },
+    "jose manuel lopez": {
+      "age": 25,
+      "ovr": 70
+    },
+    "juan musso": {
+      "age": 31,
+      "ovr": 79
+    },
+    "julian alvarez": {
+      "age": 25,
+      "ovr": 87
+    },
+    "lautaro martinez": {
+      "age": 27,
+      "ovr": 88
+    },
+    "leandro paredes": {
+      "age": 31,
+      "ovr": 78
+    },
+    "lionel messi": {
+      "age": 38,
+      "ovr": 86
+    },
+    "lisandro martinez": {
+      "age": 27,
+      "ovr": 81
+    },
+    "marcos senesi": {
+      "age": 28,
+      "ovr": 78
+    },
+    "nahuel molina": {
+      "age": 27,
+      "ovr": 79
+    },
+    "nico paz": {
+      "age": 20,
+      "ovr": 79
+    },
+    "nicolas gonzalez": {
+      "age": 27,
+      "ovr": 78
+    },
+    "nicolas otamendi": {
+      "age": 37,
+      "ovr": 82
+    },
+    "nicolas tagliafico": {
+      "age": 32,
+      "ovr": 78
+    },
+    "rodrigo de paul": {
+      "age": 31,
+      "ovr": 84
+    },
+    "thiago almada": {
+      "age": 24,
+      "ovr": 79
+    },
+    "valentin barco": {
+      "age": 20,
+      "ovr": 75
+    }
   },
   "Australia": {
-    "aiden o'neill": 70,
-    "ajdin hrustic": 67,
-    "alessandro circati": 71,
-    "awer mabil": 67,
-    "aziz behich": 67,
-    "cameron burgess": 73,
-    "cammy devlin": 71,
-    "connor metcalfe": 69,
-    "cristian volpato": 69,
-    "harry souttar": 73,
-    "jackson irvine": 75,
-    "jacob italiano": 64,
-    "jordan bos": 69,
-    "kai trewin": 69,
-    "lucas herrington": 59,
-    "mathew leckie": 70,
-    "mathew ryan": 78,
-    "mohamed toure": 68,
-    "nestory irankunda": 67,
-    "nishan velupillay": 65,
-    "patrick beach": 65,
-    "paul izzo": 70,
-    "paul okon-engstler": 52,
-    "tete yengi": 59
+    "aiden o'neill": {
+      "age": 26,
+      "ovr": 70
+    },
+    "ajdin hrustic": {
+      "age": 28,
+      "ovr": 67
+    },
+    "alessandro circati": {
+      "age": 21,
+      "ovr": 71
+    },
+    "awer mabil": {
+      "age": 29,
+      "ovr": 67
+    },
+    "aziz behich": {
+      "age": 34,
+      "ovr": 67
+    },
+    "cameron burgess": {
+      "age": 29,
+      "ovr": 73
+    },
+    "cammy devlin": {
+      "age": 27,
+      "ovr": 71
+    },
+    "connor metcalfe": {
+      "age": 25,
+      "ovr": 69
+    },
+    "cristian volpato": {
+      "age": 21,
+      "ovr": 69
+    },
+    "harry souttar": {
+      "age": 26,
+      "ovr": 73
+    },
+    "jackson irvine": {
+      "age": 32,
+      "ovr": 75
+    },
+    "jacob italiano": {
+      "age": 23,
+      "ovr": 64
+    },
+    "jordan bos": {
+      "age": 22,
+      "ovr": 69
+    },
+    "kai trewin": {
+      "age": 24,
+      "ovr": 69
+    },
+    "lucas herrington": {
+      "age": 17,
+      "ovr": 59
+    },
+    "mathew leckie": {
+      "age": 34,
+      "ovr": 70
+    },
+    "mathew ryan": {
+      "age": 33,
+      "ovr": 78
+    },
+    "mohamed toure": {
+      "age": 21,
+      "ovr": 68
+    },
+    "nestory irankunda": {
+      "age": 19,
+      "ovr": 67
+    },
+    "nishan velupillay": {
+      "age": 24,
+      "ovr": 65
+    },
+    "patrick beach": {
+      "age": 21,
+      "ovr": 65
+    },
+    "paul izzo": {
+      "age": 30,
+      "ovr": 70
+    },
+    "paul okon-engstler": {
+      "age": 20,
+      "ovr": 52
+    },
+    "tete yengi": {
+      "age": 24,
+      "ovr": 59
+    }
   },
   "Austria": {
-    "alessandro schopf": 68,
-    "alexander prass": 74,
-    "alexander schlager": 73,
-    "david affengruber": 75,
-    "david alaba": 82,
-    "dejan ljubicic": 73,
-    "florian grillitsch": 75,
-    "florian wiegele": 67,
-    "kevin danso": 79,
-    "konrad laimer": 82,
-    "marcel sabitzer": 80,
-    "marco friedl": 77,
-    "michael gregoritsch": 75,
-    "michael svoboda": 68,
-    "nicolas seiwald": 77,
-    "patrick pentz": 72,
-    "patrick wimmer": 77,
-    "paul wanner": 72,
-    "philipp lienhart": 79,
-    "phillipp mwene": 76,
-    "romano schmid": 78,
-    "sasa kalajdzic": 74,
-    "stefan posch": 79,
-    "xaver schlager": 80
+    "alessandro schopf": {
+      "age": 31,
+      "ovr": 68
+    },
+    "alexander prass": {
+      "age": 24,
+      "ovr": 74
+    },
+    "alexander schlager": {
+      "age": 29,
+      "ovr": 73
+    },
+    "david affengruber": {
+      "age": 24,
+      "ovr": 75
+    },
+    "david alaba": {
+      "age": 33,
+      "ovr": 82
+    },
+    "dejan ljubicic": {
+      "age": 27,
+      "ovr": 73
+    },
+    "florian grillitsch": {
+      "age": 29,
+      "ovr": 75
+    },
+    "florian wiegele": {
+      "age": 24,
+      "ovr": 67
+    },
+    "kevin danso": {
+      "age": 26,
+      "ovr": 79
+    },
+    "konrad laimer": {
+      "age": 28,
+      "ovr": 82
+    },
+    "marcel sabitzer": {
+      "age": 31,
+      "ovr": 80
+    },
+    "marco friedl": {
+      "age": 27,
+      "ovr": 77
+    },
+    "michael gregoritsch": {
+      "age": 31,
+      "ovr": 75
+    },
+    "michael svoboda": {
+      "age": 26,
+      "ovr": 68
+    },
+    "nicolas seiwald": {
+      "age": 24,
+      "ovr": 77
+    },
+    "patrick pentz": {
+      "age": 28,
+      "ovr": 72
+    },
+    "patrick wimmer": {
+      "age": 24,
+      "ovr": 77
+    },
+    "paul wanner": {
+      "age": 19,
+      "ovr": 72
+    },
+    "philipp lienhart": {
+      "age": 28,
+      "ovr": 79
+    },
+    "phillipp mwene": {
+      "age": 31,
+      "ovr": 76
+    },
+    "romano schmid": {
+      "age": 25,
+      "ovr": 78
+    },
+    "sasa kalajdzic": {
+      "age": 27,
+      "ovr": 74
+    },
+    "stefan posch": {
+      "age": 28,
+      "ovr": 79
+    },
+    "xaver schlager": {
+      "age": 27,
+      "ovr": 80
+    }
   },
   "Belgium": {
-    "alexis saelemaekers": 79,
-    "amadou onana": 79,
-    "arthur theate": 80,
-    "axel witsel": 77,
-    "brandon mechele": 76,
-    "charles de ketelaere": 82,
-    "diego moreira": 77,
-    "dodi lukebakio": 82,
-    "hans vanaken": 80,
-    "jeremy doku": 80,
-    "joaquin seys": 73,
-    "kevin de bruyne": 87,
-    "koni de winter": 74,
-    "leandro trossard": 83,
-    "matias fernandez-pardo": 75,
-    "maxim de cuyper": 80,
-    "mike penders": 73,
-    "nathan ngoy": 69,
-    "nicolas raskin": 77,
-    "romelu lukaku": 84,
-    "senne lammens": 78,
-    "thibaut courtois": 89,
-    "thomas meunier": 76,
-    "timothy castagne": 76,
-    "youri tielemans": 85,
-    "zeno debast": 78
+    "alexis saelemaekers": {
+      "age": 26,
+      "ovr": 79
+    },
+    "amadou onana": {
+      "age": 23,
+      "ovr": 79
+    },
+    "arthur theate": {
+      "age": 25,
+      "ovr": 80
+    },
+    "axel witsel": {
+      "age": 36,
+      "ovr": 77
+    },
+    "brandon mechele": {
+      "age": 32,
+      "ovr": 76
+    },
+    "charles de ketelaere": {
+      "age": 24,
+      "ovr": 82
+    },
+    "diego moreira": {
+      "age": 20,
+      "ovr": 77
+    },
+    "dodi lukebakio": {
+      "age": 27,
+      "ovr": 82
+    },
+    "hans vanaken": {
+      "age": 32,
+      "ovr": 80
+    },
+    "jeremy doku": {
+      "age": 23,
+      "ovr": 80
+    },
+    "joaquin seys": {
+      "age": 20,
+      "ovr": 73
+    },
+    "kevin de bruyne": {
+      "age": 34,
+      "ovr": 87
+    },
+    "koni de winter": {
+      "age": 23,
+      "ovr": 74
+    },
+    "leandro trossard": {
+      "age": 30,
+      "ovr": 83
+    },
+    "matias fernandez-pardo": {
+      "age": 20,
+      "ovr": 75
+    },
+    "maxim de cuyper": {
+      "age": 24,
+      "ovr": 80
+    },
+    "mike penders": {
+      "age": 19,
+      "ovr": 73
+    },
+    "nathan ngoy": {
+      "age": 22,
+      "ovr": 69
+    },
+    "nicolas raskin": {
+      "age": 24,
+      "ovr": 77
+    },
+    "romelu lukaku": {
+      "age": 32,
+      "ovr": 84
+    },
+    "senne lammens": {
+      "age": 22,
+      "ovr": 78
+    },
+    "thibaut courtois": {
+      "age": 33,
+      "ovr": 89
+    },
+    "thomas meunier": {
+      "age": 33,
+      "ovr": 76
+    },
+    "timothy castagne": {
+      "age": 29,
+      "ovr": 76
+    },
+    "youri tielemans": {
+      "age": 28,
+      "ovr": 85
+    },
+    "zeno debast": {
+      "age": 21,
+      "ovr": 78
+    }
   },
   "Bosnia and Herzegovina": {
-    "amar dedic": 74,
-    "amar memic": 72,
-    "amir hadziahmetovic": 73,
-    "arjan malic": 63,
-    "armin gigovic": 72,
-    "benjamin tahirovic": 67,
-    "dennis hadzikadunic": 70,
-    "dzenis burnic": 68,
-    "edin dzeko": 81,
-    "ermedin demirovic": 80,
-    "esmir bajraktarevic": 67,
-    "haris tabakovic": 73,
-    "jovo lukic": 64,
-    "kerim alajbegovic": 63,
-    "nihad mujakic": 67,
-    "nikola katic": 69,
-    "nikola vasilj": 77,
-    "samed bazdar": 69,
-    "sead kolasinac": 79,
-    "tarik muharemovic": 70
+    "amar dedic": {
+      "age": 22,
+      "ovr": 74
+    },
+    "amar memic": {
+      "age": 24,
+      "ovr": 72
+    },
+    "amir hadziahmetovic": {
+      "age": 28,
+      "ovr": 73
+    },
+    "arjan malic": {
+      "age": 19,
+      "ovr": 63
+    },
+    "armin gigovic": {
+      "age": 23,
+      "ovr": 72
+    },
+    "benjamin tahirovic": {
+      "age": 22,
+      "ovr": 67
+    },
+    "dennis hadzikadunic": {
+      "age": 26,
+      "ovr": 70
+    },
+    "dzenis burnic": {
+      "age": 27,
+      "ovr": 68
+    },
+    "edin dzeko": {
+      "age": 39,
+      "ovr": 81
+    },
+    "ermedin demirovic": {
+      "age": 27,
+      "ovr": 80
+    },
+    "esmir bajraktarevic": {
+      "age": 20,
+      "ovr": 67
+    },
+    "haris tabakovic": {
+      "age": 31,
+      "ovr": 73
+    },
+    "jovo lukic": {
+      "age": 26,
+      "ovr": 64
+    },
+    "kerim alajbegovic": {
+      "age": 17,
+      "ovr": 63
+    },
+    "nihad mujakic": {
+      "age": 27,
+      "ovr": 67
+    },
+    "nikola katic": {
+      "age": 28,
+      "ovr": 69
+    },
+    "nikola vasilj": {
+      "age": 29,
+      "ovr": 77
+    },
+    "samed bazdar": {
+      "age": 21,
+      "ovr": 69
+    },
+    "sead kolasinac": {
+      "age": 32,
+      "ovr": 79
+    },
+    "tarik muharemovic": {
+      "age": 22,
+      "ovr": 70
+    }
   },
   "Brazil": {
-    "alex sandro": 80,
-    "alisson": 89,
-    "bremer": 85,
-    "bruno guimaraes": 86,
-    "casemiro": 80,
-    "danilo luiz": 80,
-    "danilo santos": 80,
-    "douglas santos": 80,
-    "ederson moraes": 85,
-    "ederson silva": 82,
-    "endrick": 77,
-    "fabinho": 82,
-    "gabriel magalhaes": 88,
-    "gabriel martinelli": 81,
-    "igor thiago": 75,
-    "leo pereira": 74,
-    "lucas paqueta": 80,
-    "luiz henrique": 78,
-    "marquinhos": 87,
-    "matheus cunha": 83,
-    "raphinha": 89,
-    "roger ibanez": 82,
-    "vinicius junior": 89
+    "alex sandro": {
+      "age": 25,
+      "ovr": 80
+    },
+    "alisson": {
+      "age": 32,
+      "ovr": 89
+    },
+    "bremer": {
+      "age": 28,
+      "ovr": 85
+    },
+    "bruno guimaraes": {
+      "age": 27,
+      "ovr": 86
+    },
+    "casemiro": {
+      "age": 33,
+      "ovr": 80
+    },
+    "danilo luiz": {
+      "age": 27,
+      "ovr": 80
+    },
+    "danilo santos": {
+      "age": 21,
+      "ovr": 80
+    },
+    "douglas santos": {
+      "age": 21,
+      "ovr": 80
+    },
+    "ederson moraes": {
+      "age": 31,
+      "ovr": 85
+    },
+    "ederson silva": {
+      "age": 25,
+      "ovr": 82
+    },
+    "endrick": {
+      "age": 18,
+      "ovr": 77
+    },
+    "fabinho": {
+      "age": 31,
+      "ovr": 82
+    },
+    "gabriel magalhaes": {
+      "age": 27,
+      "ovr": 88
+    },
+    "gabriel martinelli": {
+      "age": 24,
+      "ovr": 81
+    },
+    "igor thiago": {
+      "age": 24,
+      "ovr": 75
+    },
+    "leo pereira": {
+      "age": 25,
+      "ovr": 74
+    },
+    "lucas paqueta": {
+      "age": 27,
+      "ovr": 80
+    },
+    "luiz henrique": {
+      "age": 23,
+      "ovr": 78
+    },
+    "marquinhos": {
+      "age": 31,
+      "ovr": 87
+    },
+    "matheus cunha": {
+      "age": 26,
+      "ovr": 83
+    },
+    "raphinha": {
+      "age": 28,
+      "ovr": 89
+    },
+    "roger ibanez": {
+      "age": 26,
+      "ovr": 82
+    },
+    "vinicius junior": {
+      "age": 24,
+      "ovr": 89
+    }
   },
   "Canada": {
-    "ali ahmed": 68,
-    "alistair johnston": 78,
-    "alphonso davies": 84,
-    "cyle larin": 77,
-    "dayne st. clair": 73,
-    "derek cornelius": 74,
-    "ismael kone": 72,
-    "jacob shaffelburg": 67,
-    "jayden nelson": 68,
-    "joel waterman": 68,
-    "jonathan david": 82,
-    "jonathan osorio": 71,
-    "liam millar": 72,
-    "luc de fougerolles": 60,
-    "mathieu choiniere": 67,
-    "maxime crepeau": 69,
-    "moise bombito": 76,
-    "nathan saliba": 68,
-    "niko sigur": 70,
-    "promise david": 75,
-    "richie laryea": 72,
-    "stephen eustaquio": 77,
-    "tajon buchanan": 74,
-    "tani oluwaseyi": 70
+    "ali ahmed": {
+      "age": 24,
+      "ovr": 68
+    },
+    "alistair johnston": {
+      "age": 26,
+      "ovr": 78
+    },
+    "alphonso davies": {
+      "age": 24,
+      "ovr": 84
+    },
+    "cyle larin": {
+      "age": 30,
+      "ovr": 77
+    },
+    "dayne st. clair": {
+      "age": 28,
+      "ovr": 73
+    },
+    "derek cornelius": {
+      "age": 27,
+      "ovr": 74
+    },
+    "ismael kone": {
+      "age": 23,
+      "ovr": 72
+    },
+    "jacob shaffelburg": {
+      "age": 25,
+      "ovr": 67
+    },
+    "jayden nelson": {
+      "age": 22,
+      "ovr": 68
+    },
+    "joel waterman": {
+      "age": 29,
+      "ovr": 68
+    },
+    "jonathan david": {
+      "age": 25,
+      "ovr": 82
+    },
+    "jonathan osorio": {
+      "age": 33,
+      "ovr": 71
+    },
+    "liam millar": {
+      "age": 25,
+      "ovr": 72
+    },
+    "luc de fougerolles": {
+      "age": 19,
+      "ovr": 60
+    },
+    "mathieu choiniere": {
+      "age": 26,
+      "ovr": 67
+    },
+    "maxime crepeau": {
+      "age": 31,
+      "ovr": 69
+    },
+    "moise bombito": {
+      "age": 25,
+      "ovr": 76
+    },
+    "nathan saliba": {
+      "age": 21,
+      "ovr": 68
+    },
+    "niko sigur": {
+      "age": 21,
+      "ovr": 70
+    },
+    "promise david": {
+      "age": 23,
+      "ovr": 75
+    },
+    "richie laryea": {
+      "age": 30,
+      "ovr": 72
+    },
+    "stephen eustaquio": {
+      "age": 28,
+      "ovr": 77
+    },
+    "tajon buchanan": {
+      "age": 26,
+      "ovr": 74
+    },
+    "tani oluwaseyi": {
+      "age": 25,
+      "ovr": 70
+    }
   },
   "Cape Verde": {
-    "cj dos santos": 63,
-    "dailon livramento": 70,
-    "helio varela": 74,
-    "jamiro monteiro": 69,
-    "joao paulo": 64,
-    "jovane cabral": 70,
-    "kevin pina": 72,
-    "logan costa": 77,
-    "nuno da costa": 74,
-    "ryan mendes": 64,
-    "sidny lopes cabral": 66,
-    "steven moreira": 72,
-    "telmo arcanjo": 71,
-    "wagner pina": 72
+    "cj dos santos": {
+      "age": 31,
+      "ovr": 63
+    },
+    "dailon livramento": {
+      "age": 24,
+      "ovr": 70
+    },
+    "helio varela": {
+      "age": 30,
+      "ovr": 74
+    },
+    "jamiro monteiro": {
+      "age": 31,
+      "ovr": 69
+    },
+    "joao paulo": {
+      "age": 27,
+      "ovr": 64
+    },
+    "jovane cabral": {
+      "age": 27,
+      "ovr": 70
+    },
+    "kevin pina": {
+      "age": 22,
+      "ovr": 72
+    },
+    "logan costa": {
+      "age": 24,
+      "ovr": 77
+    },
+    "nuno da costa": {
+      "age": 34,
+      "ovr": 74
+    },
+    "ryan mendes": {
+      "age": 27,
+      "ovr": 64
+    },
+    "sidny lopes cabral": {
+      "age": 22,
+      "ovr": 66
+    },
+    "steven moreira": {
+      "age": 30,
+      "ovr": 72
+    },
+    "telmo arcanjo": {
+      "age": 24,
+      "ovr": 71
+    },
+    "wagner pina": {
+      "age": 22,
+      "ovr": 72
+    }
   },
   "Colombia": {
-    "alvaro montero": 75,
-    "andres gomez": 65,
-    "camilo vargas": 68,
-    "daniel munoz": 81,
-    "david ospina": 76,
-    "davinson sanchez": 82,
-    "deiver machado": 76,
-    "gustavo puerta": 68,
-    "james rodriguez": 61,
-    "jaminton campaz": 76,
-    "jefferson lerma": 77,
-    "jhon arias": 78,
-    "jhon cordoba": 69,
-    "jhon lucumi": 76,
-    "johan mojica": 78,
-    "jorge carrascal": 70,
-    "juan fernando quintero": 77,
-    "juan portilla": 73,
-    "kevin castano": 77,
-    "luis diaz": 85,
-    "luis suarez": 77,
-    "richard rios": 79,
-    "santiago arias": 78,
-    "yerry mina": 77
+    "alvaro montero": {
+      "age": 30,
+      "ovr": 75
+    },
+    "andres gomez": {
+      "age": 25,
+      "ovr": 65
+    },
+    "camilo vargas": {
+      "age": 23,
+      "ovr": 68
+    },
+    "daniel munoz": {
+      "age": 29,
+      "ovr": 81
+    },
+    "david ospina": {
+      "age": 36,
+      "ovr": 76
+    },
+    "davinson sanchez": {
+      "age": 29,
+      "ovr": 82
+    },
+    "deiver machado": {
+      "age": 31,
+      "ovr": 76
+    },
+    "gustavo puerta": {
+      "age": 21,
+      "ovr": 68
+    },
+    "james rodriguez": {
+      "age": 20,
+      "ovr": 61
+    },
+    "jaminton campaz": {
+      "age": 25,
+      "ovr": 76
+    },
+    "jefferson lerma": {
+      "age": 30,
+      "ovr": 77
+    },
+    "jhon arias": {
+      "age": 27,
+      "ovr": 78
+    },
+    "jhon cordoba": {
+      "age": 24,
+      "ovr": 69
+    },
+    "jhon lucumi": {
+      "age": 27,
+      "ovr": 76
+    },
+    "johan mojica": {
+      "age": 32,
+      "ovr": 78
+    },
+    "jorge carrascal": {
+      "age": 32,
+      "ovr": 70
+    },
+    "juan fernando quintero": {
+      "age": 32,
+      "ovr": 77
+    },
+    "juan portilla": {
+      "age": 26,
+      "ovr": 73
+    },
+    "kevin castano": {
+      "age": 24,
+      "ovr": 77
+    },
+    "luis diaz": {
+      "age": 28,
+      "ovr": 85
+    },
+    "luis suarez": {
+      "age": 27,
+      "ovr": 77
+    },
+    "richard rios": {
+      "age": 25,
+      "ovr": 79
+    },
+    "santiago arias": {
+      "age": 27,
+      "ovr": 78
+    },
+    "yerry mina": {
+      "age": 30,
+      "ovr": 77
+    }
   },
   "Croatia": {
-    "andrej kramaric": 81,
-    "ante budimir": 82,
-    "dominik kotarski": 77,
-    "dominik livakovic": 80,
-    "duje caleta-car": 74,
-    "igor matanovic": 71,
-    "ivan perisic": 81,
-    "ivor pandur": 72,
-    "josip stanisic": 78,
-    "josip sutalo": 78,
-    "josko gvardiol": 84,
-    "kristijan jakic": 76,
-    "luka modric": 83,
-    "luka sucic": 78,
-    "luka vuskovic": 72,
-    "marco pasalic": 71,
-    "marin pongracic": 74,
-    "mario pasalic": 80,
-    "martin baturina": 78,
-    "martin erlic": 72,
-    "mateo kovacic": 83,
-    "nikola moro": 75,
-    "nikola vlasic": 79,
-    "petar musa": 76,
-    "petar sucic": 74,
-    "toni fruk": 75
+    "andrej kramaric": {
+      "age": 34,
+      "ovr": 81
+    },
+    "ante budimir": {
+      "age": 33,
+      "ovr": 82
+    },
+    "dominik kotarski": {
+      "age": 25,
+      "ovr": 77
+    },
+    "dominik livakovic": {
+      "age": 30,
+      "ovr": 80
+    },
+    "duje caleta-car": {
+      "age": 28,
+      "ovr": 74
+    },
+    "igor matanovic": {
+      "age": 22,
+      "ovr": 71
+    },
+    "ivan perisic": {
+      "age": 36,
+      "ovr": 81
+    },
+    "ivor pandur": {
+      "age": 25,
+      "ovr": 72
+    },
+    "josip stanisic": {
+      "age": 25,
+      "ovr": 78
+    },
+    "josip sutalo": {
+      "age": 25,
+      "ovr": 78
+    },
+    "josko gvardiol": {
+      "age": 23,
+      "ovr": 84
+    },
+    "kristijan jakic": {
+      "age": 28,
+      "ovr": 76
+    },
+    "luka modric": {
+      "age": 39,
+      "ovr": 83
+    },
+    "luka sucic": {
+      "age": 22,
+      "ovr": 78
+    },
+    "luka vuskovic": {
+      "age": 18,
+      "ovr": 72
+    },
+    "marco pasalic": {
+      "age": 24,
+      "ovr": 71
+    },
+    "marin pongracic": {
+      "age": 27,
+      "ovr": 74
+    },
+    "mario pasalic": {
+      "age": 30,
+      "ovr": 80
+    },
+    "martin baturina": {
+      "age": 22,
+      "ovr": 78
+    },
+    "martin erlic": {
+      "age": 27,
+      "ovr": 72
+    },
+    "mateo kovacic": {
+      "age": 31,
+      "ovr": 83
+    },
+    "nikola moro": {
+      "age": 27,
+      "ovr": 75
+    },
+    "nikola vlasic": {
+      "age": 27,
+      "ovr": 79
+    },
+    "petar musa": {
+      "age": 27,
+      "ovr": 76
+    },
+    "petar sucic": {
+      "age": 21,
+      "ovr": 74
+    },
+    "toni fruk": {
+      "age": 24,
+      "ovr": 75
+    }
   },
   "Curacao": {
-    "ar'jany martha": 64,
-    "brandley kuwas": 67,
-    "deveron fonville": 63,
-    "juninho bacuna": 69,
-    "leandro bacuna": 69,
-    "livano comenencia": 62,
-    "sherel floranus": 66,
-    "shurandy sambo": 68,
-    "tahith chong": 71,
-    "tyrese noslin": 66,
-    "tyrick bodak": 60
+    "ar'jany martha": {
+      "age": 21,
+      "ovr": 64
+    },
+    "brandley kuwas": {
+      "age": 32,
+      "ovr": 67
+    },
+    "deveron fonville": {
+      "age": 22,
+      "ovr": 63
+    },
+    "juninho bacuna": {
+      "age": 27,
+      "ovr": 69
+    },
+    "leandro bacuna": {
+      "age": 27,
+      "ovr": 69
+    },
+    "livano comenencia": {
+      "age": 21,
+      "ovr": 62
+    },
+    "sherel floranus": {
+      "age": 26,
+      "ovr": 66
+    },
+    "shurandy sambo": {
+      "age": 23,
+      "ovr": 68
+    },
+    "tahith chong": {
+      "age": 25,
+      "ovr": 71
+    },
+    "tyrese noslin": {
+      "age": 22,
+      "ovr": 66
+    },
+    "tyrick bodak": {
+      "age": 23,
+      "ovr": 60
+    }
   },
   "Czech Republic": {
-    "adam hlozek": 77,
-    "david doudera": 74,
-    "david jurasek": 73,
-    "david zima": 74,
-    "denis visinsky": 68,
-    "jan kuchta": 73,
-    "jaroslav zeleny": 72,
-    "jindrich stanek": 76,
-    "ladislav krejci": 78,
-    "lukas cerv": 74,
-    "lukas hornicek": 73,
-    "lukas provod": 78,
-    "matej kovar": 75,
-    "michal sadilek": 76,
-    "mojmir chytil": 74,
-    "patrik schick": 85,
-    "pavel sulc": 77,
-    "robin hranac": 71,
-    "stepan chaloupek": 70,
-    "tomas chory": 75,
-    "tomas holes": 76,
-    "tomas soucek": 78,
-    "vladimir coufal": 73
+    "adam hlozek": {
+      "age": 22,
+      "ovr": 77
+    },
+    "david doudera": {
+      "age": 27,
+      "ovr": 74
+    },
+    "david jurasek": {
+      "age": 24,
+      "ovr": 73
+    },
+    "david zima": {
+      "age": 24,
+      "ovr": 74
+    },
+    "denis visinsky": {
+      "age": 22,
+      "ovr": 68
+    },
+    "jan kuchta": {
+      "age": 28,
+      "ovr": 73
+    },
+    "jaroslav zeleny": {
+      "age": 32,
+      "ovr": 72
+    },
+    "jindrich stanek": {
+      "age": 29,
+      "ovr": 76
+    },
+    "ladislav krejci": {
+      "age": 26,
+      "ovr": 78
+    },
+    "lukas cerv": {
+      "age": 24,
+      "ovr": 74
+    },
+    "lukas hornicek": {
+      "age": 22,
+      "ovr": 73
+    },
+    "lukas provod": {
+      "age": 28,
+      "ovr": 78
+    },
+    "matej kovar": {
+      "age": 25,
+      "ovr": 75
+    },
+    "michal sadilek": {
+      "age": 26,
+      "ovr": 76
+    },
+    "mojmir chytil": {
+      "age": 26,
+      "ovr": 74
+    },
+    "patrik schick": {
+      "age": 29,
+      "ovr": 85
+    },
+    "pavel sulc": {
+      "age": 24,
+      "ovr": 77
+    },
+    "robin hranac": {
+      "age": 25,
+      "ovr": 71
+    },
+    "stepan chaloupek": {
+      "age": 22,
+      "ovr": 70
+    },
+    "tomas chory": {
+      "age": 30,
+      "ovr": 75
+    },
+    "tomas holes": {
+      "age": 32,
+      "ovr": 76
+    },
+    "tomas soucek": {
+      "age": 30,
+      "ovr": 78
+    },
+    "vladimir coufal": {
+      "age": 32,
+      "ovr": 73
+    }
   },
   "DR Congo": {
-    "aaron wan-bissaka": 80,
-    "arthur masuaku": 75,
-    "axel tuanzebe": 73,
-    "brian cipenga": 66,
-    "cedric bakambu": 77,
-    "chancel mbemba": 75,
-    "charles pickel": 71,
-    "dylan batubinsika": 71,
-    "edo kayembe": 71,
-    "joris kayembe": 74,
-    "lionel mpasi": 67,
-    "meschak elia": 70,
-    "nathanael mbuku": 70,
-    "ngal'ayel mukau": 74,
-    "noah sadiki": 74,
-    "simon banza": 81,
-    "steve kapuadi": 71,
-    "yoane wissa": 82
+    "aaron wan-bissaka": {
+      "age": 27,
+      "ovr": 80
+    },
+    "arthur masuaku": {
+      "age": 31,
+      "ovr": 75
+    },
+    "axel tuanzebe": {
+      "age": 27,
+      "ovr": 73
+    },
+    "brian cipenga": {
+      "age": 27,
+      "ovr": 66
+    },
+    "cedric bakambu": {
+      "age": 34,
+      "ovr": 77
+    },
+    "chancel mbemba": {
+      "age": 30,
+      "ovr": 75
+    },
+    "charles pickel": {
+      "age": 28,
+      "ovr": 71
+    },
+    "dylan batubinsika": {
+      "age": 29,
+      "ovr": 71
+    },
+    "edo kayembe": {
+      "age": 27,
+      "ovr": 71
+    },
+    "joris kayembe": {
+      "age": 30,
+      "ovr": 74
+    },
+    "lionel mpasi": {
+      "age": 30,
+      "ovr": 67
+    },
+    "meschak elia": {
+      "age": 27,
+      "ovr": 70
+    },
+    "nathanael mbuku": {
+      "age": 23,
+      "ovr": 70
+    },
+    "ngal'ayel mukau": {
+      "age": 20,
+      "ovr": 74
+    },
+    "noah sadiki": {
+      "age": 20,
+      "ovr": 74
+    },
+    "simon banza": {
+      "age": 28,
+      "ovr": 81
+    },
+    "steve kapuadi": {
+      "age": 27,
+      "ovr": 71
+    },
+    "yoane wissa": {
+      "age": 28,
+      "ovr": 82
+    }
   },
   "Ecuador": {
-    "alan minda": 70,
-    "angelo preciado": 75,
-    "anthony valencia": 67,
-    "denil castillo": 67,
-    "enner valencia": 58,
-    "gonzalo valle": 70,
-    "hernan galindez": 74,
-    "joel ordonez": 75,
-    "john yeboah": 70,
-    "jordy alcivar": 68,
-    "jordy caicedo": 66,
-    "kendry paez": 73,
-    "kevin rodriguez": 67,
-    "moises caicedo": 87,
-    "moises ramirez": 71,
-    "nilson angulo": 67,
-    "pervis estupinan": 79,
-    "piero hincapie": 83,
-    "willian pacho": 86,
-    "yaimar medina": 70
+    "alan minda": {
+      "age": 22,
+      "ovr": 70
+    },
+    "angelo preciado": {
+      "age": 27,
+      "ovr": 75
+    },
+    "anthony valencia": {
+      "age": 21,
+      "ovr": 67
+    },
+    "denil castillo": {
+      "age": 21,
+      "ovr": 67
+    },
+    "enner valencia": {
+      "age": 22,
+      "ovr": 58
+    },
+    "gonzalo valle": {
+      "age": 29,
+      "ovr": 70
+    },
+    "hernan galindez": {
+      "age": 38,
+      "ovr": 74
+    },
+    "joel ordonez": {
+      "age": 21,
+      "ovr": 75
+    },
+    "john yeboah": {
+      "age": 25,
+      "ovr": 70
+    },
+    "jordy alcivar": {
+      "age": 25,
+      "ovr": 68
+    },
+    "jordy caicedo": {
+      "age": 27,
+      "ovr": 66
+    },
+    "kendry paez": {
+      "age": 18,
+      "ovr": 73
+    },
+    "kevin rodriguez": {
+      "age": 25,
+      "ovr": 67
+    },
+    "moises caicedo": {
+      "age": 23,
+      "ovr": 87
+    },
+    "moises ramirez": {
+      "age": 24,
+      "ovr": 71
+    },
+    "nilson angulo": {
+      "age": 22,
+      "ovr": 67
+    },
+    "pervis estupinan": {
+      "age": 27,
+      "ovr": 79
+    },
+    "piero hincapie": {
+      "age": 23,
+      "ovr": 83
+    },
+    "willian pacho": {
+      "age": 23,
+      "ovr": 86
+    },
+    "yaimar medina": {
+      "age": 20,
+      "ovr": 70
+    }
   },
   "Egypt": {
-    "haissem hassan": 72,
-    "mohamed abdelmonem": 74,
-    "mohamed salah": 91,
-    "omar marmoush": 84,
-    "ramy rabia": 67
+    "haissem hassan": {
+      "age": 32,
+      "ovr": 72
+    },
+    "mohamed abdelmonem": {
+      "age": 26,
+      "ovr": 74
+    },
+    "mohamed salah": {
+      "age": 33,
+      "ovr": 91
+    },
+    "omar marmoush": {
+      "age": 26,
+      "ovr": 84
+    },
+    "ramy rabia": {
+      "age": 32,
+      "ovr": 67
+    }
   },
   "England": {
-    "anthony gordon": 83,
-    "bukayo saka": 88,
-    "dan burn": 79,
-    "dean henderson": 81,
-    "declan rice": 87,
-    "djed spence": 78,
-    "eberechi eze": 83,
-    "elliot anderson": 80,
-    "ezri konsa": 82,
-    "harry kane": 89,
-    "ivan toney": 81,
-    "james trafford": 76,
-    "jarell quansah": 75,
-    "john stones": 82,
-    "jordan henderson": 79,
-    "jordan pickford": 84,
-    "jude bellingham": 90,
-    "kobbie mainoo": 77,
-    "marc guehi": 82,
-    "marcus rashford": 80,
-    "morgan rogers": 82,
-    "nico o'reilly": 73,
-    "noni madueke": 80,
-    "ollie watkins": 84,
-    "reece james": 81,
-    "trevoh chalobah": 79
+    "anthony gordon": {
+      "age": 24,
+      "ovr": 83
+    },
+    "bukayo saka": {
+      "age": 23,
+      "ovr": 88
+    },
+    "dan burn": {
+      "age": 33,
+      "ovr": 79
+    },
+    "dean henderson": {
+      "age": 28,
+      "ovr": 81
+    },
+    "declan rice": {
+      "age": 26,
+      "ovr": 87
+    },
+    "djed spence": {
+      "age": 24,
+      "ovr": 78
+    },
+    "eberechi eze": {
+      "age": 27,
+      "ovr": 83
+    },
+    "elliot anderson": {
+      "age": 22,
+      "ovr": 80
+    },
+    "ezri konsa": {
+      "age": 27,
+      "ovr": 82
+    },
+    "harry kane": {
+      "age": 31,
+      "ovr": 89
+    },
+    "ivan toney": {
+      "age": 29,
+      "ovr": 81
+    },
+    "james trafford": {
+      "age": 22,
+      "ovr": 76
+    },
+    "jarell quansah": {
+      "age": 22,
+      "ovr": 75
+    },
+    "john stones": {
+      "age": 31,
+      "ovr": 82
+    },
+    "jordan henderson": {
+      "age": 35,
+      "ovr": 79
+    },
+    "jordan pickford": {
+      "age": 31,
+      "ovr": 84
+    },
+    "jude bellingham": {
+      "age": 22,
+      "ovr": 90
+    },
+    "kobbie mainoo": {
+      "age": 20,
+      "ovr": 77
+    },
+    "marc guehi": {
+      "age": 24,
+      "ovr": 82
+    },
+    "marcus rashford": {
+      "age": 27,
+      "ovr": 80
+    },
+    "morgan rogers": {
+      "age": 22,
+      "ovr": 82
+    },
+    "nico o'reilly": {
+      "age": 20,
+      "ovr": 73
+    },
+    "noni madueke": {
+      "age": 23,
+      "ovr": 80
+    },
+    "ollie watkins": {
+      "age": 29,
+      "ovr": 84
+    },
+    "reece james": {
+      "age": 25,
+      "ovr": 81
+    },
+    "trevoh chalobah": {
+      "age": 25,
+      "ovr": 79
+    }
   },
   "France": {
-    "adrien rabiot": 83,
-    "aurelien tchouameni": 84,
-    "bradley barcola": 84,
-    "brice samba": 80,
-    "dayot upamecano": 85,
-    "desire doue": 85,
-    "ibrahima konate": 86,
-    "jean-philippe mateta": 82,
-    "jules kounde": 87,
-    "kylian mbappe": 91,
-    "lucas digne": 80,
-    "lucas hernandez": 81,
-    "maghnes akliouche": 80,
-    "malo gusto": 79,
-    "manu kone": 79,
-    "marcus thuram": 85,
-    "maxence lacroix": 79,
-    "michael olise": 86,
-    "mike maignan": 87,
-    "n'golo kante": 85,
-    "ousmane dembele": 90,
-    "rayan cherki": 81,
-    "robin risser": 72,
-    "theo hernandez": 84,
-    "warren zaire-emery": 80,
-    "william saliba": 87
+    "adrien rabiot": {
+      "age": 30,
+      "ovr": 83
+    },
+    "aurelien tchouameni": {
+      "age": 25,
+      "ovr": 84
+    },
+    "bradley barcola": {
+      "age": 22,
+      "ovr": 84
+    },
+    "brice samba": {
+      "age": 31,
+      "ovr": 80
+    },
+    "dayot upamecano": {
+      "age": 26,
+      "ovr": 85
+    },
+    "desire doue": {
+      "age": 20,
+      "ovr": 85
+    },
+    "ibrahima konate": {
+      "age": 26,
+      "ovr": 86
+    },
+    "jean-philippe mateta": {
+      "age": 28,
+      "ovr": 82
+    },
+    "jules kounde": {
+      "age": 26,
+      "ovr": 87
+    },
+    "kylian mbappe": {
+      "age": 26,
+      "ovr": 91
+    },
+    "lucas digne": {
+      "age": 31,
+      "ovr": 80
+    },
+    "lucas hernandez": {
+      "age": 29,
+      "ovr": 81
+    },
+    "maghnes akliouche": {
+      "age": 23,
+      "ovr": 80
+    },
+    "malo gusto": {
+      "age": 22,
+      "ovr": 79
+    },
+    "manu kone": {
+      "age": 24,
+      "ovr": 79
+    },
+    "marcus thuram": {
+      "age": 27,
+      "ovr": 85
+    },
+    "maxence lacroix": {
+      "age": 25,
+      "ovr": 79
+    },
+    "michael olise": {
+      "age": 23,
+      "ovr": 86
+    },
+    "mike maignan": {
+      "age": 29,
+      "ovr": 87
+    },
+    "n'golo kante": {
+      "age": 34,
+      "ovr": 85
+    },
+    "ousmane dembele": {
+      "age": 28,
+      "ovr": 90
+    },
+    "rayan cherki": {
+      "age": 21,
+      "ovr": 81
+    },
+    "robin risser": {
+      "age": 20,
+      "ovr": 72
+    },
+    "theo hernandez": {
+      "age": 27,
+      "ovr": 84
+    },
+    "warren zaire-emery": {
+      "age": 19,
+      "ovr": 80
+    },
+    "william saliba": {
+      "age": 24,
+      "ovr": 87
+    }
   },
   "Germany": {
-    "aleksandar pavlovic": 79,
-    "alexander nubel": 81,
-    "angelo stiller": 83,
-    "antonio rudiger": 86,
-    "assan ouedraogo": 69,
-    "david raum": 82,
-    "deniz undav": 80,
-    "felix nmecha": 82,
-    "florian wirtz": 89,
-    "jamal musiala": 88,
-    "jamie leweling": 75,
-    "jonathan tah": 87,
-    "joshua kimmich": 89,
-    "kai havertz": 82,
-    "leon goretzka": 82,
-    "leroy sane": 82,
-    "malick thiaw": 78,
-    "manuel neuer": 84,
-    "maximilian beier": 79,
-    "nadiem amiri": 81,
-    "nathaniel brown": 77,
-    "nick woltemade": 79,
-    "nico schlotterbeck": 85,
-    "oliver baumann": 83,
-    "pascal gro": 80,
-    "waldemar anton": 82
+    "aleksandar pavlovic": {
+      "age": 21,
+      "ovr": 79
+    },
+    "alexander nubel": {
+      "age": 28,
+      "ovr": 81
+    },
+    "angelo stiller": {
+      "age": 24,
+      "ovr": 83
+    },
+    "antonio rudiger": {
+      "age": 32,
+      "ovr": 86
+    },
+    "assan ouedraogo": {
+      "age": 19,
+      "ovr": 69
+    },
+    "david raum": {
+      "age": 27,
+      "ovr": 82
+    },
+    "deniz undav": {
+      "age": 28,
+      "ovr": 80
+    },
+    "felix nmecha": {
+      "age": 24,
+      "ovr": 82
+    },
+    "florian wirtz": {
+      "age": 22,
+      "ovr": 89
+    },
+    "jamal musiala": {
+      "age": 22,
+      "ovr": 88
+    },
+    "jamie leweling": {
+      "age": 24,
+      "ovr": 75
+    },
+    "jonathan tah": {
+      "age": 29,
+      "ovr": 87
+    },
+    "joshua kimmich": {
+      "age": 30,
+      "ovr": 89
+    },
+    "kai havertz": {
+      "age": 26,
+      "ovr": 82
+    },
+    "leon goretzka": {
+      "age": 30,
+      "ovr": 82
+    },
+    "leroy sane": {
+      "age": 29,
+      "ovr": 82
+    },
+    "malick thiaw": {
+      "age": 23,
+      "ovr": 78
+    },
+    "manuel neuer": {
+      "age": 39,
+      "ovr": 84
+    },
+    "maximilian beier": {
+      "age": 22,
+      "ovr": 79
+    },
+    "nadiem amiri": {
+      "age": 28,
+      "ovr": 81
+    },
+    "nathaniel brown": {
+      "age": 22,
+      "ovr": 77
+    },
+    "nick woltemade": {
+      "age": 23,
+      "ovr": 79
+    },
+    "nico schlotterbeck": {
+      "age": 25,
+      "ovr": 85
+    },
+    "oliver baumann": {
+      "age": 35,
+      "ovr": 83
+    },
+    "pascal gro": {
+      "age": 34,
+      "ovr": 80
+    },
+    "waldemar anton": {
+      "age": 28,
+      "ovr": 82
+    }
   },
   "Ghana": {
-    "abdul fatawu": 76,
-    "abdul mumin": 77,
-    "abdul rahman baba": 76,
-    "alidu seidu": 74,
-    "antoine semenyo": 80,
-    "augustine boakye": 69,
-    "brandon thomas-asante": 69,
-    "caleb yirenkyi": 67,
-    "christopher bonsu baah": 73,
-    "elisha owusu": 73,
-    "ernest nuamah": 75,
-    "gideon mensah": 74,
-    "inaki williams": 83,
-    "jerome opoku": 72,
-    "jonas adjetey": 70,
-    "jordan ayew": 73,
-    "joseph anang": 67,
-    "kamaldeen sulemana": 71,
-    "kojo peprah oppong": 68,
-    "kwasi sibo": 69,
-    "lawrence ati-zigi": 73,
-    "marvin senaya": 69,
-    "prince kwabena adu": 70,
-    "thomas partey": 83
+    "abdul fatawu": {
+      "age": 21,
+      "ovr": 76
+    },
+    "abdul mumin": {
+      "age": 27,
+      "ovr": 77
+    },
+    "abdul rahman baba": {
+      "age": 30,
+      "ovr": 76
+    },
+    "alidu seidu": {
+      "age": 25,
+      "ovr": 74
+    },
+    "antoine semenyo": {
+      "age": 25,
+      "ovr": 80
+    },
+    "augustine boakye": {
+      "age": 24,
+      "ovr": 69
+    },
+    "brandon thomas-asante": {
+      "age": 26,
+      "ovr": 69
+    },
+    "caleb yirenkyi": {
+      "age": 19,
+      "ovr": 67
+    },
+    "christopher bonsu baah": {
+      "age": 20,
+      "ovr": 73
+    },
+    "elisha owusu": {
+      "age": 27,
+      "ovr": 73
+    },
+    "ernest nuamah": {
+      "age": 21,
+      "ovr": 75
+    },
+    "gideon mensah": {
+      "age": 26,
+      "ovr": 74
+    },
+    "inaki williams": {
+      "age": 31,
+      "ovr": 83
+    },
+    "jerome opoku": {
+      "age": 26,
+      "ovr": 72
+    },
+    "jonas adjetey": {
+      "age": 21,
+      "ovr": 70
+    },
+    "jordan ayew": {
+      "age": 33,
+      "ovr": 73
+    },
+    "joseph anang": {
+      "age": 25,
+      "ovr": 67
+    },
+    "kamaldeen sulemana": {
+      "age": 23,
+      "ovr": 71
+    },
+    "kojo peprah oppong": {
+      "age": 21,
+      "ovr": 68
+    },
+    "kwasi sibo": {
+      "age": 27,
+      "ovr": 69
+    },
+    "lawrence ati-zigi": {
+      "age": 28,
+      "ovr": 73
+    },
+    "marvin senaya": {
+      "age": 24,
+      "ovr": 69
+    },
+    "prince kwabena adu": {
+      "age": 21,
+      "ovr": 70
+    },
+    "thomas partey": {
+      "age": 32,
+      "ovr": 83
+    }
   },
   "Haiti": {
-    "carlens arcus": 71,
-    "danley jean jacques": 70,
-    "derrick etienne jr.": 66,
-    "frantzdy pierrot": 72,
-    "hannes delcroix": 71,
-    "jean-kevin duverne": 71,
-    "jean-ricner bellegarde": 75,
-    "johny placide": 69,
-    "josue casimir": 71,
-    "lenny joseph": 56,
-    "louicius deedson": 65,
-    "martin experience": 62,
-    "ricardo ade": 72,
-    "wilguens paugain": 55,
-    "wilson isidor": 72
+    "carlens arcus": {
+      "age": 29,
+      "ovr": 71
+    },
+    "danley jean jacques": {
+      "age": 25,
+      "ovr": 70
+    },
+    "derrick etienne jr.": {
+      "age": 28,
+      "ovr": 66
+    },
+    "frantzdy pierrot": {
+      "age": 30,
+      "ovr": 72
+    },
+    "hannes delcroix": {
+      "age": 26,
+      "ovr": 71
+    },
+    "jean-kevin duverne": {
+      "age": 27,
+      "ovr": 71
+    },
+    "jean-ricner bellegarde": {
+      "age": 27,
+      "ovr": 75
+    },
+    "johny placide": {
+      "age": 37,
+      "ovr": 69
+    },
+    "josue casimir": {
+      "age": 23,
+      "ovr": 71
+    },
+    "lenny joseph": {
+      "age": 19,
+      "ovr": 56
+    },
+    "louicius deedson": {
+      "age": 24,
+      "ovr": 65
+    },
+    "martin experience": {
+      "age": 26,
+      "ovr": 62
+    },
+    "ricardo ade": {
+      "age": 35,
+      "ovr": 72
+    },
+    "wilguens paugain": {
+      "age": 23,
+      "ovr": 55
+    },
+    "wilson isidor": {
+      "age": 24,
+      "ovr": 72
+    }
   },
   "Iran": {
-    "hossein hosseini": 68,
-    "mehdi taremi": 78
+    "hossein hosseini": {
+      "age": 29,
+      "ovr": 68
+    },
+    "mehdi taremi": {
+      "age": 32,
+      "ovr": 78
+    }
   },
   "Iraq": {
-    "ahmed qasem": 66,
-    "aimar sher": 67,
-    "ali al-hamadi": 66,
-    "ali jasim": 62,
-    "amir al-ammari": 65,
-    "ibrahim bayesh": 68,
-    "kevin yakob": 66,
-    "marko farji": 66,
-    "merchas doski": 68,
-    "zidane iqbal": 68
+    "ahmed qasem": {
+      "age": 21,
+      "ovr": 66
+    },
+    "aimar sher": {
+      "age": 22,
+      "ovr": 67
+    },
+    "ali al-hamadi": {
+      "age": 23,
+      "ovr": 66
+    },
+    "ali jasim": {
+      "age": 21,
+      "ovr": 62
+    },
+    "amir al-ammari": {
+      "age": 27,
+      "ovr": 65
+    },
+    "ibrahim bayesh": {
+      "age": 25,
+      "ovr": 68
+    },
+    "kevin yakob": {
+      "age": 24,
+      "ovr": 66
+    },
+    "marko farji": {
+      "age": 21,
+      "ovr": 66
+    },
+    "merchas doski": {
+      "age": 25,
+      "ovr": 68
+    },
+    "zidane iqbal": {
+      "age": 22,
+      "ovr": 68
+    }
   },
   "Ivory Coast": {
-    "alban lafont": 75,
-    "amad diallo": 79,
-    "ange-yoan bonny": 76,
-    "bazoumana toure": 70,
-    "christ inao oulai": 64,
-    "christopher operi": 74,
-    "emmanuel agbadou": 79,
-    "evan ndicka": 81,
-    "evann guessand": 79,
-    "franck kessie": 80,
-    "ghislain konan": 72,
-    "guela doue": 77,
-    "ibrahim sangare": 77,
-    "mohamed kone": 68,
-    "nicolas pepe": 80,
-    "odilon kossounou": 80,
-    "oumar diakite": 72,
-    "ousmane diomande": 80,
-    "parfait guiagon": 72,
-    "seko fofana": 77,
-    "simon adingra": 76,
-    "wilfried singo": 80,
-    "yahia fofana": 76,
-    "yan diomande": 66
+    "alban lafont": {
+      "age": 26,
+      "ovr": 75
+    },
+    "amad diallo": {
+      "age": 22,
+      "ovr": 79
+    },
+    "ange-yoan bonny": {
+      "age": 21,
+      "ovr": 76
+    },
+    "bazoumana toure": {
+      "age": 19,
+      "ovr": 70
+    },
+    "christ inao oulai": {
+      "age": 19,
+      "ovr": 64
+    },
+    "christopher operi": {
+      "age": 28,
+      "ovr": 74
+    },
+    "emmanuel agbadou": {
+      "age": 28,
+      "ovr": 79
+    },
+    "evan ndicka": {
+      "age": 25,
+      "ovr": 81
+    },
+    "evann guessand": {
+      "age": 24,
+      "ovr": 79
+    },
+    "franck kessie": {
+      "age": 28,
+      "ovr": 80
+    },
+    "ghislain konan": {
+      "age": 29,
+      "ovr": 72
+    },
+    "guela doue": {
+      "age": 22,
+      "ovr": 77
+    },
+    "ibrahim sangare": {
+      "age": 27,
+      "ovr": 77
+    },
+    "mohamed kone": {
+      "age": 23,
+      "ovr": 68
+    },
+    "nicolas pepe": {
+      "age": 30,
+      "ovr": 80
+    },
+    "odilon kossounou": {
+      "age": 24,
+      "ovr": 80
+    },
+    "oumar diakite": {
+      "age": 21,
+      "ovr": 72
+    },
+    "ousmane diomande": {
+      "age": 21,
+      "ovr": 80
+    },
+    "parfait guiagon": {
+      "age": 24,
+      "ovr": 72
+    },
+    "seko fofana": {
+      "age": 30,
+      "ovr": 77
+    },
+    "simon adingra": {
+      "age": 23,
+      "ovr": 76
+    },
+    "wilfried singo": {
+      "age": 24,
+      "ovr": 80
+    },
+    "yahia fofana": {
+      "age": 24,
+      "ovr": 76
+    },
+    "yan diomande": {
+      "age": 18,
+      "ovr": 66
+    }
   },
   "Japan": {
-    "ao tanaka": 76,
-    "ayase ueda": 74,
-    "ayumu seko": 69,
-    "daichi kamada": 77,
-    "daizen maeda": 79,
-    "hiroki ito": 78,
-    "junnosuke suzuki": 66,
-    "junya ito": 77,
-    "kaishu sano": 79,
-    "keisuke goto": 57,
-    "keito nakamura": 76,
-    "kento shiogai": 66,
-    "ko itakura": 77,
-    "koki ogawa": 68,
-    "ritsu doan": 82,
-    "shogo taniguchi": 69,
-    "shuto machino": 75,
-    "takefusa kubo": 82,
-    "tsuyoshi watanabe": 75,
-    "yuito suzuki": 71,
-    "yukinari sugawara": 74,
-    "zion suzuki": 74
+    "ao tanaka": {
+      "age": 26,
+      "ovr": 76
+    },
+    "ayase ueda": {
+      "age": 26,
+      "ovr": 74
+    },
+    "ayumu seko": {
+      "age": 25,
+      "ovr": 69
+    },
+    "daichi kamada": {
+      "age": 28,
+      "ovr": 77
+    },
+    "daizen maeda": {
+      "age": 27,
+      "ovr": 79
+    },
+    "hiroki ito": {
+      "age": 26,
+      "ovr": 78
+    },
+    "junnosuke suzuki": {
+      "age": 21,
+      "ovr": 66
+    },
+    "junya ito": {
+      "age": 32,
+      "ovr": 77
+    },
+    "kaishu sano": {
+      "age": 24,
+      "ovr": 79
+    },
+    "keisuke goto": {
+      "age": 20,
+      "ovr": 57
+    },
+    "keito nakamura": {
+      "age": 24,
+      "ovr": 76
+    },
+    "kento shiogai": {
+      "age": 20,
+      "ovr": 66
+    },
+    "ko itakura": {
+      "age": 28,
+      "ovr": 77
+    },
+    "koki ogawa": {
+      "age": 27,
+      "ovr": 68
+    },
+    "ritsu doan": {
+      "age": 27,
+      "ovr": 82
+    },
+    "shogo taniguchi": {
+      "age": 33,
+      "ovr": 69
+    },
+    "shuto machino": {
+      "age": 25,
+      "ovr": 75
+    },
+    "takefusa kubo": {
+      "age": 24,
+      "ovr": 82
+    },
+    "tsuyoshi watanabe": {
+      "age": 28,
+      "ovr": 75
+    },
+    "yuito suzuki": {
+      "age": 23,
+      "ovr": 71
+    },
+    "yukinari sugawara": {
+      "age": 25,
+      "ovr": 74
+    },
+    "zion suzuki": {
+      "age": 22,
+      "ovr": 74
+    }
   },
   "Jordan": {
-    "mohammad al-dawoud": 75,
-    "yazan al-arab": 75
+    "mohammad al-dawoud": {
+      "age": 28,
+      "ovr": 75
+    },
+    "yazan al-arab": {
+      "age": 29,
+      "ovr": 75
+    }
   },
   "Mexico": {
-    "alexis vega": 78,
-    "brian gutierrez": 68,
-    "cesar huerta": 73,
-    "cesar montes": 75,
-    "edson alvarez": 78,
-    "erik lira": 73,
-    "guillermo ochoa": 62,
-    "jesus gallardo": 75,
-    "johan vasquez": 75,
-    "jorge sanchez": 73,
-    "julian quinones": 80,
-    "luis chavez": 72,
-    "mateo chavez": 72,
-    "obed vargas": 69,
-    "orbelin pineda": 77,
-    "raul jimenez": 77,
-    "raul rangel": 72,
-    "roberto alvarado": 78,
-    "santiago gimenez": 79
+    "alexis vega": {
+      "age": 27,
+      "ovr": 78
+    },
+    "brian gutierrez": {
+      "age": 22,
+      "ovr": 68
+    },
+    "cesar huerta": {
+      "age": 24,
+      "ovr": 73
+    },
+    "cesar montes": {
+      "age": 28,
+      "ovr": 75
+    },
+    "edson alvarez": {
+      "age": 27,
+      "ovr": 78
+    },
+    "erik lira": {
+      "age": 25,
+      "ovr": 73
+    },
+    "guillermo ochoa": {
+      "age": 24,
+      "ovr": 62
+    },
+    "jesus gallardo": {
+      "age": 30,
+      "ovr": 75
+    },
+    "johan vasquez": {
+      "age": 26,
+      "ovr": 75
+    },
+    "jorge sanchez": {
+      "age": 27,
+      "ovr": 73
+    },
+    "julian quinones": {
+      "age": 28,
+      "ovr": 80
+    },
+    "luis chavez": {
+      "age": 21,
+      "ovr": 72
+    },
+    "mateo chavez": {
+      "age": 21,
+      "ovr": 72
+    },
+    "obed vargas": {
+      "age": 19,
+      "ovr": 69
+    },
+    "orbelin pineda": {
+      "age": 29,
+      "ovr": 77
+    },
+    "raul jimenez": {
+      "age": 34,
+      "ovr": 77
+    },
+    "raul rangel": {
+      "age": 25,
+      "ovr": 72
+    },
+    "roberto alvarado": {
+      "age": 26,
+      "ovr": 78
+    },
+    "santiago gimenez": {
+      "age": 24,
+      "ovr": 79
+    }
   },
   "Morocco": {
-    "achraf hakimi": 89,
-    "ahmed reda tagnaouti": 70,
-    "amine sbai": 68,
-    "anass salah-eddine": 71,
-    "ayoub el kaabi": 80,
-    "ayoube amaimouni": 63,
-    "ayyoub bouaddi": 75,
-    "azzedine ounahi": 76,
-    "bilal el khannouss": 76,
-    "brahim diaz": 82,
-    "chadi riad": 72,
-    "chemsdine talbi": 73,
-    "gessime yassine": 65,
-    "ismael saibari": 79,
-    "issa diop": 76,
-    "marwane saadane": 72,
-    "munir mohamedi": 74,
-    "neil el aynaoui": 77,
-    "noussair mazraoui": 80,
-    "redouane halhal": 63,
-    "samir el mourabet": 66,
-    "sofyan amrabat": 78,
-    "soufiane rahimi": 78,
-    "yassine bounou": 82,
-    "zakaria el ouahdi": 76
+    "achraf hakimi": {
+      "age": 26,
+      "ovr": 89
+    },
+    "ahmed reda tagnaouti": {
+      "age": 29,
+      "ovr": 70
+    },
+    "amine sbai": {
+      "age": 24,
+      "ovr": 68
+    },
+    "anass salah-eddine": {
+      "age": 23,
+      "ovr": 71
+    },
+    "ayoub el kaabi": {
+      "age": 32,
+      "ovr": 80
+    },
+    "ayoube amaimouni": {
+      "age": 20,
+      "ovr": 63
+    },
+    "ayyoub bouaddi": {
+      "age": 17,
+      "ovr": 75
+    },
+    "azzedine ounahi": {
+      "age": 25,
+      "ovr": 76
+    },
+    "bilal el khannouss": {
+      "age": 21,
+      "ovr": 76
+    },
+    "brahim diaz": {
+      "age": 25,
+      "ovr": 82
+    },
+    "chadi riad": {
+      "age": 22,
+      "ovr": 72
+    },
+    "chemsdine talbi": {
+      "age": 20,
+      "ovr": 73
+    },
+    "gessime yassine": {
+      "age": 19,
+      "ovr": 65
+    },
+    "ismael saibari": {
+      "age": 23,
+      "ovr": 79
+    },
+    "issa diop": {
+      "age": 25,
+      "ovr": 76
+    },
+    "marwane saadane": {
+      "age": 33,
+      "ovr": 72
+    },
+    "munir mohamedi": {
+      "age": 36,
+      "ovr": 74
+    },
+    "neil el aynaoui": {
+      "age": 23,
+      "ovr": 77
+    },
+    "noussair mazraoui": {
+      "age": 27,
+      "ovr": 80
+    },
+    "redouane halhal": {
+      "age": 22,
+      "ovr": 63
+    },
+    "samir el mourabet": {
+      "age": 19,
+      "ovr": 66
+    },
+    "sofyan amrabat": {
+      "age": 28,
+      "ovr": 78
+    },
+    "soufiane rahimi": {
+      "age": 29,
+      "ovr": 78
+    },
+    "yassine bounou": {
+      "age": 34,
+      "ovr": 82
+    },
+    "zakaria el ouahdi": {
+      "age": 23,
+      "ovr": 76
+    }
   },
   "Netherlands": {
-    "bart verbruggen": 78,
-    "brian brobbey": 77,
-    "cody gakpo": 84,
-    "crysencio summerville": 76,
-    "denzel dumfries": 84,
-    "donyell malen": 79,
-    "frenkie de jong": 87,
-    "guus til": 77,
-    "jan paul van hecke": 80,
-    "jorrel hato": 78,
-    "justin kluivert": 79,
-    "lutsharel geertruida": 78,
-    "mark flekken": 78,
-    "marten de roon": 81,
-    "mats wieffer": 78,
-    "memphis depay": 81,
-    "micky van de ven": 82,
-    "nathan ake": 83,
-    "noa lang": 80,
-    "quinten timber": 80,
-    "robin roefs": 74,
-    "ryan gravenberch": 85,
-    "teun koopmeiners": 81,
-    "tijjani reijnders": 86,
-    "virgil van dijk": 90,
-    "wout weghorst": 78
+    "bart verbruggen": {
+      "age": 22,
+      "ovr": 78
+    },
+    "brian brobbey": {
+      "age": 23,
+      "ovr": 77
+    },
+    "cody gakpo": {
+      "age": 26,
+      "ovr": 84
+    },
+    "crysencio summerville": {
+      "age": 23,
+      "ovr": 76
+    },
+    "denzel dumfries": {
+      "age": 29,
+      "ovr": 84
+    },
+    "donyell malen": {
+      "age": 26,
+      "ovr": 79
+    },
+    "frenkie de jong": {
+      "age": 28,
+      "ovr": 87
+    },
+    "guus til": {
+      "age": 27,
+      "ovr": 77
+    },
+    "jan paul van hecke": {
+      "age": 25,
+      "ovr": 80
+    },
+    "jorrel hato": {
+      "age": 19,
+      "ovr": 78
+    },
+    "justin kluivert": {
+      "age": 26,
+      "ovr": 79
+    },
+    "lutsharel geertruida": {
+      "age": 24,
+      "ovr": 78
+    },
+    "mark flekken": {
+      "age": 32,
+      "ovr": 78
+    },
+    "marten de roon": {
+      "age": 34,
+      "ovr": 81
+    },
+    "mats wieffer": {
+      "age": 25,
+      "ovr": 78
+    },
+    "memphis depay": {
+      "age": 31,
+      "ovr": 81
+    },
+    "micky van de ven": {
+      "age": 24,
+      "ovr": 82
+    },
+    "nathan ake": {
+      "age": 30,
+      "ovr": 83
+    },
+    "noa lang": {
+      "age": 26,
+      "ovr": 80
+    },
+    "quinten timber": {
+      "age": 24,
+      "ovr": 80
+    },
+    "robin roefs": {
+      "age": 22,
+      "ovr": 74
+    },
+    "ryan gravenberch": {
+      "age": 23,
+      "ovr": 85
+    },
+    "teun koopmeiners": {
+      "age": 27,
+      "ovr": 81
+    },
+    "tijjani reijnders": {
+      "age": 26,
+      "ovr": 86
+    },
+    "virgil van dijk": {
+      "age": 33,
+      "ovr": 90
+    },
+    "wout weghorst": {
+      "age": 32,
+      "ovr": 78
+    }
   },
   "New Zealand": {
-    "alex paulsen": 71,
-    "alex rufer": 67,
-    "ben old": 68,
-    "ben waine": 62,
-    "callan elliot": 62,
-    "callum mccowatt": 67,
-    "chris wood": 82,
-    "elijah just": 66,
-    "finn surman": 68,
-    "francis de vries": 69,
-    "jesse randall": 60,
-    "joe bell": 74,
-    "kosta barbarouses": 68,
-    "lachlan bayliss": 62,
-    "liberato cacace": 72,
-    "logan rogerson": 64,
-    "marko stamenic": 71,
-    "max crocombe": 65,
-    "michael boxall": 70,
-    "michael woud": 60,
-    "nando pijnaker": 67,
-    "ryan thomas": 66,
-    "tim payne": 63,
-    "tommy smith": 57,
-    "tyler bindon": 69
+    "alex paulsen": {
+      "age": 22,
+      "ovr": 71
+    },
+    "alex rufer": {
+      "age": 29,
+      "ovr": 67
+    },
+    "ben old": {
+      "age": 22,
+      "ovr": 68
+    },
+    "ben waine": {
+      "age": 24,
+      "ovr": 62
+    },
+    "callan elliot": {
+      "age": 25,
+      "ovr": 62
+    },
+    "callum mccowatt": {
+      "age": 26,
+      "ovr": 67
+    },
+    "chris wood": {
+      "age": 33,
+      "ovr": 82
+    },
+    "elijah just": {
+      "age": 25,
+      "ovr": 66
+    },
+    "finn surman": {
+      "age": 21,
+      "ovr": 68
+    },
+    "francis de vries": {
+      "age": 30,
+      "ovr": 69
+    },
+    "jesse randall": {
+      "age": 22,
+      "ovr": 60
+    },
+    "joe bell": {
+      "age": 26,
+      "ovr": 74
+    },
+    "kosta barbarouses": {
+      "age": 35,
+      "ovr": 68
+    },
+    "lachlan bayliss": {
+      "age": 22,
+      "ovr": 62
+    },
+    "liberato cacace": {
+      "age": 24,
+      "ovr": 72
+    },
+    "logan rogerson": {
+      "age": 27,
+      "ovr": 64
+    },
+    "marko stamenic": {
+      "age": 23,
+      "ovr": 71
+    },
+    "max crocombe": {
+      "age": 31,
+      "ovr": 65
+    },
+    "michael boxall": {
+      "age": 36,
+      "ovr": 70
+    },
+    "michael woud": {
+      "age": 26,
+      "ovr": 60
+    },
+    "nando pijnaker": {
+      "age": 26,
+      "ovr": 67
+    },
+    "ryan thomas": {
+      "age": 30,
+      "ovr": 66
+    },
+    "tim payne": {
+      "age": 31,
+      "ovr": 63
+    },
+    "tommy smith": {
+      "age": 17,
+      "ovr": 57
+    },
+    "tyler bindon": {
+      "age": 20,
+      "ovr": 69
+    }
   },
   "Norway": {
-    "alexander srloth": 84,
-    "andreas schjelderup": 75,
-    "antonio nusa": 76,
-    "david mller wolfe": 73,
-    "egil selvik": 70,
-    "erling haaland": 90,
-    "fredrik andre bjrkan": 74,
-    "fredrik aursnes": 80,
-    "henrik falchener": 65,
-    "jens petter hauge": 74,
-    "jrgen strand larsen": 78,
-    "julian ryerson": 79,
-    "kristian thorstvedt": 75,
-    "kristoffer ajer": 75,
-    "leo stigard": 73,
-    "marcus holmgren pedersen": 72,
-    "martin degaard": 87,
-    "morten thorsby": 72,
-    "oscar bobb": 72,
-    "patrick berg": 77,
-    "rjan nyland": 76,
-    "sander berge": 79,
-    "sander tangvik": 69,
-    "sondre langas": 71,
-    "thelo aasgaard": 68,
-    "torbjrn heggem": 73
+    "alexander srloth": {
+      "age": 29,
+      "ovr": 84
+    },
+    "andreas schjelderup": {
+      "age": 21,
+      "ovr": 75
+    },
+    "antonio nusa": {
+      "age": 20,
+      "ovr": 76
+    },
+    "david mller wolfe": {
+      "age": 23,
+      "ovr": 73
+    },
+    "egil selvik": {
+      "age": 27,
+      "ovr": 70
+    },
+    "erling haaland": {
+      "age": 24,
+      "ovr": 90
+    },
+    "fredrik andre bjrkan": {
+      "age": 26,
+      "ovr": 74
+    },
+    "fredrik aursnes": {
+      "age": 29,
+      "ovr": 80
+    },
+    "henrik falchener": {
+      "age": 22,
+      "ovr": 65
+    },
+    "jens petter hauge": {
+      "age": 25,
+      "ovr": 74
+    },
+    "jrgen strand larsen": {
+      "age": 25,
+      "ovr": 78
+    },
+    "julian ryerson": {
+      "age": 27,
+      "ovr": 79
+    },
+    "kristian thorstvedt": {
+      "age": 26,
+      "ovr": 75
+    },
+    "kristoffer ajer": {
+      "age": 27,
+      "ovr": 75
+    },
+    "leo stigard": {
+      "age": 25,
+      "ovr": 73
+    },
+    "marcus holmgren pedersen": {
+      "age": 24,
+      "ovr": 72
+    },
+    "martin degaard": {
+      "age": 26,
+      "ovr": 87
+    },
+    "morten thorsby": {
+      "age": 29,
+      "ovr": 72
+    },
+    "oscar bobb": {
+      "age": 21,
+      "ovr": 72
+    },
+    "patrick berg": {
+      "age": 27,
+      "ovr": 77
+    },
+    "rjan nyland": {
+      "age": 34,
+      "ovr": 76
+    },
+    "sander berge": {
+      "age": 27,
+      "ovr": 79
+    },
+    "sander tangvik": {
+      "age": 22,
+      "ovr": 69
+    },
+    "sondre langas": {
+      "age": 24,
+      "ovr": 71
+    },
+    "thelo aasgaard": {
+      "age": 23,
+      "ovr": 68
+    },
+    "torbjrn heggem": {
+      "age": 26,
+      "ovr": 73
+    }
   },
   "Panama": {
-    "andres andrade": 69,
-    "anibal godoy": 70,
-    "azarias londono": 65,
-    "carlos harvey": 65,
-    "jose cordoba": 68,
-    "jose fajardo": 68,
-    "luis mejia": 72,
-    "michael amir murillo": 76,
-    "orlando mosquera": 70
+    "andres andrade": {
+      "age": 26,
+      "ovr": 69
+    },
+    "anibal godoy": {
+      "age": 35,
+      "ovr": 70
+    },
+    "azarias londono": {
+      "age": 24,
+      "ovr": 65
+    },
+    "carlos harvey": {
+      "age": 25,
+      "ovr": 65
+    },
+    "jose cordoba": {
+      "age": 24,
+      "ovr": 68
+    },
+    "jose fajardo": {
+      "age": 31,
+      "ovr": 68
+    },
+    "luis mejia": {
+      "age": 34,
+      "ovr": 72
+    },
+    "michael amir murillo": {
+      "age": 29,
+      "ovr": 76
+    },
+    "orlando mosquera": {
+      "age": 30,
+      "ovr": 70
+    }
   },
   "Paraguay": {
-    "alex arce": 75,
-    "alexandro maidana": 58,
-    "andres cubas": 74,
-    "antonio sanabria": 76,
-    "braian ojeda": 70,
-    "diego gomez": 73,
-    "gabriel avalos": 75,
-    "gatito fernandez": 70,
-    "gustavo caballero": 68,
-    "gustavo gomez": 73,
-    "gustavo velazquez": 73,
-    "jose canale": 69,
-    "juan jose caceres": 67,
-    "julio enciso": 73,
-    "kaku": 79,
-    "matias galarza": 73,
-    "miguel almiron": 76,
-    "omar alderete": 78,
-    "orlando gill": 65
+    "alex arce": {
+      "age": 30,
+      "ovr": 75
+    },
+    "alexandro maidana": {
+      "age": 19,
+      "ovr": 58
+    },
+    "andres cubas": {
+      "age": 29,
+      "ovr": 74
+    },
+    "antonio sanabria": {
+      "age": 29,
+      "ovr": 76
+    },
+    "braian ojeda": {
+      "age": 25,
+      "ovr": 70
+    },
+    "diego gomez": {
+      "age": 22,
+      "ovr": 73
+    },
+    "gabriel avalos": {
+      "age": 34,
+      "ovr": 75
+    },
+    "gatito fernandez": {
+      "age": 37,
+      "ovr": 70
+    },
+    "gustavo caballero": {
+      "age": 34,
+      "ovr": 68
+    },
+    "gustavo gomez": {
+      "age": 22,
+      "ovr": 73
+    },
+    "gustavo velazquez": {
+      "age": 34,
+      "ovr": 73
+    },
+    "jose canale": {
+      "age": 28,
+      "ovr": 69
+    },
+    "juan jose caceres": {
+      "age": 33,
+      "ovr": 67
+    },
+    "julio enciso": {
+      "age": 21,
+      "ovr": 73
+    },
+    "kaku": {
+      "age": 30,
+      "ovr": 79
+    },
+    "matias galarza": {
+      "age": 23,
+      "ovr": 73
+    },
+    "miguel almiron": {
+      "age": 31,
+      "ovr": 76
+    },
+    "omar alderete": {
+      "age": 28,
+      "ovr": 78
+    },
+    "orlando gill": {
+      "age": 25,
+      "ovr": 65
+    }
   },
   "Portugal": {
-    "bernardo silva": 84,
-    "bruno fernandes": 87,
-    "cristiano ronaldo": 85,
-    "diogo costa": 84,
-    "diogo dalot": 79,
-    "francisco conceicao": 79,
-    "francisco trincao": 82,
-    "goncalo guedes": 75,
-    "goncalo inacio": 81,
-    "goncalo ramos": 80,
-    "joao cancelo": 84,
-    "joao felix": 79,
-    "joao neves": 85,
-    "jose sa": 77,
-    "matheus nunes": 79,
-    "nelson semedo": 77,
-    "nuno mendes": 86,
-    "pedro neto": 80,
-    "rafael leao": 84,
-    "renato veiga": 76,
-    "ruben dias": 86,
-    "ruben neves": 84,
-    "rui silva": 81,
-    "samu costa": 78,
-    "tomas araujo": 78,
-    "vitinha": 89
+    "bernardo silva": {
+      "age": 30,
+      "ovr": 84
+    },
+    "bruno fernandes": {
+      "age": 30,
+      "ovr": 87
+    },
+    "cristiano ronaldo": {
+      "age": 40,
+      "ovr": 85
+    },
+    "diogo costa": {
+      "age": 25,
+      "ovr": 84
+    },
+    "diogo dalot": {
+      "age": 26,
+      "ovr": 79
+    },
+    "francisco conceicao": {
+      "age": 22,
+      "ovr": 79
+    },
+    "francisco trincao": {
+      "age": 25,
+      "ovr": 82
+    },
+    "goncalo guedes": {
+      "age": 28,
+      "ovr": 75
+    },
+    "goncalo inacio": {
+      "age": 23,
+      "ovr": 81
+    },
+    "goncalo ramos": {
+      "age": 24,
+      "ovr": 80
+    },
+    "joao cancelo": {
+      "age": 31,
+      "ovr": 84
+    },
+    "joao felix": {
+      "age": 25,
+      "ovr": 79
+    },
+    "joao neves": {
+      "age": 20,
+      "ovr": 85
+    },
+    "jose sa": {
+      "age": 32,
+      "ovr": 77
+    },
+    "matheus nunes": {
+      "age": 26,
+      "ovr": 79
+    },
+    "nelson semedo": {
+      "age": 31,
+      "ovr": 77
+    },
+    "nuno mendes": {
+      "age": 23,
+      "ovr": 86
+    },
+    "pedro neto": {
+      "age": 25,
+      "ovr": 80
+    },
+    "rafael leao": {
+      "age": 26,
+      "ovr": 84
+    },
+    "renato veiga": {
+      "age": 21,
+      "ovr": 76
+    },
+    "ruben dias": {
+      "age": 28,
+      "ovr": 86
+    },
+    "ruben neves": {
+      "age": 28,
+      "ovr": 84
+    },
+    "rui silva": {
+      "age": 31,
+      "ovr": 81
+    },
+    "samu costa": {
+      "age": 24,
+      "ovr": 78
+    },
+    "tomas araujo": {
+      "age": 23,
+      "ovr": 78
+    },
+    "vitinha": {
+      "age": 25,
+      "ovr": 89
+    }
   },
   "Qatar": {
-    "abdulaziz hatem": 70,
-    "ahmed al-ganehi": 67,
-    "akram afif": 78,
-    "almoez ali": 74,
-    "assim madibo": 65,
-    "boualem khoukhi": 71,
-    "edmilson junior": 76,
-    "hassan al-haydos": 71,
-    "homam ahmed": 68,
-    "jassem gaber": 63,
-    "karim boudiaf": 71,
-    "lucas mendes": 70,
-    "meshaal barsham": 70,
-    "mohammed muntari": 66,
-    "pedro miguel": 68,
-    "salah zakaria": 64,
-    "yusuf abdurisag": 65
+    "abdulaziz hatem": {
+      "age": 34,
+      "ovr": 70
+    },
+    "ahmed al-ganehi": {
+      "age": 24,
+      "ovr": 67
+    },
+    "akram afif": {
+      "age": 28,
+      "ovr": 78
+    },
+    "almoez ali": {
+      "age": 28,
+      "ovr": 74
+    },
+    "assim madibo": {
+      "age": 28,
+      "ovr": 65
+    },
+    "boualem khoukhi": {
+      "age": 34,
+      "ovr": 71
+    },
+    "edmilson junior": {
+      "age": 30,
+      "ovr": 76
+    },
+    "hassan al-haydos": {
+      "age": 34,
+      "ovr": 71
+    },
+    "homam ahmed": {
+      "age": 25,
+      "ovr": 68
+    },
+    "jassem gaber": {
+      "age": 23,
+      "ovr": 63
+    },
+    "karim boudiaf": {
+      "age": 34,
+      "ovr": 71
+    },
+    "lucas mendes": {
+      "age": 34,
+      "ovr": 70
+    },
+    "meshaal barsham": {
+      "age": 27,
+      "ovr": 70
+    },
+    "mohammed muntari": {
+      "age": 31,
+      "ovr": 66
+    },
+    "pedro miguel": {
+      "age": 34,
+      "ovr": 68
+    },
+    "salah zakaria": {
+      "age": 26,
+      "ovr": 64
+    },
+    "yusuf abdurisag": {
+      "age": 25,
+      "ovr": 65
+    }
   },
   "Saudi Arabia": {
-    "abdulelah al-amri": 70,
-    "abdullah al-hamdan": 64,
-    "abdullah al-khaibari": 68,
-    "ahmed al-kassar": 63,
-    "ali lajami": 70,
-    "ali majrashi": 70,
-    "ayman yahya": 68,
-    "firas al-buraikan": 75,
-    "hassan al-tambakti": 72,
-    "hassan kadesh": 71,
-    "jehad thakri": 66,
-    "khalid al-ghannam": 60,
-    "mohamed kanno": 72,
-    "mohammed abu al-shamat": 67,
-    "mohammed al-owais": 70,
-    "moteb al-harbi": 67,
-    "musab al-juwayr": 75,
-    "nasser al-dawsari": 68,
-    "nawaf al-aqidi": 72,
-    "nawaf boushal": 67,
-    "saleh al-shehri": 69,
-    "salem al-dawsari": 82,
-    "saud abdulhamid": 75,
-    "sultan mandash": 67,
-    "ziyad al-johani": 67
+    "abdulelah al-amri": {
+      "age": 28,
+      "ovr": 70
+    },
+    "abdullah al-hamdan": {
+      "age": 25,
+      "ovr": 64
+    },
+    "abdullah al-khaibari": {
+      "age": 28,
+      "ovr": 68
+    },
+    "ahmed al-kassar": {
+      "age": 34,
+      "ovr": 63
+    },
+    "ali lajami": {
+      "age": 29,
+      "ovr": 70
+    },
+    "ali majrashi": {
+      "age": 25,
+      "ovr": 70
+    },
+    "ayman yahya": {
+      "age": 24,
+      "ovr": 68
+    },
+    "firas al-buraikan": {
+      "age": 25,
+      "ovr": 75
+    },
+    "hassan al-tambakti": {
+      "age": 26,
+      "ovr": 72
+    },
+    "hassan kadesh": {
+      "age": 32,
+      "ovr": 71
+    },
+    "jehad thakri": {
+      "age": 23,
+      "ovr": 66
+    },
+    "khalid al-ghannam": {
+      "age": 24,
+      "ovr": 60
+    },
+    "mohamed kanno": {
+      "age": 30,
+      "ovr": 72
+    },
+    "mohammed abu al-shamat": {
+      "age": 22,
+      "ovr": 67
+    },
+    "mohammed al-owais": {
+      "age": 32,
+      "ovr": 70
+    },
+    "moteb al-harbi": {
+      "age": 25,
+      "ovr": 67
+    },
+    "musab al-juwayr": {
+      "age": 22,
+      "ovr": 75
+    },
+    "nasser al-dawsari": {
+      "age": 26,
+      "ovr": 68
+    },
+    "nawaf al-aqidi": {
+      "age": 25,
+      "ovr": 72
+    },
+    "nawaf boushal": {
+      "age": 25,
+      "ovr": 67
+    },
+    "saleh al-shehri": {
+      "age": 31,
+      "ovr": 69
+    },
+    "salem al-dawsari": {
+      "age": 33,
+      "ovr": 82
+    },
+    "saud abdulhamid": {
+      "age": 25,
+      "ovr": 75
+    },
+    "sultan mandash": {
+      "age": 30,
+      "ovr": 67
+    },
+    "ziyad al-johani": {
+      "age": 23,
+      "ovr": 67
+    }
   },
   "Scotland": {
-    "aaron hickey": 74,
-    "andy robertson": 82,
-    "angus gunn": 72,
-    "anthony ralston": 71,
-    "ben gannon-doak": 71,
-    "che adams": 77,
-    "craig gordon": 67,
-    "dominic hyam": 71,
-    "findlay curtis": 63,
-    "george hirst": 72,
-    "grant hanley": 70,
-    "jack hendry": 74,
-    "john mcginn": 81,
-    "john souttar": 73,
-    "kenny mclean": 72,
-    "kieran tierney": 77,
-    "lawrence shankland": 73,
-    "lewis ferguson": 78,
-    "liam kelly": 67,
-    "lyndon dykes": 68,
-    "nathan patterson": 71,
-    "ross stewart": 71,
-    "ryan christie": 79,
-    "scott mckenna": 75,
-    "scott mctominay": 85
+    "aaron hickey": {
+      "age": 23,
+      "ovr": 74
+    },
+    "andy robertson": {
+      "age": 31,
+      "ovr": 82
+    },
+    "angus gunn": {
+      "age": 29,
+      "ovr": 72
+    },
+    "anthony ralston": {
+      "age": 26,
+      "ovr": 71
+    },
+    "ben gannon-doak": {
+      "age": 19,
+      "ovr": 71
+    },
+    "che adams": {
+      "age": 28,
+      "ovr": 77
+    },
+    "craig gordon": {
+      "age": 42,
+      "ovr": 67
+    },
+    "dominic hyam": {
+      "age": 29,
+      "ovr": 71
+    },
+    "findlay curtis": {
+      "age": 18,
+      "ovr": 63
+    },
+    "george hirst": {
+      "age": 26,
+      "ovr": 72
+    },
+    "grant hanley": {
+      "age": 33,
+      "ovr": 70
+    },
+    "jack hendry": {
+      "age": 30,
+      "ovr": 74
+    },
+    "john mcginn": {
+      "age": 30,
+      "ovr": 81
+    },
+    "john souttar": {
+      "age": 28,
+      "ovr": 73
+    },
+    "kenny mclean": {
+      "age": 33,
+      "ovr": 72
+    },
+    "kieran tierney": {
+      "age": 28,
+      "ovr": 77
+    },
+    "lawrence shankland": {
+      "age": 29,
+      "ovr": 73
+    },
+    "lewis ferguson": {
+      "age": 25,
+      "ovr": 78
+    },
+    "liam kelly": {
+      "age": 29,
+      "ovr": 67
+    },
+    "lyndon dykes": {
+      "age": 29,
+      "ovr": 68
+    },
+    "nathan patterson": {
+      "age": 23,
+      "ovr": 71
+    },
+    "ross stewart": {
+      "age": 28,
+      "ovr": 71
+    },
+    "ryan christie": {
+      "age": 30,
+      "ovr": 79
+    },
+    "scott mckenna": {
+      "age": 28,
+      "ovr": 75
+    },
+    "scott mctominay": {
+      "age": 28,
+      "ovr": 85
+    }
   },
   "Senegal": {
-    "abdoulaye seck": 60,
-    "antoine mendy": 70,
-    "assane diao": 76,
-    "bamba dieng": 71,
-    "bara sapoko ndiaye": 74,
-    "cherif ndiaye": 70,
-    "edouard mendy": 80,
-    "el hadji malick diouf": 75,
-    "habib diarra": 77,
-    "ibrahim mbaye": 68,
-    "idrissa gueye": 70,
-    "iliman ndiaye": 79,
-    "ismail jakobs": 75,
-    "ismaila sarr": 79,
-    "kalidou koulibaly": 82,
-    "krepin diatta": 74,
-    "lamine camara": 77,
-    "mamadou sarr": 65,
-    "mory diaw": 70,
-    "moussa niakhate": 77,
-    "nicolas jackson": 80,
-    "pape gueye": 78,
-    "pape matar sarr": 79,
-    "pathe ciss": 77,
-    "sadio mane": 83,
-    "yehvann diouf": 78
+    "abdoulaye seck": {
+      "age": 21,
+      "ovr": 60
+    },
+    "antoine mendy": {
+      "age": 21,
+      "ovr": 70
+    },
+    "assane diao": {
+      "age": 19,
+      "ovr": 76
+    },
+    "bamba dieng": {
+      "age": 25,
+      "ovr": 71
+    },
+    "bara sapoko ndiaye": {
+      "age": 34,
+      "ovr": 74
+    },
+    "cherif ndiaye": {
+      "age": 29,
+      "ovr": 70
+    },
+    "edouard mendy": {
+      "age": 33,
+      "ovr": 80
+    },
+    "el hadji malick diouf": {
+      "age": 20,
+      "ovr": 75
+    },
+    "habib diarra": {
+      "age": 21,
+      "ovr": 77
+    },
+    "ibrahim mbaye": {
+      "age": 27,
+      "ovr": 68
+    },
+    "idrissa gueye": {
+      "age": 18,
+      "ovr": 70
+    },
+    "iliman ndiaye": {
+      "age": 25,
+      "ovr": 79
+    },
+    "ismail jakobs": {
+      "age": 25,
+      "ovr": 75
+    },
+    "ismaila sarr": {
+      "age": 27,
+      "ovr": 79
+    },
+    "kalidou koulibaly": {
+      "age": 34,
+      "ovr": 82
+    },
+    "krepin diatta": {
+      "age": 26,
+      "ovr": 74
+    },
+    "lamine camara": {
+      "age": 21,
+      "ovr": 77
+    },
+    "mamadou sarr": {
+      "age": 28,
+      "ovr": 65
+    },
+    "mory diaw": {
+      "age": 32,
+      "ovr": 70
+    },
+    "moussa niakhate": {
+      "age": 29,
+      "ovr": 77
+    },
+    "nicolas jackson": {
+      "age": 24,
+      "ovr": 80
+    },
+    "pape gueye": {
+      "age": 26,
+      "ovr": 78
+    },
+    "pape matar sarr": {
+      "age": 22,
+      "ovr": 79
+    },
+    "pathe ciss": {
+      "age": 31,
+      "ovr": 77
+    },
+    "sadio mane": {
+      "age": 33,
+      "ovr": 83
+    },
+    "yehvann diouf": {
+      "age": 25,
+      "ovr": 78
+    }
   },
   "South Africa": {
-    "ime okon": 67,
-    "lyle foster": 72,
-    "olwethu makhanya": 57,
-    "samukele kabini": 63,
-    "sphephelo sithole": 65
+    "ime okon": {
+      "age": 21,
+      "ovr": 67
+    },
+    "lyle foster": {
+      "age": 24,
+      "ovr": 72
+    },
+    "olwethu makhanya": {
+      "age": 21,
+      "ovr": 57
+    },
+    "samukele kabini": {
+      "age": 21,
+      "ovr": 63
+    },
+    "sphephelo sithole": {
+      "age": 26,
+      "ovr": 65
+    }
   },
   "South Korea": {
-    "bae jun-ho": 71,
-    "cho gue-sung": 70,
-    "eom ji-sung": 71,
-    "hwang hee-chan": 75,
-    "hwang in-beom": 77,
-    "jens castrop": 70,
-    "jo hyeon-woo": 75,
-    "kim jin-gyu": 60,
-    "kim min-jae": 82,
-    "kim moon-hwan": 69,
-    "kim seung-gyu": 60,
-    "kim tae-hyeon": 65,
-    "lee dong-gyeong": 75,
-    "lee gi-hyuk": 65,
-    "lee han-beom": 69,
-    "lee jae-sung": 77,
-    "lee kang-in": 79,
-    "lee tae-seok": 69,
-    "oh hyeon-gyu": 71,
-    "paik seung-ho": 72,
-    "park jin-seob": 71,
-    "seol young-woo": 67,
-    "son heung-min": 69,
-    "song bum-keun": 74,
-    "yang hyun-jun": 70
+    "bae jun-ho": {
+      "age": 21,
+      "ovr": 71
+    },
+    "cho gue-sung": {
+      "age": 27,
+      "ovr": 70
+    },
+    "eom ji-sung": {
+      "age": 23,
+      "ovr": 71
+    },
+    "hwang hee-chan": {
+      "age": 29,
+      "ovr": 75
+    },
+    "hwang in-beom": {
+      "age": 28,
+      "ovr": 77
+    },
+    "jens castrop": {
+      "age": 21,
+      "ovr": 70
+    },
+    "jo hyeon-woo": {
+      "age": 33,
+      "ovr": 75
+    },
+    "kim jin-gyu": {
+      "age": 27,
+      "ovr": 60
+    },
+    "kim min-jae": {
+      "age": 28,
+      "ovr": 82
+    },
+    "kim moon-hwan": {
+      "age": 29,
+      "ovr": 69
+    },
+    "kim seung-gyu": {
+      "age": 27,
+      "ovr": 60
+    },
+    "kim tae-hyeon": {
+      "age": 26,
+      "ovr": 65
+    },
+    "lee dong-gyeong": {
+      "age": 27,
+      "ovr": 75
+    },
+    "lee gi-hyuk": {
+      "age": 28,
+      "ovr": 65
+    },
+    "lee han-beom": {
+      "age": 23,
+      "ovr": 69
+    },
+    "lee jae-sung": {
+      "age": 32,
+      "ovr": 77
+    },
+    "lee kang-in": {
+      "age": 24,
+      "ovr": 79
+    },
+    "lee tae-seok": {
+      "age": 22,
+      "ovr": 69
+    },
+    "oh hyeon-gyu": {
+      "age": 24,
+      "ovr": 71
+    },
+    "paik seung-ho": {
+      "age": 28,
+      "ovr": 72
+    },
+    "park jin-seob": {
+      "age": 29,
+      "ovr": 71
+    },
+    "seol young-woo": {
+      "age": 27,
+      "ovr": 67
+    },
+    "son heung-min": {
+      "age": 33,
+      "ovr": 69
+    },
+    "song bum-keun": {
+      "age": 27,
+      "ovr": 74
+    },
+    "yang hyun-jun": {
+      "age": 23,
+      "ovr": 70
+    }
   },
   "Spain": {
-    "alex baena": 84,
-    "alex grimaldo": 84,
-    "aymeric laporte": 82,
-    "borja iglesias": 80,
-    "dani olmo": 85,
-    "david raya": 87,
-    "eric garcia": 79,
-    "fabian ruiz": 85,
-    "ferran torres": 83,
-    "gavi": 83,
-    "joan garcia": 83,
-    "lamine yamal": 89,
-    "marc cucurella": 84,
-    "marc pubill": 73,
-    "marcos llorente": 84,
-    "martin zubimendi": 83,
-    "mikel merino": 83,
-    "mikel oyarzabal": 82,
-    "nico williams": 86,
-    "pau cubarsi": 82,
-    "pedri": 89,
-    "pedro porro": 82,
-    "rodri": 90,
-    "unai simon": 85,
-    "victor munoz": 65,
-    "yeremy pino": 80
+    "alex baena": {
+      "age": 23,
+      "ovr": 84
+    },
+    "alex grimaldo": {
+      "age": 29,
+      "ovr": 84
+    },
+    "aymeric laporte": {
+      "age": 31,
+      "ovr": 82
+    },
+    "borja iglesias": {
+      "age": 32,
+      "ovr": 80
+    },
+    "dani olmo": {
+      "age": 27,
+      "ovr": 85
+    },
+    "david raya": {
+      "age": 29,
+      "ovr": 87
+    },
+    "eric garcia": {
+      "age": 24,
+      "ovr": 79
+    },
+    "fabian ruiz": {
+      "age": 29,
+      "ovr": 85
+    },
+    "ferran torres": {
+      "age": 25,
+      "ovr": 83
+    },
+    "gavi": {
+      "age": 20,
+      "ovr": 83
+    },
+    "joan garcia": {
+      "age": 24,
+      "ovr": 83
+    },
+    "lamine yamal": {
+      "age": 17,
+      "ovr": 89
+    },
+    "marc cucurella": {
+      "age": 26,
+      "ovr": 84
+    },
+    "marc pubill": {
+      "age": 22,
+      "ovr": 73
+    },
+    "marcos llorente": {
+      "age": 30,
+      "ovr": 84
+    },
+    "martin zubimendi": {
+      "age": 26,
+      "ovr": 83
+    },
+    "mikel merino": {
+      "age": 29,
+      "ovr": 83
+    },
+    "mikel oyarzabal": {
+      "age": 28,
+      "ovr": 82
+    },
+    "nico williams": {
+      "age": 22,
+      "ovr": 86
+    },
+    "pau cubarsi": {
+      "age": 18,
+      "ovr": 82
+    },
+    "pedri": {
+      "age": 22,
+      "ovr": 89
+    },
+    "pedro porro": {
+      "age": 25,
+      "ovr": 82
+    },
+    "rodri": {
+      "age": 29,
+      "ovr": 90
+    },
+    "unai simon": {
+      "age": 28,
+      "ovr": 85
+    },
+    "victor munoz": {
+      "age": 21,
+      "ovr": 65
+    },
+    "yeremy pino": {
+      "age": 22,
+      "ovr": 80
+    }
   },
   "Sweden": {
-    "alexander bernhardsson": 72,
-    "alexander isak": 88,
-    "anthony elanga": 81,
-    "benjamin nygren": 73,
-    "besfort zeneli": 72,
-    "carl starfelt": 78,
-    "daniel svensson": 77,
-    "elliot stroud": 71,
-    "eric smith": 75,
-    "gabriel gudmundsson": 77,
-    "gustaf lagerbielke": 71,
-    "gustaf nilsson": 75,
-    "herman johansson": 70,
-    "hjalmar ekdal": 72,
-    "isak hien": 78,
-    "jacob widell zetterstrom": 71,
-    "jesper karlstrom": 75,
-    "ken sema": 70,
-    "kristoffer nordfeldt": 72,
-    "lucas bergvall": 77,
-    "mattias svanberg": 76,
-    "taha ali": 68,
-    "victor lindelof": 75,
-    "viktor gyokeres": 87,
-    "viktor johansson": 74,
-    "yasin ayari": 75
+    "alexander bernhardsson": {
+      "age": 26,
+      "ovr": 72
+    },
+    "alexander isak": {
+      "age": 25,
+      "ovr": 88
+    },
+    "anthony elanga": {
+      "age": 23,
+      "ovr": 81
+    },
+    "benjamin nygren": {
+      "age": 23,
+      "ovr": 73
+    },
+    "besfort zeneli": {
+      "age": 22,
+      "ovr": 72
+    },
+    "carl starfelt": {
+      "age": 30,
+      "ovr": 78
+    },
+    "daniel svensson": {
+      "age": 23,
+      "ovr": 77
+    },
+    "elliot stroud": {
+      "age": 23,
+      "ovr": 71
+    },
+    "eric smith": {
+      "age": 28,
+      "ovr": 75
+    },
+    "gabriel gudmundsson": {
+      "age": 26,
+      "ovr": 77
+    },
+    "gustaf lagerbielke": {
+      "age": 25,
+      "ovr": 71
+    },
+    "gustaf nilsson": {
+      "age": 28,
+      "ovr": 75
+    },
+    "herman johansson": {
+      "age": 27,
+      "ovr": 70
+    },
+    "hjalmar ekdal": {
+      "age": 26,
+      "ovr": 72
+    },
+    "isak hien": {
+      "age": 26,
+      "ovr": 78
+    },
+    "jacob widell zetterstrom": {
+      "age": 26,
+      "ovr": 71
+    },
+    "jesper karlstrom": {
+      "age": 30,
+      "ovr": 75
+    },
+    "ken sema": {
+      "age": 31,
+      "ovr": 70
+    },
+    "kristoffer nordfeldt": {
+      "age": 36,
+      "ovr": 72
+    },
+    "lucas bergvall": {
+      "age": 19,
+      "ovr": 77
+    },
+    "mattias svanberg": {
+      "age": 26,
+      "ovr": 76
+    },
+    "taha ali": {
+      "age": 27,
+      "ovr": 68
+    },
+    "victor lindelof": {
+      "age": 30,
+      "ovr": 75
+    },
+    "viktor gyokeres": {
+      "age": 27,
+      "ovr": 87
+    },
+    "viktor johansson": {
+      "age": 26,
+      "ovr": 74
+    },
+    "yasin ayari": {
+      "age": 21,
+      "ovr": 75
+    }
   },
   "Switzerland": {
-    "ardon jashari": 77,
-    "aurele amenda": 71,
-    "breel embolo": 77,
-    "cedric itten": 70,
-    "christian fassnacht": 72,
-    "dan ndoye": 79,
-    "denis zakaria": 82,
-    "djibril sow": 76,
-    "eray comert": 72,
-    "fabian rieder": 74,
-    "granit xhaka": 85,
-    "gregor kobel": 86,
-    "johan manzambi": 67,
-    "luca jaquez": 69,
-    "manuel akanji": 82,
-    "marvin keller": 72,
-    "michel aebischer": 74,
-    "miro muheim": 75,
-    "nico elvedi": 77,
-    "noah okafor": 76,
-    "remo freuler": 81,
-    "ricardo rodriguez": 74,
-    "ruben vargas": 75,
-    "silvan widmer": 72,
-    "yvon mvogo": 76,
-    "zeki amdouni": 75
+    "ardon jashari": {
+      "age": 22,
+      "ovr": 77
+    },
+    "aurele amenda": {
+      "age": 21,
+      "ovr": 71
+    },
+    "breel embolo": {
+      "age": 28,
+      "ovr": 77
+    },
+    "cedric itten": {
+      "age": 28,
+      "ovr": 70
+    },
+    "christian fassnacht": {
+      "age": 31,
+      "ovr": 72
+    },
+    "dan ndoye": {
+      "age": 24,
+      "ovr": 79
+    },
+    "denis zakaria": {
+      "age": 28,
+      "ovr": 82
+    },
+    "djibril sow": {
+      "age": 28,
+      "ovr": 76
+    },
+    "eray comert": {
+      "age": 27,
+      "ovr": 72
+    },
+    "fabian rieder": {
+      "age": 23,
+      "ovr": 74
+    },
+    "granit xhaka": {
+      "age": 32,
+      "ovr": 85
+    },
+    "gregor kobel": {
+      "age": 27,
+      "ovr": 86
+    },
+    "johan manzambi": {
+      "age": 19,
+      "ovr": 67
+    },
+    "luca jaquez": {
+      "age": 22,
+      "ovr": 69
+    },
+    "manuel akanji": {
+      "age": 29,
+      "ovr": 82
+    },
+    "marvin keller": {
+      "age": 22,
+      "ovr": 72
+    },
+    "michel aebischer": {
+      "age": 28,
+      "ovr": 74
+    },
+    "miro muheim": {
+      "age": 27,
+      "ovr": 75
+    },
+    "nico elvedi": {
+      "age": 28,
+      "ovr": 77
+    },
+    "noah okafor": {
+      "age": 25,
+      "ovr": 76
+    },
+    "remo freuler": {
+      "age": 33,
+      "ovr": 81
+    },
+    "ricardo rodriguez": {
+      "age": 32,
+      "ovr": 74
+    },
+    "ruben vargas": {
+      "age": 26,
+      "ovr": 75
+    },
+    "silvan widmer": {
+      "age": 32,
+      "ovr": 72
+    },
+    "yvon mvogo": {
+      "age": 31,
+      "ovr": 76
+    },
+    "zeki amdouni": {
+      "age": 24,
+      "ovr": 75
+    }
   },
   "Tunisia": {
-    "adem arous": 59,
-    "ali abdi": 76,
-    "anis ben slimane": 67,
-    "dylan bronn": 68,
-    "elias achouri": 72,
-    "elias saad": 72,
-    "ellyes skhiri": 80,
-    "hadj mahmoud": 67,
-    "hannibal mejbri": 74,
-    "ismael gharbi": 73,
-    "montassar talbi": 73,
-    "mortadha ben ouanes": 69,
-    "moutaz neffati": 63,
-    "rani khedira": 75,
-    "sebastian tounekti": 69,
-    "yan valery": 71
+    "adem arous": {
+      "age": 20,
+      "ovr": 59
+    },
+    "ali abdi": {
+      "age": 31,
+      "ovr": 76
+    },
+    "anis ben slimane": {
+      "age": 24,
+      "ovr": 67
+    },
+    "dylan bronn": {
+      "age": 30,
+      "ovr": 68
+    },
+    "elias achouri": {
+      "age": 26,
+      "ovr": 72
+    },
+    "elias saad": {
+      "age": 25,
+      "ovr": 72
+    },
+    "ellyes skhiri": {
+      "age": 30,
+      "ovr": 80
+    },
+    "hadj mahmoud": {
+      "age": 25,
+      "ovr": 67
+    },
+    "hannibal mejbri": {
+      "age": 22,
+      "ovr": 74
+    },
+    "ismael gharbi": {
+      "age": 21,
+      "ovr": 73
+    },
+    "montassar talbi": {
+      "age": 27,
+      "ovr": 73
+    },
+    "mortadha ben ouanes": {
+      "age": 30,
+      "ovr": 69
+    },
+    "moutaz neffati": {
+      "age": 20,
+      "ovr": 63
+    },
+    "rani khedira": {
+      "age": 31,
+      "ovr": 75
+    },
+    "sebastian tounekti": {
+      "age": 22,
+      "ovr": 69
+    },
+    "yan valery": {
+      "age": 26,
+      "ovr": 71
+    }
   },
   "Turkey": {
-    "abdulkerim bardakc": 80,
-    "altay bayndr": 75,
-    "arda guler": 81,
-    "bars alper ylmaz": 80,
-    "caglar soyuncu": 77,
-    "can uzun": 74,
-    "deniz gul": 66,
-    "eren elmal": 75,
-    "ferdi kadoglu": 79,
-    "hakan calhanoglu": 86,
-    "irfan can kahveci": 78,
-    "ismail yuksek": 77,
-    "kaan ayhan": 76,
-    "kenan yldz": 79,
-    "kerem akturkoglu": 80,
-    "merih demiral": 78,
-    "mert gunok": 78,
-    "mert muldur": 74,
-    "oguz aydn": 77,
-    "orkun kokcu": 82,
-    "ozan kabak": 75,
-    "salih ozcan": 75,
-    "ugurcan cakr": 80,
-    "yunus akgun": 78,
-    "zeki celik": 76
+    "abdulkerim bardakc": {
+      "age": 30,
+      "ovr": 80
+    },
+    "altay bayndr": {
+      "age": 27,
+      "ovr": 75
+    },
+    "arda guler": {
+      "age": 20,
+      "ovr": 81
+    },
+    "bars alper ylmaz": {
+      "age": 25,
+      "ovr": 80
+    },
+    "caglar soyuncu": {
+      "age": 29,
+      "ovr": 77
+    },
+    "can uzun": {
+      "age": 19,
+      "ovr": 74
+    },
+    "deniz gul": {
+      "age": 20,
+      "ovr": 66
+    },
+    "eren elmal": {
+      "age": 24,
+      "ovr": 75
+    },
+    "ferdi kadoglu": {
+      "age": 25,
+      "ovr": 79
+    },
+    "hakan calhanoglu": {
+      "age": 31,
+      "ovr": 86
+    },
+    "irfan can kahveci": {
+      "age": 29,
+      "ovr": 78
+    },
+    "ismail yuksek": {
+      "age": 26,
+      "ovr": 77
+    },
+    "kaan ayhan": {
+      "age": 30,
+      "ovr": 76
+    },
+    "kenan yldz": {
+      "age": 20,
+      "ovr": 79
+    },
+    "kerem akturkoglu": {
+      "age": 26,
+      "ovr": 80
+    },
+    "merih demiral": {
+      "age": 27,
+      "ovr": 78
+    },
+    "mert gunok": {
+      "age": 36,
+      "ovr": 78
+    },
+    "mert muldur": {
+      "age": 26,
+      "ovr": 74
+    },
+    "oguz aydn": {
+      "age": 24,
+      "ovr": 77
+    },
+    "orkun kokcu": {
+      "age": 24,
+      "ovr": 82
+    },
+    "ozan kabak": {
+      "age": 25,
+      "ovr": 75
+    },
+    "salih ozcan": {
+      "age": 27,
+      "ovr": 75
+    },
+    "ugurcan cakr": {
+      "age": 29,
+      "ovr": 80
+    },
+    "yunus akgun": {
+      "age": 24,
+      "ovr": 78
+    },
+    "zeki celik": {
+      "age": 28,
+      "ovr": 76
+    }
   },
   "United States": {
-    "alejandro zendejas": 76,
-    "alex freeman": 65,
-    "antonee robinson": 82,
-    "auston trusty": 74,
-    "brenden aaronson": 74,
-    "chris brady": 69,
-    "chris richards": 77,
-    "christian pulisic": 84,
-    "cristian roldan": 74,
-    "folarin balogun": 77,
-    "giovanni reyna": 75,
-    "haji wright": 73,
-    "joe scally": 74,
-    "malik tillman": 82,
-    "mark mckenzie": 74,
-    "matt freese": 69,
-    "matt turner": 74,
-    "max arfsten": 67,
-    "miles robinson": 73,
-    "ricardo pepi": 76,
-    "sebastian berhalter": 67,
-    "sergino dest": 79,
-    "tim ream": 72,
-    "timothy weah": 77,
-    "tyler adams": 79,
-    "weston mckennie": 78
+    "alejandro zendejas": {
+      "age": 27,
+      "ovr": 76
+    },
+    "alex freeman": {
+      "age": 20,
+      "ovr": 65
+    },
+    "antonee robinson": {
+      "age": 27,
+      "ovr": 82
+    },
+    "auston trusty": {
+      "age": 26,
+      "ovr": 74
+    },
+    "brenden aaronson": {
+      "age": 24,
+      "ovr": 74
+    },
+    "chris brady": {
+      "age": 21,
+      "ovr": 69
+    },
+    "chris richards": {
+      "age": 25,
+      "ovr": 77
+    },
+    "christian pulisic": {
+      "age": 26,
+      "ovr": 84
+    },
+    "cristian roldan": {
+      "age": 30,
+      "ovr": 74
+    },
+    "folarin balogun": {
+      "age": 23,
+      "ovr": 77
+    },
+    "giovanni reyna": {
+      "age": 22,
+      "ovr": 75
+    },
+    "haji wright": {
+      "age": 27,
+      "ovr": 73
+    },
+    "joe scally": {
+      "age": 22,
+      "ovr": 74
+    },
+    "malik tillman": {
+      "age": 23,
+      "ovr": 82
+    },
+    "mark mckenzie": {
+      "age": 26,
+      "ovr": 74
+    },
+    "matt freese": {
+      "age": 26,
+      "ovr": 69
+    },
+    "matt turner": {
+      "age": 31,
+      "ovr": 74
+    },
+    "max arfsten": {
+      "age": 24,
+      "ovr": 67
+    },
+    "miles robinson": {
+      "age": 28,
+      "ovr": 73
+    },
+    "ricardo pepi": {
+      "age": 22,
+      "ovr": 76
+    },
+    "sebastian berhalter": {
+      "age": 24,
+      "ovr": 67
+    },
+    "sergino dest": {
+      "age": 24,
+      "ovr": 79
+    },
+    "tim ream": {
+      "age": 37,
+      "ovr": 72
+    },
+    "timothy weah": {
+      "age": 25,
+      "ovr": 77
+    },
+    "tyler adams": {
+      "age": 26,
+      "ovr": 79
+    },
+    "weston mckennie": {
+      "age": 26,
+      "ovr": 78
+    }
   },
   "Uruguay": {
-    "brian rodriguez": 76,
-    "darwin nunez": 79,
-    "emiliano martinez": 71,
-    "facundo pellistri": 73,
-    "federico valverde": 89,
-    "federico vinas": 72,
-    "fernando muslera": 79,
-    "guillermo varela": 68,
-    "jose maria gimenez": 83,
-    "juan manuel sanabria": 69,
-    "manuel ugarte": 79,
-    "mathias olivera": 78,
-    "maximiliano araujo": 77,
-    "nicolas de la cruz": 65,
-    "rodrigo bentancur": 80,
-    "rodrigo zalazar": 79,
-    "ronald araujo": 83,
-    "santiago bueno": 76
+    "brian rodriguez": {
+      "age": 31,
+      "ovr": 76
+    },
+    "darwin nunez": {
+      "age": 26,
+      "ovr": 79
+    },
+    "emiliano martinez": {
+      "age": 27,
+      "ovr": 71
+    },
+    "facundo pellistri": {
+      "age": 23,
+      "ovr": 73
+    },
+    "federico valverde": {
+      "age": 26,
+      "ovr": 89
+    },
+    "federico vinas": {
+      "age": 27,
+      "ovr": 72
+    },
+    "fernando muslera": {
+      "age": 39,
+      "ovr": 79
+    },
+    "guillermo varela": {
+      "age": 37,
+      "ovr": 68
+    },
+    "jose maria gimenez": {
+      "age": 30,
+      "ovr": 83
+    },
+    "juan manuel sanabria": {
+      "age": 23,
+      "ovr": 69
+    },
+    "manuel ugarte": {
+      "age": 24,
+      "ovr": 79
+    },
+    "mathias olivera": {
+      "age": 27,
+      "ovr": 78
+    },
+    "maximiliano araujo": {
+      "age": 25,
+      "ovr": 77
+    },
+    "nicolas de la cruz": {
+      "age": 19,
+      "ovr": 65
+    },
+    "rodrigo bentancur": {
+      "age": 28,
+      "ovr": 80
+    },
+    "rodrigo zalazar": {
+      "age": 25,
+      "ovr": 79
+    },
+    "ronald araujo": {
+      "age": 26,
+      "ovr": 83
+    },
+    "santiago bueno": {
+      "age": 26,
+      "ovr": 76
+    }
   },
   "Uzbekistan": {
-    "abbosbek fayzullaev": 65,
-    "abdukodir khusanov": 77,
-    "eldor shomurodov": 74
+    "abbosbek fayzullaev": {
+      "age": 21,
+      "ovr": 65
+    },
+    "abdukodir khusanov": {
+      "age": 21,
+      "ovr": 77
+    },
+    "eldor shomurodov": {
+      "age": 30,
+      "ovr": 74
+    }
   }
 }
