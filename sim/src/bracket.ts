@@ -6,17 +6,17 @@
 // and final exactly as in FIFA's published schedule.
 //
 // FIFA's Annex C fixes which qualifying third meets which winner for each of the
-// 495 possible third-place combinations. Rather than embed that table we solve
-// the same constraint directly: a perfect matching of the eight qualifying groups
-// onto the eight winner slots that respects each slot's eligible-group list. The
-// result is always a legal 2026 bracket and is deterministic for a given set of
-// qualifying thirds.
+// 495 possible third-place combinations. We use that published table directly (see
+// thirdsTable.ts), so every bracket the app builds matches a real, drawable 2026
+// knockout. As a safety net for any unexpected input, we can also solve the same
+// constraint from each slot's eligible-group list.
 
 import type { SimContext } from "./context";
 import { simulateKnockout, type MatchSpec } from "./match";
 import type { Rng } from "./rng";
 import type { GroupStanding, MatchResult, Stage } from "./types";
 import type { ThirdsResult } from "./thirds";
+import { OFFICIAL_THIRDS, THIRD_MATCH_ORDER } from "./thirdsTable";
 
 export type Source =
   | { kind: "winner"; group: string }
@@ -86,11 +86,30 @@ export const FINAL = { match: 104, from: [101, 102] as [number, number] };
 export const THIRD_PLACE = { match: 103, from: [101, 102] as [number, number] };
 
 /**
- * Assign the eight qualifying groups to the eight winner slots, respecting each
- * slot's eligibility, by backtracking. Returns a map of match number to the group
- * whose third-placed team fills that slot.
+ * Map the eight qualifying groups to the eight winner slots that face a third, by
+ * looking up FIFA's published Annex C table. Returns a map of match number to the
+ * group whose third-placed team fills that slot. Falls back to solving the
+ * eligibility constraint directly if the combination is ever missing.
  */
 export function allocateThirds(qualifiedGroups: string[]): Record<number, string> {
+  const key = [...qualifiedGroups].sort().join("");
+  const official = OFFICIAL_THIRDS[key];
+  if (official) {
+    const assignment: Record<number, string> = {};
+    THIRD_MATCH_ORDER.forEach((match, i) => {
+      assignment[match] = official[i]!;
+    });
+    return assignment;
+  }
+  return solveThirds(qualifiedGroups);
+}
+
+/**
+ * Solve the slot-eligibility constraint directly: a perfect matching of the
+ * qualifying groups onto the winner slots that respects each slot's eligible
+ * groups. Used only as a fallback for inputs outside the official table.
+ */
+function solveThirds(qualifiedGroups: string[]): Record<number, string> {
   const qualified = new Set(qualifiedGroups);
   const assignment: Record<number, string> = {};
   const used = new Set<string>();

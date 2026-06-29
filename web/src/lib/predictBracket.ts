@@ -65,8 +65,31 @@ const R16_BY: { match: number; from: [number, number] }[] = R16;
 const QF_BY: { match: number; from: [number, number] }[] = QF;
 const SF_BY: { match: number; from: [number, number] }[] = SF;
 
-/** Seed the 16 round-of-32 ties from the predicted group orders. */
-export function seedR32(model: Model, order: Record<string, string[]>): SeedMatch[] {
+/**
+ * The eight group letters whose third-placed team advances by default: the
+ * strongest thirds by model rating. This is the sensible starting selection the
+ * user can then override.
+ */
+export function defaultQualifiedThirds(model: Model, order: Record<string, string[]>): string[] {
+  const ratingOf = new Map(model.teams.map((t) => [t.name, t.rating]));
+  return Object.entries(order)
+    .map(([g, teams]) => ({ group: g, rating: ratingOf.get(teams[2] ?? "") ?? -Infinity }))
+    .sort((a, b) => b.rating - a.rating)
+    .slice(0, 8)
+    .map((t) => t.group)
+    .sort();
+}
+
+/**
+ * Seed the 16 round-of-32 ties from the predicted group orders. `qualifiedThirds`
+ * is the set of eight group letters whose third-placed team advances; when it is
+ * not a valid set of eight, we fall back to the strongest thirds by rating.
+ */
+export function seedR32(
+  model: Model,
+  order: Record<string, string[]>,
+  qualifiedThirds?: string[],
+): SeedMatch[] {
   // resolveSource only reads rank + team, so a minimal standing row is enough
   const standings: Record<string, GroupStanding[]> = {};
   for (const [g, teams] of Object.entries(order)) {
@@ -84,17 +107,11 @@ export function seedR32(model: Model, order: Record<string, string[]>): SeedMatc
     }));
   }
 
-  // the eight strongest third-placed teams qualify
-  const ratingOf = new Map(model.teams.map((t) => [t.name, t.rating]));
-  const thirds = Object.entries(order).map(([g, teams]) => ({
-    group: g,
-    rating: ratingOf.get(teams[2] ?? "") ?? -Infinity,
-  }));
-  const qualifiedGroups = thirds
-    .sort((a, b) => b.rating - a.rating)
-    .slice(0, 8)
-    .map((t) => t.group);
-  const thirdByMatch = allocateThirds(qualifiedGroups);
+  const groups =
+    qualifiedThirds && qualifiedThirds.length === 8
+      ? [...qualifiedThirds].sort()
+      : defaultQualifiedThirds(model, order);
+  const thirdByMatch = allocateThirds(groups);
 
   return R32.map((slot) => ({
     match: slot.match,

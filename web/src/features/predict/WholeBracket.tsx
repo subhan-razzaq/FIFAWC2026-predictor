@@ -19,6 +19,7 @@ import {
   autoFillBracket,
   championOf,
   deepPicks,
+  defaultQualifiedThirds,
   resolveBracket,
   seedR32,
   type Side,
@@ -31,13 +32,18 @@ interface SavedDraft {
   snapshot: string;
   order: Record<string, string[]>;
   picks: Record<number, string>;
+  thirds?: string[];
+}
+
+interface InitialState {
+  order: Record<string, string[]>;
+  picks: Record<number, string>;
+  thirds: string[];
+  fromShare: boolean;
 }
 
 /** Restore a prediction from a shared `?b=` link, then local storage, then defaults. */
-function loadInitial(
-  model: Model,
-  defaultOrder: Record<string, string[]>,
-): { order: Record<string, string[]>; picks: Record<number, string>; fromShare: boolean } {
+function loadInitial(model: Model, defaultOrder: Record<string, string[]>): InitialState {
   if (typeof window !== "undefined") {
     const token = new URLSearchParams(window.location.search).get("b");
     if (token) {
@@ -49,14 +55,16 @@ function loadInitial(
       if (raw) {
         const saved = JSON.parse(raw) as SavedDraft;
         if (saved.snapshot === model.meta.snapshot_date && saved.order) {
-          return { order: saved.order, picks: saved.picks ?? {}, fromShare: false };
+          const order = saved.order;
+          const thirds = saved.thirds?.length === 8 ? saved.thirds : defaultQualifiedThirds(model, order);
+          return { order, picks: saved.picks ?? {}, thirds, fromShare: false };
         }
       }
     } catch {
       /* corrupt storage: fall through to defaults */
     }
   }
-  return { order: defaultOrder, picks: {}, fromShare: false };
+  return { order: defaultOrder, picks: {}, thirds: defaultQualifiedThirds(model, defaultOrder), fromShare: false };
 }
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -108,6 +116,7 @@ export function WholeBracket({ model }: { model: Model }) {
 
   const [order, setOrder] = useState<Record<string, string[]>>(initial.order);
   const [picks, setPicks] = useState<Record<number, string>>(initial.picks);
+  const [thirds, setThirds] = useState<string[]>(initial.thirds);
   // a shared or in-progress bracket lands straight on the knockouts canvas
   const [step, setStep] = useState(Object.keys(initial.picks).length > 0 ? 1 : 0);
   const [fromShare] = useState(initial.fromShare);
@@ -123,8 +132,24 @@ export function WholeBracket({ model }: { model: Model }) {
     return m;
   }, [model]);
 
-  // the R32 reseeds whenever the predicted group orders change
-  const seedMatches = useMemo(() => seedR32(model, order), [model, order]);
+  const ratingOf = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const t of model.teams) m.set(t.name, t.rating);
+    return m;
+  }, [model]);
+
+  // the twelve third-placed teams from the current group orders, strongest first
+  const thirdCandidates = useMemo(
+    () =>
+      blocks
+        .map((b) => ({ group: b.group, team: order[b.group]?.[2] ?? "" }))
+        .sort((a, b) => (ratingOf.get(b.team) ?? 0) - (ratingOf.get(a.team) ?? 0)),
+    [blocks, order, ratingOf],
+  );
+
+  // the R32 reseeds whenever the predicted group orders or the qualifying thirds change
+  const seedMatches = useMemo(() => seedR32(model, order, thirds), [model, order, thirds]);
+  const thirdsComplete = thirds.length === 8;
   const { part, picks: cleanPicks } = useMemo(() => resolveBracket(seedMatches, picks), [seedMatches, picks]);
 
   // a change to the groups can invalidate downstream winners; prune them
@@ -146,19 +171,19 @@ export function WholeBracket({ model }: { model: Model }) {
   // keep the working bracket across refreshes and trips to other pages
   useEffect(() => {
     try {
-      const draft: SavedDraft = { snapshot: model.meta.snapshot_date, order, picks: cleanPicks };
+      const draft: SavedDraft = { snapshot: model.meta.snapshot_date, order, picks: cleanPicks, thirds };
       window.localStorage.setItem(STORE_KEY, JSON.stringify(draft));
     } catch {
       /* storage full or unavailable: keep playing without a save */
     }
-  }, [model, order, cleanPicks]);
+  }, [model, order, cleanPicks, thirds]);
 
   const champion = championOf(cleanPicks);
   const complete = champion !== undefined;
 
   const copyShareLink = async () => {
     try {
-      await navigator.clipboard.writeText(predictionShareUrl(model, order, cleanPicks));
+      await navigator.clipboard.writeText(predictionShareUrl(model, order, cleanPicks, thirds));
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1800);
     } catch {
@@ -185,7 +210,25 @@ export function WholeBracket({ model }: { model: Model }) {
   };
 
   const resetGroups = () => {
-    setOrder(Object.fromEntries(blocks.map((b) => [b.group, [...b.teams]])));
+    const fresh = Object.fromEntries(blocks.map((b) => [b.group, [...b.teams]]));
+    setOrder(fresh);
+    setThirds(defaultQualifiedThirds(model, fresh));
+    setGrade(null);
+  };
+
+  // toggle a group's third-placed team in or out of the eight qualifiers, never
+  // letting the selection climb past eight
+  const toggleThird = (group: string) => {
+    setThirds((prev) => {
+      if (prev.includes(group)) return prev.filter((g) => g !== group);
+      if (prev.length >= 8) return prev;
+      return [...prev, group].sort();
+    });
+    setGrade(null);
+  };
+
+  const bestThirds = () => {
+    setThirds(defaultQualifiedThirds(model, order));
     setGrade(null);
   };
 
@@ -264,6 +307,45 @@ export function WholeBracket({ model }: { model: Model }) {
           </div>
         ))}
       </div>
+
+      <div className="pred-thirds">
+        <div className="pred-substep-head">
+          <div>
+            <span className="eyebrow">Best third-placed teams</span>
+            <p className="mono pred-hint">
+              Eight of the twelve third-placed teams reach the Round of 32. Pick the eight you back. Chosen{" "}
+              <b className={thirdsComplete ? "pred-thirds__count is-ok" : "pred-thirds__count"}>{thirds.length}</b> of 8.
+            </p>
+          </div>
+          <button className="btn btn--ghost" onClick={bestThirds}>
+            Best eight by rating
+          </button>
+        </div>
+        <div className="pred-thirds__grid">
+          {thirdCandidates.map(({ group, team }) => {
+            const on = thirds.includes(group);
+            return (
+              <button
+                key={group}
+                type="button"
+                className={`pred-third ${on ? "is-on" : ""}`}
+                onClick={() => toggleThird(group)}
+                disabled={!on && thirds.length >= 8}
+                aria-pressed={on}
+              >
+                <span className="pred-third__chip" style={{ background: groupColor(group) }}>
+                  {group}
+                </span>
+                <TeamBadge team={team} size={18} />
+                <span className="pred-third__name">{team}</span>
+                <span className="pred-third__mark" aria-hidden>
+                  {on ? "✓" : "+"}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 
@@ -271,8 +353,8 @@ export function WholeBracket({ model }: { model: Model }) {
     <div>
       <div className="pred-substep-head">
         <p className="mono pred-hint">
-          Click the winner of every tie, Round of 32 up to the final. The eight best third-placed teams (by rating)
-          fill the bracket automatically.
+          Click the winner of every tie, Round of 32 up to the final. Your eight chosen third-placed teams fill their
+          official Annex C slots.
         </p>
         <div className="pred-bracket-ctl">
           <button className="btn btn--ghost" onClick={fillFavourites}>
@@ -316,8 +398,13 @@ export function WholeBracket({ model }: { model: Model }) {
             Back
           </button>
           {step === 0 ? (
-            <button className="btn" onClick={() => setStep(1)}>
-              Next: build the bracket
+            <button
+              className="btn"
+              onClick={() => setStep(1)}
+              disabled={!thirdsComplete}
+              title={thirdsComplete ? "" : "Pick exactly eight third-placed teams"}
+            >
+              {thirdsComplete ? "Next: build the bracket" : `Pick ${8 - thirds.length} more third-placed team${8 - thirds.length === 1 ? "" : "s"}`}
             </button>
           ) : (
             <button className="btn" onClick={() => void run()} disabled={!complete || running} title={complete ? "" : "Pick a champion first"}>

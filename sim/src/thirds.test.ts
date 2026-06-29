@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { allocateThirds } from "./bracket";
+import { OFFICIAL_THIRDS } from "./thirdsTable";
 
 const GROUPS = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"];
 
@@ -52,5 +53,25 @@ describe("thirds allocation", () => {
       expect(usedGroups.size).toBe(8);
       expect([...usedGroups].sort()).toEqual([...qualified].sort());
     }
+  });
+
+  it("covers every combination in the official Annex C table", () => {
+    expect(Object.keys(OFFICIAL_THIRDS).length).toBe(495);
+    for (const qualified of combinations(GROUPS, 8)) {
+      expect(OFFICIAL_THIRDS).toHaveProperty(qualified.join(""));
+    }
+  });
+
+  it("matches FIFA's published worked example", () => {
+    // groups B, D, E, F, I, J, K, L qualify (the example in the 2026 regulations)
+    const a = allocateThirds(["B", "D", "E", "F", "I", "J", "K", "L"]);
+    expect(a[79]).toBe("E"); // 1A vs 3E
+    expect(a[85]).toBe("J"); // 1B vs 3J
+    expect(a[81]).toBe("B"); // 1D vs 3B
+    expect(a[74]).toBe("D"); // 1E vs 3D
+    expect(a[82]).toBe("I"); // 1G vs 3I
+    expect(a[77]).toBe("F"); // 1I vs 3F
+    expect(a[87]).toBe("L"); // 1K vs 3L
+    expect(a[80]).toBe("K"); // 1L vs 3K
   });
 });
