@@ -32,6 +32,7 @@ interface Props {
 
 export function GradeScreen({ model, team, group, reached, isChampion, projection, played, onRestart }: Props) {
   const seedLabel = useStore((s) => s.seedLabel);
+  const seed = useStore((s) => s.seed);
   const grade = gradeRun(reached, isChampion, projection ?? undefined);
   const results: MatchResult[] = played.map((p) => p.result);
   const enriched: EnrichedMatch[] = played.map((p) => p.enriched);
@@ -127,7 +128,7 @@ export function GradeScreen({ model, team, group, reached, isChampion, projectio
         </motion.div>
       </motion.div>
 
-      <AwardsCeremony model={model} team={team} played={played} />
+      <AwardsCeremony model={model} seed={seed} played={played} />
 
       <TournamentStats model={model} team={team} played={played} />
 

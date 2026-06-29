@@ -1,11 +1,15 @@
-// The closing ceremony. Once a run ends we hand out the individual awards, each one
-// a faux-3D trophy beside the winner's photo, then lay out the team of the
-// tournament on a pitch. Every winner is computed from the manager's real run.
+// The closing ceremony. Once a run ends we hand out the tournament's individual
+// awards, each one a faux-3D trophy beside the winner's photo, then lay out the team
+// of the tournament on a pitch. Winners are computed across the WHOLE competition: a
+// full simulation of every match on the run's seed, with the manager's actual results
+// spliced in, so the Golden Boot can belong to any nation, not just the user's.
 
+import { useMemo } from "react";
 import { motion } from "framer-motion";
-import type { Model } from "@weltmeister/sim";
+import { runSingle, type Model } from "@weltmeister/sim";
 import type { PlayedMatch } from "../../store/store";
-import { computeAwards, type AwardWinner } from "../../lib/awards";
+import { type AwardWinner } from "../../lib/awards";
+import { competitionAwards } from "../../lib/competition";
 import { PlayerAvatar } from "../../components/PlayerAvatar";
 import { AwardTrophy } from "./AwardTrophy";
 import { FORMATIONS } from "../../lib/manage";
@@ -55,15 +59,20 @@ function AwardCard({
   );
 }
 
-export function AwardsCeremony({ model, team, played }: { model: Model; team: string; played: PlayedMatch[] }) {
+export function AwardsCeremony({ model, seed, played }: { model: Model; seed: number; played: PlayedMatch[] }) {
+  // a full tournament on this seed (with the manager's real results spliced in) gives
+  // every nation's scorers and ratings, so the awards span the whole competition
+  const awards = useMemo(() => {
+    const full = runSingle(model, seed);
+    return competitionAwards(model, seed, full, played);
+  }, [model, seed, played]);
   if (played.length === 0) return null;
-  const awards = computeAwards(model, team, played);
   const f = FORMATIONS["4-3-3"]!;
 
   return (
     <div className="awards">
       <div className="awards__head">
-        <span className="eyebrow">Tournament awards</span>
+        <span className="eyebrow">Tournament awards · the whole World Cup</span>
         <h3 className="anton">The honours</h3>
       </div>
 
