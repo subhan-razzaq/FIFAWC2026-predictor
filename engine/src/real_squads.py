@@ -28,17 +28,25 @@ WIKITEXT = STATIC_DIR / "squads_wikitext.json"
 # fallback avatar in the app.
 PHOTOS_FILE = STATIC_DIR / "player_photos.json"
 
+# committed {team: {player: overall}} map of EA Sports FC 26 overalls, resolved
+# offline by ea_ratings.py. This is the primary source for player overalls, so the
+# numbers match what a player of football expects. Anyone the dataset does not list
+# (mostly squad players from nations EA rates thinly) falls back to the curated star
+# list, then the club+caps heuristic.
+EA_OVERALLS_FILE = STATIC_DIR / "ea_fc26_overalls.json"
 
-def _load_photos() -> dict[str, str]:
-    if PHOTOS_FILE.exists():
+
+def _load_json(path) -> dict:
+    if path.exists():
         try:
-            return json.loads(PHOTOS_FILE.read_text(encoding="utf-8"))
+            return json.loads(path.read_text(encoding="utf-8"))
         except (json.JSONDecodeError, OSError):
             return {}
     return {}
 
 
-_PHOTOS = _load_photos()
+_PHOTOS = _load_json(PHOTOS_FILE)
+_EA_OVERALLS = _load_json(EA_OVERALLS_FILE)
 
 # wikitext heading -> our canonical (martj42) team name
 TEAM_ALIASES = {
@@ -330,9 +338,21 @@ def _rates(pos: str, ability: float, caps: int, goals: int) -> tuple[float, floa
     return round(npxg, 3), round(xa, 3)
 
 
-def _to_player(p: dict) -> dict:
-    override = _star_ability(p["name"])
-    ability = override if override is not None else min(GENERIC_CAP, _ability(p))
+def _player_ability(team: str, p: dict) -> float:
+    """Resolve a player's ability, in order of trust: their EA Sports FC 26 overall,
+    then a hand-curated overall for a defining player, then the club+caps heuristic
+    held below the star floor."""
+    ea = _EA_OVERALLS.get(team, {}).get(_ascii(p["name"]).lower())
+    if ea is not None:
+        return _ability_for_ovr(int(ea))
+    star = _star_ability(p["name"])
+    if star is not None:
+        return star
+    return min(GENERIC_CAP, _ability(p))
+
+
+def _to_player(team: str, p: dict) -> dict:
+    ability = _player_ability(team, p)
     npxg, xa = _rates(p["pos"], ability, p["caps"], p["goals"])
     return {
         "name": p["name"],
@@ -381,7 +401,7 @@ def _project_eleven(players: list[dict]) -> list[str]:
 
 
 def build_team(team_name: str, raw_players: list[dict]) -> dict:
-    players = [_to_player(p) for p in raw_players]
+    players = [_to_player(team_name, p) for p in raw_players]
     # cap at the frozen 26, keeping the strongest if the source lists more
     if len(players) > 26:
         # keep position balance: never drop below the squad shape, then best rest
