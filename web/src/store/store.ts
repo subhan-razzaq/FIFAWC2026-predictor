@@ -44,6 +44,20 @@ import {
   type PlayerStates,
 } from "../lib/cards";
 import { depleteStamina, GROUP_REST, KO_REST, recoverStamina } from "../lib/fatigue";
+import { applyPerformance, teamMorale, type PerfInput } from "../lib/morale";
+import { applyEvents, recoverInjuries, rollSquadEvents } from "../lib/events";
+import { opponentManager } from "../lib/managers";
+import { scoutTeam } from "../lib/scouting";
+import { buildNewspaper, type Newspaper } from "../lib/news";
+import { matchRatings } from "../lib/grade";
+import {
+  boardMessage,
+  disciplineMessage,
+  medicalMessage,
+  returnsMessage,
+  scoutMessage,
+  type InboxMessage,
+} from "../lib/inbox";
 
 export type Status = "boot" | "ready" | "running" | "done" | "error";
 export type Theme = "dark" | "light";
@@ -119,6 +133,11 @@ export interface CareerState {
   outcome: { reached: Stage; isChampion: boolean } | null;
   projection: TeamOdds | null;
   lastResult: PlayedMatch | null;
+  // the living career layer
+  inbox: InboxMessage[];
+  fans: number; // 0..100 fan happiness, moved by results and press answers
+  pressDone: boolean; // whether the press conference for `current` has been faced
+  lastNews: Newspaper | null; // the back page after the latest result
 }
 
 /** Total substitutions allowed across the match (made at any stoppage). */
@@ -156,6 +175,10 @@ interface StoreState {
   setDraft: (patch: Partial<MatchSettings>) => void;
   setFormation: (formation: string) => void;
   setEleven: (eleven: string[]) => void;
+  // the living career layer
+  readMessage: (id: string) => void;
+  answerPress: (moraleDelta: number, fansDelta: number) => void;
+  dismissNews: () => void;
   // live match lifecycle
   kickOff: () => void;
   goToHalftime: () => void;
@@ -193,6 +216,79 @@ function initStates(model: Model, team: string): PlayerStates {
   const states: PlayerStates = {};
   for (const p of model.squads[team]!.players) states[p.name] = freshCondition();
   return states;
+}
+
+/** Compose the pre-match inbox for an upcoming fixture: the assistant's dossier on
+ * the opponent (with deep analysis and the rival manager), plus any medical,
+ * discipline, injury-return and board notes from the latest build-up. */
+function buildInbox(
+  model: Model,
+  opponent: string,
+  matchday: number,
+  events: ReturnType<typeof rollSquadEvents>,
+  returned: string[],
+  suspended: string[],
+  fans: number,
+  morale: number,
+): InboxMessage[] {
+  const messages: InboxMessage[] = [
+    scoutMessage(matchday, opponent, scoutTeam(model, opponent), opponentManager(model, opponent)),
+  ];
+  const med = medicalMessage(matchday, events);
+  if (med) messages.push(med);
+  const ret = returnsMessage(matchday, returned);
+  if (ret) messages.push(ret);
+  const disc = disciplineMessage(matchday, suspended);
+  if (disc) messages.push(disc);
+  messages.push(boardMessage(matchday, fans, morale));
+  return messages;
+}
+
+/** The names suspended for the upcoming match (banned, so unpickable). */
+function suspendedNames(states: PlayerStates): string[] {
+  return Object.entries(states)
+    .filter(([, c]) => c.suspendedNext)
+    .map(([name]) => name);
+}
+
+function clamp01to100(v: number): number {
+  return Math.max(0, Math.min(100, v));
+}
+
+/** Fold a played match into every involved player's form and morale, using the
+ * canonical match ratings, goals, assists and minutes. Starters update on their
+ * performance, the unused bench updates on watching from the sidelines. */
+function applyFormAndMorale(
+  model: Model,
+  team: string,
+  enriched: EnrichedMatch,
+  result: MatchResult,
+  minutes: Map<string, number>,
+  won: boolean,
+  drew: boolean,
+  states: PlayerStates,
+): PlayerStates {
+  const ratings = matchRatings(model, team, result, enriched);
+  const ratingOf = new Map(ratings.map((r) => [r.player, r]));
+  const next: PlayerStates = { ...states };
+  for (const p of model.squads[team]!.players) {
+    const mins = minutes.get(p.name) ?? 0;
+    const r = ratingOf.get(p.name);
+    const perf: PerfInput = {
+      played: mins > 0,
+      benched: mins === 0,
+      minutes: mins,
+      rating: r?.rating ?? 6.5,
+      goals: r?.goals ?? 0,
+      assists: r?.assists ?? 0,
+      won,
+      drew,
+    };
+    const cur = next[p.name] ?? freshCondition();
+    const upd = applyPerformance(cur.form, cur.morale, perf);
+    next[p.name] = { ...cur, form: upd.form, morale: upd.morale };
+  }
+  return next;
 }
 
 /** Build a default match plan (lineup, tactics, captain, pk) for an upcoming
@@ -343,7 +439,15 @@ export const useStore = create<StoreState>((set, get) => ({
               career?: CareerState;
             };
             if (saved.career && saved.snapshot === model.meta.snapshot_date && typeof saved.seed === "number") {
-              set({ career: saved.career, seed: saved.seed, seedLabel: saved.seedLabel ?? String(saved.seed) });
+              // backfill the living-career fields for runs saved before they existed
+              const career: CareerState = {
+                ...saved.career,
+                inbox: saved.career.inbox ?? [],
+                fans: saved.career.fans ?? 75,
+                pressDone: saved.career.pressDone ?? false,
+                lastNews: saved.career.lastNews ?? null,
+              };
+              set({ career, seed: saved.seed, seedLabel: saved.seedLabel ?? String(saved.seed) });
             } else {
               window.localStorage.removeItem(CAREER_KEY);
             }
@@ -406,12 +510,16 @@ export const useStore = create<StoreState>((set, get) => ({
   // --- Manager Mode actions ---------------------------------------------------
 
   startCareer: (team) => {
-    const { model } = get();
+    const { model, seed } = get();
     if (!model) return;
-    const states = initStates(model, team);
+    let states = initStates(model, team);
     const schedule = managedGroupSchedule(model, team);
     const current = schedule[0]!;
+    // opening build-up: a chance of an early injury or illness before a ball is kicked
+    const events = rollSquadEvents(seed, team, 0, model.squads[team]!.players, states);
+    states = applyEvents(states, events);
     const draft = defaultSettings(model, team, states, model.squads[team]!.formation, model.squads[team]!.projected_eleven);
+    const inbox = buildInbox(model, current.opponent, 0, events, [], [], 75, 70);
     set({
       career: {
         team,
@@ -425,6 +533,10 @@ export const useStore = create<StoreState>((set, get) => ({
         outcome: null,
         projection: get().baseline?.teams.find((t) => t.team === team) ?? null,
         lastResult: null,
+        inbox,
+        fans: 75,
+        pressDone: false,
+        lastNews: null,
       },
     });
     // a one-time baseline run gives the pre-tournament projection and the grade
@@ -743,6 +855,18 @@ export const useStore = create<StoreState>((set, get) => ({
     states = applyMatchCards(states, cards.yellows, cards.reds);
     if (info.stage === "QF") states = wipeYellows(states);
 
+    // form and morale from how each player actually performed this match
+    const tg = result.home === team ? result.homeGoals : result.awayGoals;
+    const og = result.home === team ? result.awayGoals : result.homeGoals;
+    const won = result.winner ? result.winner === team : tg > og;
+    const drew = !result.winner && tg === og;
+    states = applyFormAndMorale(model, team, enriched, result, minutes, won, drew, states);
+
+    // the back page reacts to the result, and so do the fans
+    const matchday = c.played.length;
+    const news = buildNewspaper(seed, matchday, team, result, info.stage);
+    const fans = clamp01to100((c.fans ?? 75) + (won ? 6 : drew ? 1 : -5));
+
     const playedMatch: PlayedMatch = { info, settings: live.start, result, enriched };
     set({
       career: {
@@ -752,6 +876,8 @@ export const useStore = create<StoreState>((set, get) => ({
         playerStates: states,
         played: [...c.played, playedMatch],
         lastResult: playedMatch,
+        fans,
+        lastNews: news,
       },
     });
   },
@@ -761,22 +887,33 @@ export const useStore = create<StoreState>((set, get) => ({
     const c = get().career;
     if (!model || !c) return;
 
-    // rest recovery between matches
+    // rest recovery between matches, and one match served off every injury lay-off
     const lastStage = c.played[c.played.length - 1]?.info.stage ?? "group";
     const rest = lastStage === "group" ? GROUP_REST : KO_REST;
     let states: PlayerStates = {};
     for (const [name, cond] of Object.entries(c.playerStates)) {
       states[name] = { ...cond, stamina: recoverStamina(cond.stamina, rest) };
     }
+    const recovered = recoverInjuries(states);
+    states = recovered.states;
+    const matchday = c.played.length;
+
+    const advanceTo = (current: ManagedMatchInfo, group: GroupStageOutcome | null) => {
+      // build-up events: fresh injuries or illness can strike before the next game
+      const events = rollSquadEvents(seed, c.team, matchday, model.squads[c.team]!.players, states);
+      states = applyEvents(states, events);
+      const draft = defaultSettings(model, c.team, states, c.draft?.formation ?? model.squads[c.team]!.formation, c.draft?.eleven ?? model.squads[c.team]!.projected_eleven);
+      const morale = teamMorale(states, draft.eleven).morale;
+      const inbox = buildInbox(model, current.opponent, matchday, events, recovered.returned, suspendedNames(states), c.fans ?? 75, morale);
+      set({ career: { ...c, phase: "preMatch", current, draft, group: group ?? c.group, playerStates: states, lastResult: null, inbox, pressDone: false } });
+    };
 
     const groupPlayed = c.played.filter((p) => p.info.stage === "group").length;
 
     // still in the group stage: line up the next fixture
     if (groupPlayed < 3) {
       const schedule = managedGroupSchedule(model, c.team);
-      const next = schedule[groupPlayed]!;
-      const draft = defaultSettings(model, c.team, states, c.draft?.formation ?? model.squads[c.team]!.formation, c.draft?.eleven ?? model.squads[c.team]!.projected_eleven);
-      set({ career: { ...c, phase: "preMatch", current: next, draft, playerStates: states, lastResult: null } });
+      advanceTo(schedule[groupPlayed]!, c.group);
       return;
     }
 
@@ -802,8 +939,7 @@ export const useStore = create<StoreState>((set, get) => ({
         hostHome: status.hostHome,
         hostAway: status.hostAway,
       };
-      const draft = defaultSettings(model, c.team, states, c.draft?.formation ?? model.squads[c.team]!.formation, c.draft?.eleven ?? model.squads[c.team]!.projected_eleven);
-      set({ career: { ...c, phase: "preMatch", current, draft, group, playerStates: states, lastResult: null } });
+      advanceTo(current, group);
       return;
     }
 
@@ -819,6 +955,29 @@ export const useStore = create<StoreState>((set, get) => ({
         outcome: { reached, isChampion: status.status === "champion" },
       },
     });
+  },
+
+  readMessage: (id) => {
+    const c = get().career;
+    if (!c) return;
+    set({ career: { ...c, inbox: c.inbox.map((m) => (m.id === id ? { ...m, read: true } : m)) } });
+  },
+
+  answerPress: (moraleDelta, fansDelta) => {
+    const c = get().career;
+    if (!c || c.pressDone) return;
+    // a press answer nudges every player's morale and the fans
+    const states: PlayerStates = {};
+    for (const [name, cond] of Object.entries(c.playerStates)) {
+      states[name] = { ...cond, morale: clamp01to100((cond.morale ?? 70) + moraleDelta) };
+    }
+    set({ career: { ...c, playerStates: states, fans: clamp01to100((c.fans ?? 75) + fansDelta), pressDone: true } });
+  },
+
+  dismissNews: () => {
+    const c = get().career;
+    if (!c) return;
+    set({ career: { ...c, lastNews: null } });
   },
 
   resetCareer: () => set({ career: null }),

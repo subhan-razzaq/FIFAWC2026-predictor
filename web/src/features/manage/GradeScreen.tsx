@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import type { EnrichedMatch, MatchResult, Model, TeamOdds } from "@weltmeister/sim";
 import { gradeRun, impactSubs, tournamentScorers } from "../../lib/grade";
 import { TournamentStats } from "./TournamentStats";
+import { AwardsCeremony } from "./AwardsCeremony";
 import { TeamBadge } from "../../components/TeamBadge";
 import { Confetti } from "../../components/Confetti";
 import { Trophy } from "../bracket/Trophy";
@@ -125,6 +126,8 @@ export function GradeScreen({ model, team, group, reached, isChampion, projectio
           </div>
         </motion.div>
       </motion.div>
+
+      <AwardsCeremony model={model} team={team} played={played} />
 
       <TournamentStats model={model} team={team} played={played} />
 

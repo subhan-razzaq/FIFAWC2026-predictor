@@ -6,10 +6,11 @@
 
 import { useRef, useState } from "react";
 import type { Squad, SquadPlayer } from "@weltmeister/sim";
-import { FORMATIONS, ovr } from "../../lib/manage";
+import { FORMATIONS, ovr, ovrWithForm } from "../../lib/manage";
 import { isOutOfPosition } from "../../lib/lineup";
 import { staminaTier } from "../../lib/fatigue";
-import { isAvailable, type PlayerStates } from "../../lib/cards";
+import { isAvailable, unavailableReason, type PlayerStates } from "../../lib/cards";
+import { formLabel, formOvrDelta } from "../../lib/morale";
 import { PlayerAvatar } from "../../components/PlayerAvatar";
 
 interface Props {
@@ -44,10 +45,10 @@ export function DragPitch({ squad, eleven, formation, captain, penaltyTaker, sta
   const startSet = new Set(eleven);
 
   const benchByPos: Record<string, SquadPlayer[]> = { GK: [], DF: [], MF: [], FW: [] };
-  const suspended: SquadPlayer[] = [];
+  const unavailable: SquadPlayer[] = [];
   for (const p of squad.players) {
     if (startSet.has(p.name)) continue;
-    if (!isAvailable(states, p.name)) suspended.push(p);
+    if (!isAvailable(states, p.name)) unavailable.push(p);
     else benchByPos[p.group]?.push(p);
   }
   for (const k of Object.keys(benchByPos)) benchByPos[k]!.sort((a, b) => b.ability - a.ability);
@@ -110,9 +111,12 @@ export function DragPitch({ squad, eleven, formation, captain, penaltyTaker, sta
           const slot = f.slots[i] ?? { x: 50, y: 50, pos: "MF" as const };
           const p = byName.get(name);
           const oop = p ? isOutOfPosition(p.group, slot.pos) : false;
-          const stamina = states[name]?.stamina ?? 100;
-          const yellows = states[name]?.yellows ?? 0;
+          const cond = states[name];
+          const stamina = cond?.stamina ?? 100;
+          const yellows = cond?.yellows ?? 0;
           const tier = staminaTier(stamina);
+          const fd = formOvrDelta(cond?.form);
+          const fl = formLabel(cond?.form);
           return (
             <div
               key={`${name}-${i}`}
@@ -129,7 +133,16 @@ export function DragPitch({ squad, eleven, formation, captain, penaltyTaker, sta
                 <span className="pitch__dot" style={{ borderColor: RING[p?.group ?? "MF"] ?? "var(--steel)" }}>
                   <PlayerAvatar photo={p?.photo} name={name} />
                 </span>
-                {p && <em className="pitch__ovr mono" aria-label={`overall ${ovr(p.ability)}`}>{ovr(p.ability)}</em>}
+                {p && (
+                  <em className="pitch__ovr mono" aria-label={`overall ${ovrWithForm(p.ability, fd)}`}>
+                    {ovrWithForm(p.ability, fd)}
+                  </em>
+                )}
+                {fd !== 0 && (
+                  <em className={`pitch__form form-${fl}`} aria-label={`form ${fl}`}>
+                    {fd > 0 ? "▲" : "▼"}
+                  </em>
+                )}
                 {name === captain && <em className="pitch__cap">C</em>}
                 {name === penaltyTaker && <em className="pitch__pk">P</em>}
                 {yellows > 0 && <em className="pitch__yc" aria-label="booked" />}
@@ -177,15 +190,19 @@ export function DragPitch({ squad, eleven, formation, captain, penaltyTaker, sta
             </div>
           </div>
         ))}
-        {suspended.length > 0 && (
+        {unavailable.length > 0 && (
           <div className="dpitch-bench__group">
             <span className="dpitch-bench__pos mono">OUT</span>
             <div className="dpitch-bench__list">
-              {suspended.map((p) => (
-                <span key={p.name} className="dpitch-chip suspended" title={`${p.name}, suspended`}>
-                  {lastName(p.name)} <em>susp.</em>
-                </span>
-              ))}
+              {unavailable.map((p) => {
+                const reason = unavailableReason(states, p.name) ?? "Out";
+                const injured = reason !== "Suspended";
+                return (
+                  <span key={p.name} className="dpitch-chip suspended" title={`${p.name}, ${reason.toLowerCase()}`}>
+                    {lastName(p.name)} <em>{injured ? "inj." : "susp."}</em>
+                  </span>
+                );
+              })}
             </div>
           </div>
         )}

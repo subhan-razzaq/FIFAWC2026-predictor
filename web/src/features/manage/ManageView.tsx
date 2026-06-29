@@ -16,6 +16,10 @@ import { GradeScreen } from "./GradeScreen";
 import { TournamentPanel } from "./TournamentPanel";
 import { TournamentStats } from "./TournamentStats";
 import { LiveMatchCenter } from "./LiveMatchCenter";
+import { ManagerInbox } from "./ManagerInbox";
+import { PressConference } from "./PressConference";
+import { HeadlineBar, NewspaperModal } from "./NewspaperModal";
+import { teamMorale, moraleLabel } from "../../lib/morale";
 import { MatchResultCard } from "../../components/MatchResultCard";
 import { TeamBadge } from "../../components/TeamBadge";
 import { oddsPct } from "../../lib/format";
@@ -24,6 +28,7 @@ import { isAvailable, type PlayerStates } from "../../lib/cards";
 import type { CareerState } from "../../store/store";
 import type { Model, Squad, TeamOdds } from "@weltmeister/sim";
 import "./manage.css";
+import "./career.css";
 
 const STAGE_HEAD: Record<string, string> = {
   group: "Group stage",
@@ -142,6 +147,9 @@ function Active({
 
   const { team, current, draft, phase, lastResult } = career;
   const squad = model.squads[team]!;
+  const [paperOpen, setPaperOpen] = useState(false);
+  const [preTab, setPreTab] = useState<"team" | "inbox">("team");
+  const [pressOpen, setPressOpen] = useState(false);
 
   if ((phase === "live" || phase === "halftime") && career.live) {
     return (
@@ -180,6 +188,8 @@ function Active({
           </motion.div>
           <div className="manage-result__sub mono">{STAGE_HEAD[lastResult.info.stage]}</div>
         </div>
+        {career.lastNews && <HeadlineBar news={career.lastNews} onOpen={() => setPaperOpen(true)} />}
+        {career.lastNews && <NewspaperModal news={career.lastNews} open={paperOpen} onClose={() => setPaperOpen(false)} />}
         <MatchResultCard
           match={r}
           groupOf={groupOf}
@@ -211,6 +221,29 @@ function Active({
 
   if (!current || !draft) return null;
   const oppGroup = groupOf.get(current.opponent);
+  const matchday = career.played.length;
+  const tm = teamMorale(career.playerStates, draft.eleven);
+  const unread = career.inbox.filter((m) => !m.read).length;
+
+  if (pressOpen) {
+    return (
+      <div>
+        <div className="manage-matchbar flat-card">
+          <span className="manage-matchbar__stage eyebrow">Press conference · before {current.opponent}</span>
+        </div>
+        <PressConference
+          seed={seed}
+          team={team}
+          opponent={current.opponent}
+          matchday={matchday}
+          onDone={() => {
+            setPressOpen(false);
+            kickOff();
+          }}
+        />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -232,7 +265,24 @@ function Active({
         </div>
       </div>
 
-      <div className="manage-play">
+      <div className="manage-mood mono">
+        <span className={`manage-mood__chip morale-${moraleLabel(tm.morale)}`}>Morale: {moraleLabel(tm.morale)}</span>
+        <span className="manage-mood__chip">Chemistry {Math.round(tm.chemistry)}</span>
+        <span className="manage-mood__chip">Fans {Math.round(career.fans)}</span>
+      </div>
+
+      <div className="manage-tabs">
+        <button type="button" className={`manage-tab ${preTab === "team" ? "is-on" : ""}`} onClick={() => setPreTab("team")}>
+          Team sheet
+        </button>
+        <button type="button" className={`manage-tab ${preTab === "inbox" ? "is-on" : ""}`} onClick={() => setPreTab("inbox")}>
+          Inbox{unread > 0 ? ` (${unread})` : ""}
+        </button>
+      </div>
+
+      {preTab === "inbox" && <ManagerInbox model={model} group={oppGroup} />}
+
+      <div className="manage-play" style={preTab === "inbox" ? { display: "none" } : undefined}>
         <div className="manage-play__pitch">
           <LineupTools
             squad={squad}
@@ -263,8 +313,8 @@ function Active({
             onFormation={setFormation}
             onPatch={setDraft}
           />
-          <button className="btn manage-play__go" onClick={kickOff}>
-            Kick off →
+          <button className="btn manage-play__go" onClick={() => (career.pressDone ? kickOff() : setPressOpen(true))}>
+            {career.pressDone ? "Kick off →" : "Face the press →"}
           </button>
           <Projection projection={career.projection} />
         </div>

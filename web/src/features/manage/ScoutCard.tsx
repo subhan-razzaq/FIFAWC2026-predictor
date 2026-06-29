@@ -2,19 +2,35 @@
 
 import type { Model } from "@weltmeister/sim";
 import { scoutTeam } from "../../lib/scouting";
+import { opponentManager } from "../../lib/managers";
 import { TeamBadge } from "../../components/TeamBadge";
+import { ManagerBadge } from "./ManagerBadge";
 
-export function ScoutCard({ model, opponent, group }: { model: Model; opponent: string; group?: string }) {
+export function ScoutCard({
+  model,
+  opponent,
+  group,
+  embedded = false,
+}: {
+  model: Model;
+  opponent: string;
+  group?: string;
+  embedded?: boolean;
+}) {
   const r = scoutTeam(model, opponent);
+  const manager = opponentManager(model, opponent);
   return (
-    <div className="scout flat-card">
-      <div className="scout__head">
-        <TeamBadge team={opponent} group={group} size={26} />
-        <div>
-          <div className="eyebrow">Scout report</div>
-          <div className="scout__headline">{r.headline}</div>
+    <div className={embedded ? "scout scout--embedded" : "scout flat-card"}>
+      {!embedded && (
+        <div className="scout__head">
+          <TeamBadge team={opponent} group={group} size={26} />
+          <div>
+            <div className="eyebrow">Scout report</div>
+            <div className="scout__headline">{r.headline}</div>
+          </div>
         </div>
-      </div>
+      )}
+      {!embedded && <ManagerBadge manager={manager} compact />}
 
       <div className="scout__meters">
         <Meter label="Attack" value={r.attack} tag={r.threat} />

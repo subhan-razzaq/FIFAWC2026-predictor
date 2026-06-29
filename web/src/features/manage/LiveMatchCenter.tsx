@@ -7,7 +7,7 @@
 
 import { useEffect, useMemo, useRef, useState, type MutableRefObject } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { arrangeEleven, type Model, type SquadPlayer } from "@weltmeister/sim";
+import { arrangeEleven, hashSeed, type Model, type SquadPlayer } from "@weltmeister/sim";
 import { useStore } from "../../store/store";
 import type { CareerState, LiveSub } from "../../store/store";
 import { MAX_SUBS } from "../../store/store";
@@ -70,7 +70,7 @@ function setupSig(l: NonNullable<CareerState["live"]>): string {
 
 interface FeedItem {
   minute: number;
-  kind: "period" | "goal" | "sub" | "card";
+  kind: "period" | "goal" | "sub" | "card" | "commentary";
   side?: "home" | "away";
   // goal payload
   scorer?: string;
@@ -500,12 +500,12 @@ function CommentaryFeed({ feed }: { feed: FeedItem[] }) {
         <AnimatePresence initial={false}>
           {feed.map((f) => {
             const key = `${f.minute}-${f.kind}-${f.scorer ?? f.on ?? f.text ?? ""}`;
-            if (f.kind === "period") {
+            if (f.kind === "period" || f.kind === "commentary") {
               return (
                 <motion.div
                   key={key}
                   layout
-                  className="lmc__ev lmc__ev--period"
+                  className={`lmc__ev ${f.kind === "commentary" ? "lmc__ev--commentary" : "lmc__ev--period"}`}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.25 }}
@@ -1053,6 +1053,7 @@ function buildFeed(
     if (cd.minute > clock) continue;
     items.push({ minute: cd.minute, kind: "card", side: cd.side, player: cd.player, cardType: cd.type === "red" ? "red" : "yellow" });
   }
+  for (const c of liveCommentary(live, clock)) items.push(c);
   if (clock >= 45) items.push({ minute: 45, kind: "period", text: "Half-time" });
   if (live.afterExtraTime && clock >= 90) items.push({ minute: 90, kind: "period", text: "Into extra time" });
   if (ftReached) {
@@ -1069,5 +1070,36 @@ function buildFeed(
 }
 
 function rank(f: FeedItem): number {
-  return f.kind === "goal" ? 3 : f.kind === "card" ? 2 : f.kind === "sub" ? 1 : 0;
+  return f.kind === "goal" ? 4 : f.kind === "card" ? 3 : f.kind === "sub" ? 2 : f.kind === "commentary" ? 1 : 0;
+}
+
+const ATMOSPHERE = [
+  "End to end stuff here, the crowd are loving it.",
+  "A lull in the play as both sides catch their breath.",
+  "Good pressure now, the manager is up off the bench.",
+  "Half a chance there, flashed across the face of goal.",
+  "The keeper claims it confidently under pressure.",
+  "Patient build-up, probing for an opening.",
+  "A crunching tackle wins it back and the fans roar.",
+  "Tempo rising as the hour mark approaches.",
+  "A free-kick in a dangerous area, bodies in the box.",
+  "Sloppy in possession there, almost punished.",
+  "The bench is shouting instructions, push them higher.",
+  "A booming clearance and the move breaks down.",
+];
+
+/** Deterministic atmosphere lines sprinkled through the half, so the feed keeps
+ * ticking between the real events. Seeded off the match and re-sim count so a
+ * replay reads the same. Lines that would collide with a goal minute are skipped. */
+function liveCommentary(live: NonNullable<CareerState["live"]>, clock: number): FeedItem[] {
+  const out: FeedItem[] = [];
+  const segStart = live.half === 2 ? 45 : 0;
+  const goalMins = new Set(live.goals.map((g) => g.minute));
+  const seed = hashSeed(`commentary|${live.home}|${live.away}|${live.half}|${live.resimCount}`);
+  for (let m = segStart + 6; m <= Math.min(clock, live.endClock - 2); m += 8) {
+    if (goalMins.has(m) || goalMins.has(m - 1) || goalMins.has(m + 1)) continue;
+    const idx = hashSeed(`${seed}|${m}`) % ATMOSPHERE.length;
+    out.push({ minute: m, kind: "commentary", text: ATMOSPHERE[idx] });
+  }
+  return out;
 }
