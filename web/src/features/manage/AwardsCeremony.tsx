@@ -95,9 +95,11 @@ export function AwardsCeremony({ model, seed, played }: { model: Model; seed: nu
             {awards.teamOfTournament.map((slot, i) => {
               const pos = f.slots[i] ?? { x: 50, y: 50 };
               return (
-                <div key={slot.player} className="awards__totw-player" style={{ left: `${pos.x}%`, top: `${pos.y}%` }}>
+                <div key={`${slot.player}-${i}`} className="awards__totw-player" style={{ left: `${pos.x}%`, top: `${pos.y}%` }}>
                   <span className="awards__totw-face" style={{ borderColor: RING[slot.pos] ?? "var(--steel)" }}>
-                    <PlayerAvatar photo={slot.photo} name={slot.player} />
+                    <span className="awards__totw-clip">
+                      <PlayerAvatar photo={slot.photo} name={slot.player} />
+                    </span>
                     <span className="awards__totw-rating mono">{slot.rating.toFixed(1)}</span>
                   </span>
                   <span className="awards__totw-name">{lastName(slot.player)}</span>

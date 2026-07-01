@@ -49,6 +49,7 @@ import { applyEvents, recoverInjuries, rollSquadEvents } from "../lib/events";
 import { opponentManager } from "../lib/managers";
 import { scoutTeam } from "../lib/scouting";
 import { buildNewspaper, type Newspaper } from "../lib/news";
+import { newsContext } from "../lib/competition";
 import { matchRatings } from "../lib/grade";
 import {
   boardMessage,
@@ -862,12 +863,19 @@ export const useStore = create<StoreState>((set, get) => ({
     const drew = !result.winner && tg === og;
     states = applyFormAndMorale(model, team, enriched, result, minutes, won, drew, states);
 
-    // the back page reacts to the result, and so do the fans
-    const matchday = c.played.length;
-    const news = buildNewspaper(seed, matchday, team, result, info.stage);
-    const fans = clamp01to100((c.fans ?? 75) + (won ? 6 : drew ? 1 : -5));
-
     const playedMatch: PlayedMatch = { info, settings: live.start, result, enriched };
+
+    // the back page reacts to the result and to the wider tournament, and so do the fans
+    const matchday = c.played.length;
+    let ctx: ReturnType<typeof newsContext> | undefined;
+    try {
+      const full = runSingle(model, seed);
+      ctx = newsContext(model, full, [...c.played, playedMatch], info.stage);
+    } catch {
+      /* if the full sim fails for any reason, fall back to the local report */
+    }
+    const news = buildNewspaper(seed, matchday, team, result, info.stage, ctx);
+    const fans = clamp01to100((c.fans ?? 75) + (won ? 6 : drew ? 1 : -5));
     set({
       career: {
         ...c,

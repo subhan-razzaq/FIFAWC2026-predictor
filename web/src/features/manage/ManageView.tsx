@@ -17,6 +17,7 @@ import { TournamentPanel } from "./TournamentPanel";
 import { TournamentStats } from "./TournamentStats";
 import { LiveMatchCenter } from "./LiveMatchCenter";
 import { ManagerInbox } from "./ManagerInbox";
+import { TournamentHub } from "./TournamentHub";
 import { PressConference } from "./PressConference";
 import { HeadlineBar, NewspaperModal } from "./NewspaperModal";
 import { teamMorale, moraleLabel } from "../../lib/morale";
@@ -148,7 +149,7 @@ function Active({
   const { team, current, draft, phase, lastResult } = career;
   const squad = model.squads[team]!;
   const [paperOpen, setPaperOpen] = useState(false);
-  const [preTab, setPreTab] = useState<"team" | "inbox">("team");
+  const [preTab, setPreTab] = useState<"team" | "inbox" | "tournament">("team");
   const [pressOpen, setPressOpen] = useState(false);
 
   if ((phase === "live" || phase === "halftime") && career.live) {
@@ -214,6 +215,10 @@ function Active({
         </button>
         <Journey career={career} team={team} />
         <TournamentPanel model={model} seed={seed} career={career} groupOf={groupOf} />
+        <div className="manage-hub-block">
+          <div className="eyebrow manage-hub-block__head">Around the World Cup</div>
+          <TournamentHub model={model} seed={seed} career={career} groupOf={groupOf} />
+        </div>
         <TournamentStats model={model} team={team} played={career.played} />
       </div>
     );
@@ -278,11 +283,15 @@ function Active({
         <button type="button" className={`manage-tab ${preTab === "inbox" ? "is-on" : ""}`} onClick={() => setPreTab("inbox")}>
           Inbox{unread > 0 ? ` (${unread})` : ""}
         </button>
+        <button type="button" className={`manage-tab ${preTab === "tournament" ? "is-on" : ""}`} onClick={() => setPreTab("tournament")}>
+          Tournament
+        </button>
       </div>
 
       {preTab === "inbox" && <ManagerInbox model={model} group={oppGroup} />}
+      {preTab === "tournament" && <TournamentHub model={model} seed={seed} career={career} groupOf={groupOf} />}
 
-      <div className="manage-play" style={preTab === "inbox" ? { display: "none" } : undefined}>
+      <div className="manage-play" style={preTab !== "team" ? { display: "none" } : undefined}>
         <div className="manage-play__pitch">
           <LineupTools
             squad={squad}

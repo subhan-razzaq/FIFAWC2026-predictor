@@ -23,6 +23,17 @@ export interface Newspaper {
   pages: NewsPage[];
 }
 
+/** Real context from the rest of the tournament, so the paper can report on other
+ * games and the wider picture rather than inventing vague rumours. */
+export interface NewsContext {
+  /** other results at the same stage as the manager's game, with their scorers. */
+  otherResults: MatchResult[];
+  /** the current top scorer of the whole tournament, if there is one. */
+  topScorer?: { player: string; team: string; goals: number };
+  /** fitted attack ratings, to judge which results are genuine upsets. */
+  ratingOf?: Map<string, number>;
+}
+
 const PAPERS = ["The Global Post", "World Sport Daily", "The Touchline", "Frontpage FC", "The Terrace"];
 
 const STAGE_WORD: Record<Stage, string> = {
@@ -132,24 +143,89 @@ function starPage(team: string, result: MatchResult): NewsPage | null {
   return { kicker: "THE STAR", splash: `${name.toUpperCase()} ON TARGET`, standfirst: `${name} with the decisive contribution for ${team}.`, tone: "neutral", body: [`${name} popped up with a goal that could prove important come the end of the tournament.`] };
 }
 
-/** One tournament-wide brief, still grounded so it never reads as a vague rumour. */
-function aroundPage(seed: number, matchday: number, team: string, stage: Stage): NewsPage {
-  const bank: NewsPage[] = [
-    { kicker: "ELSEWHERE", splash: "HOSTS MARCH ON", standfirst: "A home crowd roars its side through the round.", tone: "neutral", body: ["The three host nations continue to draw vast, noisy crowds across the continent."] },
-    { kicker: "THE RACE", splash: "GOLDEN BOOT HEATS UP", standfirst: "The scoring charts tighten at the top.", tone: "neutral", body: ["With goals flying in across the groups, the race for the Golden Boot is wide open."] },
-    { kicker: "FANS", splash: "CARNIVAL IN THE STANDS", standfirst: "Supporters turn the host cities into one long party.", tone: "neutral", body: ["From coast to coast, the World Cup has taken over."] },
-    { kicker: "TACTICS", splash: "PRESSING GAME RULES", standfirst: "The sides who press highest are setting the pace.", tone: "neutral", body: ["Analysts note that the most aggressive teams are reaping the rewards in the final third."] },
-    { kicker: "DRAMA", splash: "LATE GOALS DECIDE IT", standfirst: "Stoppage time is providing the headlines.", tone: "neutral", body: ["More than one tie has swung in the dying minutes during this ", "round."] },
-  ];
-  const h = hashSeed(`around|${seed}|${matchday}|${team}|${stage}`);
-  return bank[h % bank.length]!;
+/** The biggest result from elsewhere in the round: a thrashing or a marquee win,
+ * reported with the real teams and scorers. */
+function elsewherePage(myTeam: string, stage: Stage, ctx: NewsContext): NewsPage | null {
+  const others = ctx.otherResults.filter((m) => m.home !== myTeam && m.away !== myTeam);
+  if (others.length === 0) return null;
+  // pick the match with the biggest goal margin, then most total goals
+  const best = [...others].sort((a, b) => {
+    const ma = Math.abs(a.homeGoals - a.awayGoals);
+    const mb = Math.abs(b.homeGoals - b.awayGoals);
+    return mb - ma || b.homeGoals + b.awayGoals - (a.homeGoals + a.awayGoals);
+  })[0]!;
+  const win = best.homeGoals >= best.awayGoals ? best.home : best.away;
+  const lose = win === best.home ? best.away : best.home;
+  const wg = Math.max(best.homeGoals, best.awayGoals);
+  const lg = Math.min(best.homeGoals, best.awayGoals);
+  const scorers = scorerPhrase(scorerTally(best.scorers, win));
+  const margin = wg - lg;
+  const splash = margin >= 3 ? `${win.toUpperCase()} PUT ${lose.toUpperCase()} TO THE SWORD` : `${win.toUpperCase()} SEE OFF ${lose.toUpperCase()}`;
+  return {
+    kicker: "ELSEWHERE",
+    splash,
+    standfirst: `${win} beat ${lose} ${wg}-${lg} in the ${STAGE_WORD[stage]}.`,
+    tone: "neutral",
+    body: [
+      `The pick of the round elsewhere saw ${win} beat ${lose} ${wg}-${lg}.`,
+      scorers ? `${scorers} did the damage.` : `It was a night to forget for ${lose}.`,
+    ],
+  };
 }
 
-export function buildNewspaper(seed: number, matchday: number, team: string, result: MatchResult, stage: Stage): Newspaper {
+/** An upset from the round, judged against the fitted attack ratings, if one exists. */
+function upsetPage(myTeam: string, ctx: NewsContext): NewsPage | null {
+  if (!ctx.ratingOf) return null;
+  const others = ctx.otherResults.filter((m) => m.home !== myTeam && m.away !== myTeam);
+  let best: { winner: string; loser: string; wg: number; lg: number; gap: number } | null = null;
+  for (const m of others) {
+    const decided = m.winner ?? (m.homeGoals > m.awayGoals ? m.home : m.awayGoals > m.homeGoals ? m.away : null);
+    if (!decided) continue;
+    const loser = decided === m.home ? m.away : m.home;
+    const gap = (ctx.ratingOf.get(loser) ?? 0) - (ctx.ratingOf.get(decided) ?? 0);
+    const wg = decided === m.home ? m.homeGoals : m.awayGoals;
+    const lg = decided === m.home ? m.awayGoals : m.homeGoals;
+    if (gap > 0 && (!best || gap > best.gap)) best = { winner: decided, loser, wg, lg, gap };
+  }
+  if (!best || best.gap < 0.25) return null;
+  return {
+    kicker: "UPSET",
+    splash: `${best.winner.toUpperCase()} SHOCK ${best.loser.toUpperCase()}`,
+    standfirst: `${best.winner} stun the favourites ${best.wg}-${best.lg}.`,
+    tone: "neutral",
+    body: [`Few saw it coming, but ${best.winner} had too much for ${best.loser} and take the headlines.`],
+  };
+}
+
+/** The scoring race, named from the real top scorer of the tournament. */
+function racePage(ctx: NewsContext): NewsPage | null {
+  if (!ctx.topScorer || ctx.topScorer.goals < 2) return null;
+  const { player, team, goals } = ctx.topScorer;
+  return {
+    kicker: "GOLDEN BOOT",
+    splash: `${lastName(player).toUpperCase()} LEADS THE RACE`,
+    standfirst: `${player} of ${team} tops the scoring charts on ${goals}.`,
+    tone: "neutral",
+    body: [`${player} has hit ${goals} so far and sits clear at the top of the Golden Boot race.`, "The rest of the field has some catching up to do."],
+  };
+}
+
+export function buildNewspaper(seed: number, matchday: number, team: string, result: MatchResult, stage: Stage, ctx?: NewsContext): Newspaper {
   const pages: NewsPage[] = [reportPage(team, result, stage)];
   const star = starPage(team, result);
   if (star) pages.push(star);
-  pages.push(aroundPage(seed, matchday, team, stage));
+  if (ctx) {
+    const elsewhere = elsewherePage(team, stage, ctx);
+    if (elsewhere) pages.push(elsewhere);
+    const upset = upsetPage(team, ctx);
+    if (upset) pages.push(upset);
+    const race = racePage(ctx);
+    if (race) pages.push(race);
+  }
+  // guarantee at least one wider story even with no context yet
+  if (pages.length === 1) {
+    pages.push({ kicker: "AROUND THE GROUNDS", splash: "THE WORLD CUP ROLLS ON", standfirst: "Drama across the host cities as the tournament builds.", tone: "neutral", body: ["From coast to coast, the World Cup has taken over."] });
+  }
   return {
     masthead: masthead(seed, matchday),
     date: `World Cup 2026 · ${STAGE_WORD[stage]}`,
