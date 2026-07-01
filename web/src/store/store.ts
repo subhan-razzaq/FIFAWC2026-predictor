@@ -62,6 +62,7 @@ import {
 
 export type Status = "boot" | "ready" | "running" | "done" | "error";
 export type Theme = "dark" | "light";
+export type ManageSection = "squad" | "inbox" | "tournament";
 
 function readTheme(): Theme {
   if (typeof window === "undefined") return "dark";
@@ -159,6 +160,10 @@ interface StoreState {
   single: TournamentResult | null;
 
   career: CareerState | null;
+
+  /** which manager-mode section is showing (drives the in-game nav). */
+  manageView: ManageSection;
+  setManageView: (v: ManageSection) => void;
 
   theme: Theme;
   toggleTheme: () => void;
@@ -400,6 +405,9 @@ export const useStore = create<StoreState>((set, get) => ({
   single: null,
 
   career: null,
+
+  manageView: "squad",
+  setManageView: (v) => set({ manageView: v }),
 
   theme: readTheme(),
   toggleTheme: () => {

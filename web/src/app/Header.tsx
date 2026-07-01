@@ -1,5 +1,5 @@
-import { NavLink } from "react-router-dom";
-import { useStore } from "../store/store";
+import { NavLink, useLocation } from "react-router-dom";
+import { useStore, type ManageSection } from "../store/store";
 
 const LINKS = [
   { to: "/", label: "Dashboard", end: true },
@@ -10,6 +10,12 @@ const LINKS = [
   { to: "/scorers", label: "Stats" },
   { to: "/methodology", label: "Method" },
   { to: "/about", label: "About" },
+];
+
+const MANAGE_SECTIONS: { key: ManageSection; label: string }[] = [
+  { key: "squad", label: "Squad" },
+  { key: "inbox", label: "Inbox" },
+  { key: "tournament", label: "Tournament" },
 ];
 
 const RUN_OPTIONS = [5000, 10000, 25000, 50000];
@@ -50,30 +56,55 @@ export function Header() {
   const run = useStore((s) => s.run);
   const theme = useStore((s) => s.theme);
   const toggleTheme = useStore((s) => s.toggleTheme);
+  const career = useStore((s) => s.career);
+  const manageView = useStore((s) => s.manageView);
+  const setManageView = useStore((s) => s.setManageView);
   const running = status === "running";
+  const location = useLocation();
+
+  // in an active career, the nav becomes the in-game sections and the sim controls
+  // step aside, so it reads as a game mode rather than the browsing site
+  const inCareer = !!career && career.phase !== "ended" && location.pathname === "/manage";
+  const unread = career?.inbox.filter((m) => !m.read).length ?? 0;
 
   return (
-    <header className="site-header">
+    <header className={`site-header ${inCareer ? "site-header--career" : ""}`}>
       <div className="wrap site-header__row">
         <NavLink to="/" className="brand" aria-label="WELTMEISTER home">
           <img src={`${import.meta.env.BASE_URL}26.png`} className="brand-logo" alt="" width={30} height={30} />
           WELTMEISTER
         </NavLink>
 
-        <nav className="nav" aria-label="Primary">
-          {LINKS.map((l) => (
-            <NavLink
-              key={l.to}
-              to={l.to}
-              end={l.end}
-              className={({ isActive }) => `${isActive ? "active" : ""}${l.primary ? " nav-primary" : ""}`}
-            >
-              {l.label}
-            </NavLink>
-          ))}
-        </nav>
+        {inCareer ? (
+          <nav className="nav nav--career" aria-label="Manager sections">
+            {MANAGE_SECTIONS.map((s) => (
+              <button
+                key={s.key}
+                type="button"
+                className={`nav-seg ${manageView === s.key ? "active" : ""}`}
+                onClick={() => setManageView(s.key)}
+              >
+                {s.label}
+                {s.key === "inbox" && unread > 0 && <span className="nav-seg__badge">{unread}</span>}
+              </button>
+            ))}
+          </nav>
+        ) : (
+          <nav className="nav" aria-label="Primary">
+            {LINKS.map((l) => (
+              <NavLink
+                key={l.to}
+                to={l.to}
+                end={l.end}
+                className={({ isActive }) => `${isActive ? "active" : ""}${l.primary ? " nav-primary" : ""}`}
+              >
+                {l.label}
+              </NavLink>
+            ))}
+          </nav>
+        )}
 
-        <div className="simctl">
+        <div className="simctl" style={inCareer ? { visibility: "hidden" } : undefined}>
           <button
             className="btn btn--ghost theme-toggle"
             onClick={toggleTheme}

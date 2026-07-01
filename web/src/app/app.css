@@ -119,6 +119,48 @@ main#main {
   color: var(--gold-bright);
 }
 
+/* in-career nav: the site links become manager sections, styled as segments */
+.nav--career {
+  gap: 2px;
+  align-items: center;
+}
+.nav-seg {
+  position: relative;
+  font-family: var(--font-mono);
+  font-size: var(--t-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  padding: var(--s-2) var(--s-4);
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: color var(--dur-fast), border-bottom-color var(--dur-fast), background var(--dur-fast);
+}
+.nav-seg:hover {
+  color: var(--text);
+  background: var(--surface-hi);
+}
+.nav-seg.active {
+  color: var(--gold);
+  border-bottom-color: var(--gold);
+}
+.nav-seg__badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 16px;
+  height: 16px;
+  margin-left: 6px;
+  padding: 0 4px;
+  background: var(--gold);
+  color: var(--ink);
+  font-size: 10px;
+  font-weight: 700;
+  vertical-align: middle;
+}
+.site-header--career {
+  border-bottom-color: color-mix(in srgb, var(--gold) 40%, var(--line-strong));
+}
+
 /* sim control */
 .simctl {
   display: flex;

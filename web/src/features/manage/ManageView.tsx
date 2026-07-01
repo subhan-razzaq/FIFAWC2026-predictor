@@ -2,7 +2,7 @@
 // shape and tactics, scout the opponent, play the game, manage stamina and
 // suspensions across the run, and finish with a manager grade.
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useStore } from "../../store/store";
 import { Confetti } from "../../components/Confetti";
@@ -145,12 +145,19 @@ function Active({
   const setDraft = useStore((s) => s.setDraft);
   const kickOff = useStore((s) => s.kickOff);
   const continueCareer = useStore((s) => s.continueCareer);
+  const manageView = useStore((s) => s.manageView);
+  const setManageView = useStore((s) => s.setManageView);
 
   const { team, current, draft, phase, lastResult } = career;
   const squad = model.squads[team]!;
   const [paperOpen, setPaperOpen] = useState(false);
-  const [preTab, setPreTab] = useState<"team" | "inbox" | "tournament">("team");
   const [pressOpen, setPressOpen] = useState(false);
+
+  // a live match, half-time or the result screen always shows the match itself,
+  // never the inbox or tournament section, so snap back to the squad view there
+  useEffect(() => {
+    if (phase !== "preMatch" && manageView !== "squad") setManageView("squad");
+  }, [phase, manageView, setManageView]);
 
   if ((phase === "live" || phase === "halftime") && career.live) {
     return (
@@ -228,7 +235,6 @@ function Active({
   const oppGroup = groupOf.get(current.opponent);
   const matchday = career.played.length;
   const tm = teamMorale(career.playerStates, draft.eleven);
-  const unread = career.inbox.filter((m) => !m.read).length;
 
   if (pressOpen) {
     return (
@@ -276,61 +282,54 @@ function Active({
         <span className="manage-mood__chip">Fans {Math.round(career.fans)}</span>
       </div>
 
-      <div className="manage-tabs">
-        <button type="button" className={`manage-tab ${preTab === "team" ? "is-on" : ""}`} onClick={() => setPreTab("team")}>
-          Team sheet
-        </button>
-        <button type="button" className={`manage-tab ${preTab === "inbox" ? "is-on" : ""}`} onClick={() => setPreTab("inbox")}>
-          Inbox{unread > 0 ? ` (${unread})` : ""}
-        </button>
-        <button type="button" className={`manage-tab ${preTab === "tournament" ? "is-on" : ""}`} onClick={() => setPreTab("tournament")}>
-          Tournament
-        </button>
-      </div>
+      {manageView === "inbox" ? (
+        <ManagerInbox model={model} group={oppGroup} />
+      ) : manageView === "tournament" ? (
+        <TournamentHub model={model} seed={seed} career={career} groupOf={groupOf} />
+      ) : (
+        <>
+          <div className="manage-play">
+            <div className="manage-play__pitch">
+              <LineupTools
+                squad={squad}
+                formation={draft.formation}
+                eleven={draft.eleven}
+                states={career.playerStates}
+                onPick={setEleven}
+              />
+              <DragPitch
+                squad={squad}
+                eleven={draft.eleven}
+                formation={draft.formation}
+                captain={draft.captain}
+                penaltyTaker={draft.penaltyTaker}
+                states={career.playerStates}
+                onChange={setEleven}
+              />
+            </div>
 
-      {preTab === "inbox" && <ManagerInbox model={model} group={oppGroup} />}
-      {preTab === "tournament" && <TournamentHub model={model} seed={seed} career={career} groupOf={groupOf} />}
+            <div className="manage-play__side">
+              <MatchOdds model={model} team={team} current={current} draft={draft} states={career.playerStates} />
+              <ScoutCard model={model} opponent={current.opponent} group={oppGroup} />
+              <TacticsPanel
+                model={model}
+                team={team}
+                draft={draft}
+                states={career.playerStates}
+                onFormation={setFormation}
+                onPatch={setDraft}
+              />
+              <button className="btn manage-play__go" onClick={() => (career.pressDone ? kickOff() : setPressOpen(true))}>
+                {career.pressDone ? "Kick off →" : "Face the press →"}
+              </button>
+              <Projection projection={career.projection} />
+            </div>
+          </div>
 
-      <div className="manage-play" style={preTab !== "team" ? { display: "none" } : undefined}>
-        <div className="manage-play__pitch">
-          <LineupTools
-            squad={squad}
-            formation={draft.formation}
-            eleven={draft.eleven}
-            states={career.playerStates}
-            onPick={setEleven}
-          />
-          <DragPitch
-            squad={squad}
-            eleven={draft.eleven}
-            formation={draft.formation}
-            captain={draft.captain}
-            penaltyTaker={draft.penaltyTaker}
-            states={career.playerStates}
-            onChange={setEleven}
-          />
-        </div>
-
-        <div className="manage-play__side">
-          <MatchOdds model={model} team={team} current={current} draft={draft} states={career.playerStates} />
-          <ScoutCard model={model} opponent={current.opponent} group={oppGroup} />
-          <TacticsPanel
-            model={model}
-            team={team}
-            draft={draft}
-            states={career.playerStates}
-            onFormation={setFormation}
-            onPatch={setDraft}
-          />
-          <button className="btn manage-play__go" onClick={() => (career.pressDone ? kickOff() : setPressOpen(true))}>
-            {career.pressDone ? "Kick off →" : "Face the press →"}
-          </button>
-          <Projection projection={career.projection} />
-        </div>
-      </div>
-
-      <Journey career={career} team={team} />
-      <TournamentPanel model={model} seed={seed} career={career} groupOf={groupOf} />
+          <Journey career={career} team={team} />
+          <TournamentPanel model={model} seed={seed} career={career} groupOf={groupOf} />
+        </>
+      )}
     </div>
   );
 }
