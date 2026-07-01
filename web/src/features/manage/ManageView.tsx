@@ -173,7 +173,6 @@ function Active({
         <LiveMatchCenter model={model} career={career} groupOf={groupOf} />
         <Journey career={career} team={team} />
         <TournamentPanel model={model} seed={seed} career={career} groupOf={groupOf} />
-        <TournamentStats model={model} team={team} played={career.played} />
       </div>
     );
   }
@@ -287,6 +286,14 @@ function Active({
         <ManagerInbox model={model} group={oppGroup} />
       ) : manageView === "tournament" ? (
         <TournamentHub model={model} seed={seed} career={career} groupOf={groupOf} />
+      ) : manageView === "stats" ? (
+        career.played.length === 0 ? (
+          <div className="thub thub--empty mono">
+            Your squad stats fill in as you play. Come back after your first match to see your Golden Boot race, clean sheets, discipline and results.
+          </div>
+        ) : (
+          <TournamentStats model={model} team={team} played={career.played} />
+        )
       ) : manageView === "scout" ? (
         <div className="manage-scout-page">
           <div className="eyebrow">Next opponent · {current.opponent}</div>

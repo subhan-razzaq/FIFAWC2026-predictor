@@ -17,6 +17,7 @@ const MANAGE_SECTIONS: { key: ManageSection; label: string }[] = [
   { key: "scout", label: "Scout" },
   { key: "inbox", label: "Inbox" },
   { key: "tournament", label: "Tournament" },
+  { key: "stats", label: "My Stats" },
   { key: "news", label: "News" },
 ];
 

@@ -62,7 +62,7 @@ import {
 
 export type Status = "boot" | "ready" | "running" | "done" | "error";
 export type Theme = "dark" | "light";
-export type ManageSection = "squad" | "scout" | "inbox" | "tournament" | "news";
+export type ManageSection = "squad" | "scout" | "inbox" | "tournament" | "stats" | "news";
 
 function readTheme(): Theme {
   if (typeof window === "undefined") return "dark";
@@ -521,6 +521,11 @@ export const useStore = create<StoreState>((set, get) => ({
   startCareer: (team) => {
     const { model } = get();
     if (!model) return;
+    // every career gets its own fresh seed, so no two runs play out the same way. The
+    // seed still drives everything within the run, so re-sims and the saved career stay
+    // consistent and reproducible.
+    const seed = Math.floor(Math.random() * 1_000_000);
+    set({ seed, seedLabel: String(seed), baseline: null });
     // start with a fully fit squad: no injuries before a ball has been kicked. Knocks
     // and illness only strike in the build-up between matches, once you are playing.
     const states = initStates(model, team);
@@ -539,7 +544,7 @@ export const useStore = create<StoreState>((set, get) => ({
         played: [],
         group: null,
         outcome: null,
-        projection: get().baseline?.teams.find((t) => t.team === team) ?? null,
+        projection: null,
         lastResult: null,
         inbox,
         fans: 75,
@@ -547,19 +552,19 @@ export const useStore = create<StoreState>((set, get) => ({
         lastNews: null,
       },
     });
-    // a one-time baseline run gives the pre-tournament projection and the grade
-    // benchmark; reuse it if we already have one for this seed.
-    if (!get().baseline) {
-      const { seed, runs } = get();
-      void getRunner()
-        .montecarlo(model, runs, seed, undefined)
-        .then((base) => {
-          set({ baseline: base });
-          const c = get().career;
-          if (c) set({ career: { ...c, projection: base.teams.find((t) => t.team === c.team) ?? null } });
-        })
-        .catch(() => {});
-    }
+    // a one-time baseline run on this career's seed gives the pre-tournament projection
+    // and the grade benchmark.
+    const { runs } = get();
+    void getRunner()
+      .montecarlo(model, runs, seed, undefined)
+      .then((base) => {
+        // ignore if a newer career started in the meantime
+        if (get().seed !== seed) return;
+        set({ baseline: base });
+        const c = get().career;
+        if (c) set({ career: { ...c, projection: base.teams.find((t) => t.team === c.team) ?? null } });
+      })
+      .catch(() => {});
   },
 
   setDraft: (patch) => {
