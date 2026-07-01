@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 
 import { useStore } from "../store/store";
 import { Header } from "./Header";
@@ -74,7 +75,37 @@ export function App() {
       </a>
       <Header />
       <main id="main">
-        <Routes>
+        <PageTransitions />
+      </main>
+      <Footer />
+    </div>
+  );
+}
+
+// Cross-fade and lift between pages. Each route mounts inside an AnimatePresence so
+// leaving a page fades it out while the next slides gently up into place. Reduced
+// motion collapses this to an instant swap.
+function PageTransitions() {
+  const location = useLocation();
+  const reduce = useReducedMotion();
+  const variants = reduce
+    ? { initial: {}, animate: {}, exit: {} }
+    : {
+        initial: { opacity: 0, y: 10 },
+        animate: { opacity: 1, y: 0 },
+        exit: { opacity: 0, y: -6 },
+      };
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={location.pathname}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        variants={variants}
+        transition={{ duration: 0.34, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <Routes location={location}>
           <Route path="/" element={<HomeView />} />
           <Route path="/results" element={<ResultsView />} />
           <Route path="/bracket" element={<BracketView />} />
@@ -85,8 +116,7 @@ export function App() {
           <Route path="/about" element={<AboutView />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </main>
-      <Footer />
-    </div>
+      </motion.div>
+    </AnimatePresence>
   );
 }

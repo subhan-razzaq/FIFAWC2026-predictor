@@ -188,24 +188,40 @@ main#main {
   color: var(--ink);
   background: var(--gold);
   font-weight: 700;
-  transition: transform var(--dur-fast), background var(--dur-fast);
+  transition: transform var(--dur-fast) var(--ease-broadcast), background var(--dur-fast), box-shadow var(--dur-fast);
 }
 .btn:hover {
   background: var(--gold-bright);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--gold) 30%, transparent);
 }
 .btn:active {
   transform: translateY(1px);
+  box-shadow: none;
 }
 .btn--ghost {
   background: transparent;
   color: var(--text);
+  box-shadow: none;
 }
 .btn--ghost:hover {
   background: var(--surface-hi);
+  box-shadow: none;
 }
 .btn:disabled {
   opacity: 0.5;
   cursor: progress;
+  transform: none;
+  box-shadow: none;
+}
+
+/* an interactive card that lifts slightly on hover, for clickable surfaces */
+.flat-card--interactive {
+  transition: transform var(--dur-fast) var(--ease-broadcast), border-color var(--dur-fast), background var(--dur-fast);
+}
+.flat-card--interactive:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--gold) 45%, var(--line-strong));
 }
 
 .progress {

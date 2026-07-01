@@ -48,10 +48,18 @@
 .manage-mood__chip.morale-unsettled, .manage-mood__chip.morale-unhappy { color: var(--fifa-red); border-color: color-mix(in srgb, var(--fifa-red) 45%, var(--line-strong)); }
 .manage-tabs { display: flex; gap: 2px; margin-bottom: var(--s-3); }
 .manage-tab {
-  padding: 8px 16px; border: var(--border-strong); background: var(--surface);
+  position: relative; padding: 8px 16px; border: var(--border-strong); background: var(--surface);
   color: var(--text-dim); font-weight: 700; font-size: var(--t-sm);
+  transition: color var(--dur-fast), background var(--dur-fast);
 }
-.manage-tab.is-on { background: var(--surface-hi); color: var(--text); border-bottom: 2px solid var(--gold); }
+.manage-tab::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -2px; height: 2px;
+  background: var(--gold); transform: scaleX(0); transform-origin: center;
+  transition: transform var(--dur) var(--ease-broadcast);
+}
+.manage-tab:hover { color: var(--text); background: var(--surface-hi); }
+.manage-tab.is-on { background: var(--surface-hi); color: var(--text); }
+.manage-tab.is-on::after { transform: scaleX(1); }
 
 /* form arrow on a pitch token */
 .pitch__form {

@@ -79,10 +79,10 @@ export function TournamentHub({
             <motion.ol
               key={race}
               className="thub__race"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial="hidden"
+              animate="show"
               exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.22 }}
+              variants={{ hidden: {}, show: { transition: { staggerChildren: 0.03 } } }}
             >
               {rows.length === 0 ? (
                 <li className="thub__none mono">No entries yet.</li>
@@ -113,7 +113,11 @@ export function TournamentHub({
 function RaceRow({ entry, rank, unit, groupOf }: { entry: RaceEntry; rank: number; unit: string; groupOf: Map<string, string> }) {
   const shown = unit === "rating" ? entry.value.toFixed(2) : String(entry.value);
   return (
-    <motion.li layout className={`thub__row ${rank === 1 ? "is-leader" : ""}`}>
+    <motion.li
+      layout
+      className={`thub__row ${rank === 1 ? "is-leader" : ""}`}
+      variants={{ hidden: { opacity: 0, x: -10 }, show: { opacity: 1, x: 0 } }}
+    >
       <span className="thub__rank mono">{rank}</span>
       <span className="thub__face">
         <span className="thub__face-clip">
