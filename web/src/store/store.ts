@@ -62,7 +62,7 @@ import {
 
 export type Status = "boot" | "ready" | "running" | "done" | "error";
 export type Theme = "dark" | "light";
-export type ManageSection = "squad" | "inbox" | "tournament";
+export type ManageSection = "squad" | "scout" | "inbox" | "tournament" | "news";
 
 function readTheme(): Theme {
   if (typeof window === "undefined") return "dark";

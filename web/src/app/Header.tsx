@@ -14,8 +14,10 @@ const LINKS = [
 
 const MANAGE_SECTIONS: { key: ManageSection; label: string }[] = [
   { key: "squad", label: "Squad" },
+  { key: "scout", label: "Scout" },
   { key: "inbox", label: "Inbox" },
   { key: "tournament", label: "Tournament" },
+  { key: "news", label: "News" },
 ];
 
 const RUN_OPTIONS = [5000, 10000, 25000, 50000];

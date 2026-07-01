@@ -116,6 +116,7 @@ export function ManageView() {
           model={model}
           team={career.team}
           group={groupOf.get(career.team)}
+          groupOf={groupOf}
           reached={career.outcome.reached}
           isChampion={career.outcome.isChampion}
           projection={career.projection}
@@ -286,6 +287,13 @@ function Active({
         <ManagerInbox model={model} group={oppGroup} />
       ) : manageView === "tournament" ? (
         <TournamentHub model={model} seed={seed} career={career} groupOf={groupOf} />
+      ) : manageView === "scout" ? (
+        <div className="manage-scout-page">
+          <div className="eyebrow">Next opponent · {current.opponent}</div>
+          <ScoutCard model={model} opponent={current.opponent} group={oppGroup} />
+        </div>
+      ) : manageView === "news" ? (
+        <NewsPage career={career} />
       ) : (
         <>
           <div className="manage-play">
@@ -337,6 +345,40 @@ function Active({
 function lastName(name: string): string {
   const parts = name.split(" ");
   return parts.length > 1 ? parts.slice(1).join(" ") : name;
+}
+
+// The News section: the latest back page laid out in full, so it reads like the
+// day's paper rather than a fleeting pop-up.
+function NewsPage({ career }: { career: CareerState }) {
+  const news = career.lastNews;
+  if (!news) {
+    return (
+      <div className="thub thub--empty mono">
+        No back pages yet. After your first match the press will have plenty to say, here and around the World Cup.
+      </div>
+    );
+  }
+  return (
+    <div className="newspage">
+      <div className="newspage__paper">
+        <div className="paper__masthead">{news.masthead}</div>
+        <div className="paper__rule" />
+        <div className="paper__date mono">{news.date}</div>
+        {news.pages.map((p, i) => (
+          <div key={i} className="newspage__story">
+            <div className="paper__kicker mono">{p.kicker}</div>
+            <h3 className="paper__splash">{p.splash}</h3>
+            <p className="paper__standfirst">{p.standfirst}</p>
+            <div className="paper__body">
+              {p.body.map((para, j) => (
+                <p key={j}>{para}</p>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 // Quick team-sheet actions plus the team news the rotation mechanic hinges on:
