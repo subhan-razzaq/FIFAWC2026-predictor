@@ -5,9 +5,21 @@
 // tournament's Golden Boot, Golden Ball, Golden Glove, Best Young Player (aged 21 or
 // under) and a Team of the Tournament, each from any nation, not only the user's.
 
-import { enrichMatch, type MatchResult, type Model, type Stage, type TournamentResult } from "@weltmeister/sim";
+import {
+  enrichMatch,
+  FINAL,
+  QF,
+  R16,
+  R32,
+  SF,
+  type MatchResult,
+  type Model,
+  type Stage,
+  type TournamentResult,
+} from "@weltmeister/sim";
 import type { PlayedMatch } from "../store/store";
 import { YOUNG_PLAYER_MAX_AGE, type Awards, type AwardWinner, type TotwSlot } from "./awards";
+import { resolveBracket, seedR32, type Side } from "./predictBracket";
 
 interface Acc {
   player: string;
@@ -170,6 +182,62 @@ const STAGE_LABEL: Record<Stage, string> = {
   final: "Final",
 };
 
+/** A team-pair key that ignores home/away order, for matching results to fixtures. */
+function pairKey(a: string, b: string): string {
+  return [a, b].sort().join("|");
+}
+
+/** Look up each group fixture's matchday (1..3) by its team pairing. */
+function buildMatchdayIndex(model: Model): Map<string, number> {
+  const idx = new Map<string, number>();
+  for (const f of model.fixtures) {
+    if (f.stage === "group" && f.matchday) idx.set(pairKey(f.home, f.away), f.matchday);
+  }
+  return idx;
+}
+
+/**
+ * Group the revealed matches into rounds for the results feed, newest first. The
+ * group stage is split into its three matchdays (like the knockout rounds are
+ * separate blocks), so results read one round at a time rather than as one long
+ * list. Later stages are one block each.
+ */
+function groupResultsByRound(model: Model, revealed: MatchResult[]): CompetitionResults[] {
+  const mdIndex = buildMatchdayIndex(model);
+  const out: CompetitionResults[] = [];
+
+  // group stage: one block per matchday, newest matchday first
+  const groupMatches = revealed.filter((m) => m.stage === "group");
+  const byMatchday = new Map<number, MatchResult[]>();
+  for (const m of groupMatches) {
+    const md = mdIndex.get(pairKey(m.home, m.away)) ?? 1;
+    const arr = byMatchday.get(md) ?? [];
+    arr.push(m);
+    byMatchday.set(md, arr);
+  }
+  for (const md of [3, 2, 1]) {
+    const matches = byMatchday.get(md);
+    if (matches && matches.length) out.push({ stage: "group", label: `Group stage · Matchday ${md}`, matches });
+  }
+
+  // knockout rounds: one block each, newest first
+  const koStages = STAGE_ORDER.filter((s) => s !== "group").reverse();
+  for (const s of koStages) {
+    const matches = revealed.filter((m) => m.stage === s);
+    if (matches.length) out.unshift({ stage: s, label: STAGE_LABEL[s], matches });
+  }
+  // knockouts should sit above the group stage (newest first overall)
+  return out.sort((a, b) => {
+    const sa = STAGE_ORDER.indexOf(a.stage);
+    const sb = STAGE_ORDER.indexOf(b.stage);
+    if (sa !== sb) return sb - sa;
+    // same stage (group): higher matchday first, read from the label
+    const ma = Number(a.label.match(/Matchday (\d)/)?.[1] ?? 0);
+    const mb = Number(b.label.match(/Matchday (\d)/)?.[1] ?? 0);
+    return mb - ma;
+  });
+}
+
 /** How far the tournament has progressed, from the manager's own run: the furthest
  * stage they have a completed result in, and how many group games they have played. */
 function progress(played: PlayedMatch[]): { furthest: number; groupGames: number } {
@@ -251,18 +319,127 @@ export function competitionState(
     .slice(0, 12)
     .map((a) => entry(a, avgOf(a), `Age ${ageOf(a.team, a.player)}, ${avgOf(a).toFixed(2)} avg`));
 
-  // group the revealed matches by stage for the results feed, newest stage first
-  const byStage = new Map<Stage, MatchResult[]>();
-  for (const m of revealed) {
-    const arr = byStage.get(m.stage) ?? [];
-    arr.push(m);
-    byStage.set(m.stage, arr);
-  }
-  const results: CompetitionResults[] = STAGE_ORDER.filter((s) => byStage.has(s))
-    .reverse()
-    .map((s) => ({ stage: s, label: STAGE_LABEL[s], matches: byStage.get(s)! }));
+  const results = groupResultsByRound(model, revealed);
 
   return { goldenBoot, goldenBall, goldenGlove, youngPlayer, results, matchesPlayed: revealed.length };
+}
+
+// --- read-only knockout bracket from the actual results -----------------------
+
+export interface BracketSlot {
+  match: number;
+  home?: string;
+  away?: string;
+  homeGoals?: number;
+  awayGoals?: number;
+  winner?: string;
+  pens?: [number, number];
+  played: boolean;
+}
+
+export interface BracketState {
+  slots: Record<number, BracketSlot>;
+  champion?: string;
+  runnerUp?: string;
+  third?: string;
+  fourth?: string;
+}
+
+const KO_STAGE_OF: Record<number, Stage> = (() => {
+  const m: Record<number, Stage> = {};
+  for (const s of R32) m[s.match] = "R32";
+  for (const r of R16) m[r.match] = "R16";
+  for (const r of QF) m[r.match] = "QF";
+  for (const r of SF) m[r.match] = "SF";
+  m[FINAL.match] = "final";
+  return m;
+})();
+
+/** Read the winner of a played knockout tie (shootout winner if it went to pens). */
+function resultWinner(m: MatchResult): string {
+  if (m.winner) return m.winner;
+  return m.homeGoals >= m.awayGoals ? m.home : m.away;
+}
+
+/**
+ * Rebuild the knockout bracket as a read-only board from the tournament's group
+ * standings and the actual knockout results. We seed the Round of 32 the official
+ * way, then fill each tie's participants and score by matching the real result
+ * between the two teams the bracket puts together.
+ */
+export function competitionBracket(result: TournamentResult, played: PlayedMatch[]): BracketState {
+  const playedByKey = new Map<string, MatchResult>();
+  for (const p of played) {
+    if (p.info.stage !== "group") playedByKey.set(`${p.info.stage}|${pairKey(p.result.home, p.result.away)}`, p.result);
+  }
+
+  // index every knockout tie by stage + team pair. The simulation is the base (so
+  // the bracket is always complete, even in the half the manager never reached), and
+  // the manager's real results overwrite the exact ties they actually played.
+  const koByKey = new Map<string, MatchResult>();
+  for (const m of result.matches) {
+    if (m.stage !== "group") koByKey.set(`${m.stage}|${pairKey(m.home, m.away)}`, m);
+  }
+  for (const [k, r] of playedByKey) koByKey.set(k, r);
+
+  // group orders for the R32 seeding, taken from the tournament's standings
+  const order: Record<string, string[]> = {};
+  const groupOfTeam = new Map<string, string>();
+  for (const [g, rows] of Object.entries(result.groupStandings)) {
+    order[g] = [...rows].sort((a, b) => a.rank - b.rank).map((r) => r.team);
+    for (const r of rows) groupOfTeam.set(r.team, g);
+  }
+  // the eight qualifying thirds, as the group letters seedR32 expects
+  const qualifiedGroups = result.bestThirds.map((team) => groupOfTeam.get(team) ?? "").filter(Boolean);
+  // seedR32's model argument is only read when the thirds list is absent; we always
+  // pass an explicit eight, so a lightweight stub is safe here
+  const seed = seedR32({ teams: [] } as unknown as Model, order, qualifiedGroups);
+
+  const picks: Record<number, string> = {};
+  const slots: Record<number, BracketSlot> = {};
+  const SLOT_ORDER = [
+    ...R32.map((s) => s.match),
+    ...R16.map((r) => r.match),
+    ...QF.map((r) => r.match),
+    ...SF.map((r) => r.match),
+    FINAL.match,
+  ];
+  for (const match of SLOT_ORDER) {
+    const { part } = resolveBracket(seed, picks);
+    const side: Side = part[match] ?? {};
+    const slot: BracketSlot = { match, home: side.home, away: side.away, played: false };
+    if (side.home && side.away) {
+      const stage = KO_STAGE_OF[match];
+      const res = koByKey.get(`${stage}|${pairKey(side.home, side.away)}`);
+      if (res) {
+        const homeIsHome = res.home === side.home;
+        slot.homeGoals = homeIsHome ? res.homeGoals : res.awayGoals;
+        slot.awayGoals = homeIsHome ? res.awayGoals : res.homeGoals;
+        slot.winner = resultWinner(res);
+        slot.played = true;
+        if (res.shootout) {
+          slot.pens = homeIsHome ? [res.shootout.home, res.shootout.away] : [res.shootout.away, res.shootout.home];
+        }
+        picks[match] = slot.winner;
+      }
+    }
+    slots[match] = slot;
+  }
+
+  // podium: prefer the walked final (which carries the manager's real result if they
+  // reached it), and fall back to the simulation's own champion when it does not.
+  const finalSlot = slots[FINAL.match];
+  const champion = finalSlot?.winner ?? result.champion;
+  const runnerUp = finalSlot?.winner
+    ? finalSlot.home === finalSlot.winner
+      ? finalSlot.away
+      : finalSlot.home
+    : result.runnerUp;
+  const tp = [...koByKey.values()].find((m) => m.stage === "third_place") ?? result.matches.find((m) => m.stage === "third_place");
+  const third = tp ? resultWinner(tp) : result.third;
+  const fourth = tp ? (third === tp.home ? tp.away : tp.home) : undefined;
+
+  return { slots, champion, runnerUp, third, fourth };
 }
 
 /** The context a newspaper needs to report on the wider tournament: the other

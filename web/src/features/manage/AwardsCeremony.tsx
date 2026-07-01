@@ -9,9 +9,11 @@ import { motion } from "framer-motion";
 import { runSingle, type Model } from "@weltmeister/sim";
 import type { PlayedMatch } from "../../store/store";
 import { type AwardWinner } from "../../lib/awards";
-import { competitionAwards } from "../../lib/competition";
+import { competitionAwards, competitionBracket } from "../../lib/competition";
 import { PlayerAvatar } from "../../components/PlayerAvatar";
+import { TeamBadge } from "../../components/TeamBadge";
 import { AwardTrophy } from "./AwardTrophy";
+import { ResultsBracket } from "./ResultsBracket";
 import { FORMATIONS } from "../../lib/manage";
 
 const RING: Record<string, string> = {
@@ -59,18 +61,47 @@ function AwardCard({
   );
 }
 
-export function AwardsCeremony({ model, seed, played }: { model: Model; seed: number; played: PlayedMatch[] }) {
+export function AwardsCeremony({
+  model,
+  seed,
+  played,
+  groupOf,
+}: {
+  model: Model;
+  seed: number;
+  played: PlayedMatch[];
+  groupOf: Map<string, string>;
+}) {
   // a full tournament on this seed (with the manager's real results spliced in) gives
   // every nation's scorers and ratings, so the awards span the whole competition
-  const awards = useMemo(() => {
+  const { awards, bracket } = useMemo(() => {
     const full = runSingle(model, seed);
-    return competitionAwards(model, seed, full, played);
+    return { awards: competitionAwards(model, seed, full, played), bracket: competitionBracket(full, played) };
   }, [model, seed, played]);
   if (played.length === 0) return null;
   const f = FORMATIONS["4-3-3"]!;
+  const hasKnockouts = Object.values(bracket.slots).some((s) => s.played);
 
   return (
     <div className="awards">
+      {(bracket.champion || bracket.third) && (
+        <div className="podium">
+          <div className="eyebrow">Final standings</div>
+          <div className="podium__row">
+            {bracket.runnerUp && <PodiumStep place={2} team={bracket.runnerUp} groupOf={groupOf} />}
+            {bracket.champion && <PodiumStep place={1} team={bracket.champion} groupOf={groupOf} />}
+            {bracket.third && <PodiumStep place={3} team={bracket.third} groupOf={groupOf} />}
+          </div>
+        </div>
+      )}
+
+      {hasKnockouts && (
+        <div className="awards__bracket">
+          <div className="eyebrow">The road to the final</div>
+          <ResultsBracket bracket={bracket} groupOf={groupOf} />
+        </div>
+      )}
+
       <div className="awards__head">
         <span className="eyebrow">Tournament awards · the whole World Cup</span>
         <h3 className="anton">The honours</h3>
@@ -110,6 +141,24 @@ export function AwardsCeremony({ model, seed, played }: { model: Model; seed: nu
         </div>
       )}
     </div>
+  );
+}
+
+function PodiumStep({ place, team, groupOf }: { place: 1 | 2 | 3; team: string; groupOf: Map<string, string> }) {
+  const label = place === 1 ? "Champions" : place === 2 ? "Runners-up" : "Third place";
+  return (
+    <motion.div
+      className={`podium__step podium__step--${place}`}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: place === 1 ? 0.1 : place === 2 ? 0.25 : 0.35, ease: [0.16, 1, 0.3, 1] }}
+    >
+      <div className="podium__medal mono">{place}</div>
+      <TeamBadge team={team} group={groupOf.get(team)} size={place === 1 ? 44 : 34} />
+      <div className="podium__team anton">{team}</div>
+      <div className="podium__label eyebrow">{label}</div>
+      <div className="podium__block" />
+    </motion.div>
   );
 }
 

@@ -7,12 +7,14 @@ import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { runSingle, type Model, type MatchResult } from "@weltmeister/sim";
 import type { CareerState } from "../../store/store";
-import { competitionState, type RaceEntry } from "../../lib/competition";
+import { competitionBracket, competitionState, type RaceEntry } from "../../lib/competition";
 import { PlayerAvatar } from "../../components/PlayerAvatar";
 import { TeamBadge } from "../../components/TeamBadge";
 import { teamCode } from "../../lib/teamCode";
+import { ResultsBracket } from "./ResultsBracket";
 
 type RaceKey = "goldenBoot" | "goldenBall" | "goldenGlove" | "youngPlayer";
+type HubView = "races" | "results" | "bracket";
 
 const RACES: { key: RaceKey; label: string; unit: string }[] = [
   { key: "goldenBoot", label: "Golden Boot", unit: "goals" },
@@ -33,11 +35,14 @@ export function TournamentHub({
   groupOf: Map<string, string>;
 }) {
   const [race, setRace] = useState<RaceKey>("goldenBoot");
-  const [view, setView] = useState<"races" | "results">("races");
+  const [view, setView] = useState<HubView>("races");
 
-  const state = useMemo(() => {
+  const { state, bracket, hasKnockouts } = useMemo(() => {
     const full = runSingle(model, seed);
-    return competitionState(model, seed, full, career.played);
+    const st = competitionState(model, seed, full, career.played);
+    const bk = competitionBracket(full, career.played);
+    const anyKo = Object.values(bk.slots).some((s) => s.played);
+    return { state: st, bracket: bk, hasKnockouts: anyKo };
   }, [model, seed, career.played]);
 
   if (career.played.length === 0) {
@@ -61,9 +66,16 @@ export function TournamentHub({
         <button className={`thub__seg ${view === "results" ? "is-on" : ""}`} onClick={() => setView("results")}>
           All results
         </button>
+        {hasKnockouts && (
+          <button className={`thub__seg ${view === "bracket" ? "is-on" : ""}`} onClick={() => setView("bracket")}>
+            Bracket
+          </button>
+        )}
       </div>
 
-      {view === "races" ? (
+      {view === "bracket" && hasKnockouts ? (
+        <ResultsBracket bracket={bracket} groupOf={groupOf} />
+      ) : view === "races" ? (
         <div className="thub__races">
           <div className="thub__tabs">
             {RACES.map((r) => (
@@ -95,7 +107,7 @@ export function TournamentHub({
       ) : (
         <div className="thub__results">
           {state.results.map((block) => (
-            <div key={block.stage} className="thub__resblock">
+            <div key={block.label} className="thub__resblock">
               <div className="eyebrow thub__resstage">{block.label}</div>
               <div className="thub__resgrid">
                 {block.matches.map((m, i) => (

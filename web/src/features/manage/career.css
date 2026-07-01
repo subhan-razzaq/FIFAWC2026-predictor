@@ -1,5 +1,61 @@
 /* ============================ living career layer ============================ */
 
+/* dedicated scout and news sections in the in-career nav */
+.manage-scout-page { max-width: 620px; }
+.manage-scout-page .eyebrow { margin-bottom: var(--s-2); }
+.newspage { display: flex; justify-content: center; }
+.newspage__paper { width: min(680px, 100%); background: #f3efe3; color: #1a1712; padding: var(--s-5) var(--s-6) var(--s-6); }
+.newspage__story { margin-top: var(--s-4); padding-top: var(--s-4); border-top: 1px solid #cabfa3; }
+.newspage__story:first-of-type { border-top: none; }
+.newspage .paper__masthead { font-family: var(--font-display); font-weight: 700; font-size: 2.4rem; text-align: center; }
+.newspage .paper__body { column-count: 2; column-gap: var(--s-4); }
+.newspage .paper__body p { break-inside: avoid; }
+@media (max-width: 640px) { .newspage .paper__body { column-count: 1; } }
+
+/* final-standings podium on the awards screen */
+.podium { margin-bottom: var(--s-5); }
+.podium__row { display: flex; align-items: flex-end; justify-content: center; gap: var(--s-3); margin-top: var(--s-3); }
+.podium__step { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 128px; }
+.podium__medal { width: 24px; height: 24px; display: grid; place-items: center; font-weight: 700; color: var(--ink); background: var(--steel); border-radius: 50%; }
+.podium__step--1 .podium__medal { background: var(--gold); }
+.podium__step--2 .podium__medal { background: #c7ccd6; }
+.podium__step--3 .podium__medal { background: #cd7f32; color: #fff; }
+.podium__team { font-size: var(--t-sm); text-align: center; }
+.podium__step--1 .podium__team { font-size: 1.1rem; color: var(--gold); }
+.podium__label { font-size: 10px; }
+.podium__block { width: 100%; margin-top: 4px; background: linear-gradient(180deg, var(--surface-hi), var(--surface)); border: var(--border-strong); }
+.podium__step--1 .podium__block { height: 64px; border-top: 3px solid var(--gold); }
+.podium__step--2 .podium__block { height: 44px; border-top: 3px solid #c7ccd6; }
+.podium__step--3 .podium__block { height: 30px; border-top: 3px solid #cd7f32; }
+.awards__bracket { margin-bottom: var(--s-5); }
+.awards__bracket .eyebrow { margin-bottom: var(--s-2); }
+
+/* read-only knockout bracket (tournament hub + awards screen) */
+.rbk-wrap { overflow-x: auto; padding-bottom: var(--s-2); }
+.rbk { display: flex; gap: var(--s-2); align-items: center; min-width: 900px; padding: var(--s-2) 0; }
+.rbk-col { display: flex; flex-direction: column; justify-content: space-around; flex: 1; min-width: 84px; }
+.rbk-col__label { font-size: 10px; color: var(--text-faint); text-align: center; letter-spacing: 0.14em; margin-bottom: var(--s-2); }
+.rbk-col__nodes { display: flex; flex-direction: column; justify-content: space-around; flex: 1; gap: var(--s-2); }
+.rbk-match { display: grid; gap: 2px; border: var(--border); background: var(--surface); }
+.rbk-match--tbd { min-height: 40px; border-style: dashed; opacity: 0.4; }
+.rbk-slot { display: flex; align-items: center; gap: 6px; padding: 4px 7px; font-size: var(--t-xs); border-bottom: 1px solid var(--line); }
+.rbk-slot:last-child { border-bottom: none; }
+.rbk-slot__code { font-weight: 700; letter-spacing: 0.02em; }
+.rbk-slot__score { margin-left: auto; font-weight: 700; color: var(--text-dim); }
+.rbk-slot__pens { color: var(--text-faint); font-size: 9px; margin-left: 2px; }
+.rbk-slot__tbd, .rbk-slot__code.rbk-slot__tbd { color: var(--text-faint); }
+.rbk-slot--tbd { color: var(--text-faint); }
+.rbk-slot.is-win { background: color-mix(in srgb, var(--mex-green) 15%, transparent); }
+.rbk-slot.is-win .rbk-slot__code { color: var(--text); }
+.rbk-slot.is-win .rbk-slot__score { color: var(--mex-green); }
+.rbk-slot.is-out { opacity: 0.5; }
+.rbk-match--big .rbk-slot { padding: 7px 9px; font-size: var(--t-sm); }
+.rbk-center { display: flex; flex-direction: column; align-items: center; gap: var(--s-2); flex: 0 0 auto; min-width: 128px; }
+.rbk-match--big { border-color: var(--gold); min-width: 120px; }
+.rbk-trophy { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.rbk-trophy__name { font-family: var(--font-display); font-weight: 700; font-size: var(--t-sm); text-transform: uppercase; }
+.rbk-trophy__name--pending { color: var(--text-faint); font-weight: 400; text-transform: none; }
+
 /* tournament hub: live award races and all results across the World Cup */
 .thub { margin-top: var(--s-2); }
 .thub--empty { padding: var(--s-5); border: var(--border); background: var(--surface); color: var(--text-faint); line-height: 1.6; }

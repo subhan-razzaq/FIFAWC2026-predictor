@@ -23,6 +23,7 @@ interface Props {
   model: Model;
   team: string;
   group?: string;
+  groupOf: Map<string, string>;
   reached: "group" | "R32" | "R16" | "QF" | "SF" | "third_place" | "final";
   isChampion: boolean;
   projection: TeamOdds | null;
@@ -30,7 +31,7 @@ interface Props {
   onRestart: () => void;
 }
 
-export function GradeScreen({ model, team, group, reached, isChampion, projection, played, onRestart }: Props) {
+export function GradeScreen({ model, team, group, groupOf, reached, isChampion, projection, played, onRestart }: Props) {
   const seedLabel = useStore((s) => s.seedLabel);
   const seed = useStore((s) => s.seed);
   const grade = gradeRun(reached, isChampion, projection ?? undefined);
@@ -128,7 +129,7 @@ export function GradeScreen({ model, team, group, reached, isChampion, projectio
         </motion.div>
       </motion.div>
 
-      <AwardsCeremony model={model} seed={seed} played={played} />
+      <AwardsCeremony model={model} seed={seed} played={played} groupOf={groupOf} />
 
       <TournamentStats model={model} team={team} played={played} />
 
