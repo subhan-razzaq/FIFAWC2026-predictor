@@ -22,19 +22,33 @@ interface Acc {
 
 const STAGE_ORDER: Stage[] = ["group", "R32", "R16", "QF", "SF", "third_place", "final"];
 
-/** Replace the simulated version of each match the manager actually played with the
- * real result, matched on the two teams and the stage. */
-function spliceManagerResults(matches: MatchResult[], played: PlayedMatch[]): MatchResult[] {
-  const byKey = new Map<string, MatchResult>();
-  for (const p of played) {
-    const a = [p.result.home, p.result.away].sort().join("|");
-    byKey.set(`${p.result.stage}|${a}`, p.result);
+/**
+ * Reconcile the simulated tournament with the manager's real run. The manager's own
+ * matches are the ones they actually played, in the order they played them; every
+ * other team's matches come from the simulation. Crucially, we drop the simulation's
+ * fictional versions of the manager team's games (which pair them with different
+ * opponents or scorelines than the user saw), so the feed never contradicts what the
+ * user actually did.
+ */
+function reconcileResults(matches: MatchResult[], played: PlayedMatch[], managerTeam: string): MatchResult[] {
+  const others = matches.filter((m) => m.home !== managerTeam && m.away !== managerTeam);
+  const mine = played.map((p) => p.result);
+  return [...others, ...mine];
+}
+
+/** The team the manager is running: the one nation that appears in every game they
+ * have played (their opponents all differ, they are the constant). */
+function managerTeamOf(played: PlayedMatch[]): string {
+  const first = played[0];
+  if (!first) return "";
+  if (played.length === 1) return first.info.isHome ? first.result.home : first.result.away;
+  const second = played[1]!;
+  const a = new Set([first.result.home, first.result.away]);
+  if (a.has(second.result.home) && a.has(second.result.away)) {
+    // both teams reappear (unlikely), fall back to the info flag
+    return first.info.isHome ? first.result.home : first.result.away;
   }
-  return matches.map((m) => {
-    const a = [m.home, m.away].sort().join("|");
-    const real = byKey.get(`${m.stage}|${a}`);
-    return real ?? m;
-  });
+  return a.has(second.result.home) ? second.result.home : second.result.away;
 }
 
 /** Accumulate per-player goals, assists, ratings and clean sheets across a set of
@@ -84,7 +98,8 @@ export function competitionAwards(
   result: TournamentResult,
   played: PlayedMatch[],
 ): Awards {
-  const matches = spliceManagerResults(result.matches, played);
+  const managerTeam = managerTeamOf(played);
+  const matches = reconcileResults(result.matches, played, managerTeam);
   const all = accumulate(model, seed, matches);
   const photoOf = (team: string, name: string) => model.squads[team]?.players.find((p) => p.name === name)?.photo ?? null;
   const ageOf = (team: string, name: string) => model.squads[team]?.players.find((p) => p.name === name)?.age;
@@ -180,7 +195,8 @@ export function competitionState(
   result: TournamentResult,
   played: PlayedMatch[],
 ): CompetitionState {
-  const matches = spliceManagerResults(result.matches, played);
+  const managerTeam = managerTeamOf(played);
+  const matches = reconcileResults(result.matches, played, managerTeam);
   const { furthest, groupGames } = progress(played);
 
   // decide which matches count as "played" so far
@@ -215,13 +231,13 @@ export function competitionState(
     .map((a) => entry(a, a.goals, `${a.goals} goal${a.goals === 1 ? "" : "s"}, ${a.assists} assist${a.assists === 1 ? "" : "s"}`));
 
   const goldenBall = all
-    .filter((a) => a.pos !== "GK" && a.apps >= 2)
+    .filter((a) => a.pos !== "GK")
     .sort((x, y) => ballScoreOf(y) - ballScoreOf(x))
     .slice(0, 12)
     .map((a) => entry(a, avgOf(a), `${avgOf(a).toFixed(2)} avg rating, ${a.goals}g ${a.assists}a`));
 
   const goldenGlove = all
-    .filter((a) => a.pos === "GK" && a.apps >= 1)
+    .filter((a) => a.pos === "GK")
     .sort((x, y) => y.cleanSheets - x.cleanSheets || avgOf(y) - avgOf(x))
     .slice(0, 12)
     .map((a) => entry(a, a.cleanSheets, `${a.cleanSheets} clean sheet${a.cleanSheets === 1 ? "" : "s"}`));
@@ -229,7 +245,7 @@ export function competitionState(
   const youngPlayer = all
     .filter((a) => {
       const age = ageOf(a.team, a.player);
-      return age !== undefined && age <= YOUNG_PLAYER_MAX_AGE && a.apps >= 2;
+      return age !== undefined && age <= YOUNG_PLAYER_MAX_AGE;
     })
     .sort((x, y) => ballScoreOf(y) - ballScoreOf(x))
     .slice(0, 12)
@@ -258,8 +274,10 @@ export function newsContext(
   played: PlayedMatch[],
   stage: Stage,
 ): { otherResults: MatchResult[]; topScorer?: { player: string; team: string; goals: number }; ratingOf: Map<string, number> } {
-  const matches = spliceManagerResults(result.matches, played);
-  const otherResults = matches.filter((m) => m.stage === stage);
+  const managerTeam = managerTeamOf(played);
+  const matches = reconcileResults(result.matches, played, managerTeam);
+  // only real other-team games at this stage, never the manager's own team
+  const otherResults = matches.filter((m) => m.stage === stage && m.home !== managerTeam && m.away !== managerTeam);
   // top scorer so far, across every revealed match up to the current stage
   const furthest = STAGE_ORDER.indexOf(stage);
   const done = matches.filter((m) => STAGE_ORDER.indexOf(m.stage) <= furthest);

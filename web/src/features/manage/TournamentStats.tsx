@@ -122,7 +122,7 @@ export function TournamentStats({ model, team, played }: { model: Model; team: s
 
   return (
     <div className="tstats">
-      <div className="eyebrow">Tournament stats · {team}</div>
+      <div className="eyebrow">My team stats · {team}</div>
       <div className="tstats-grid">
         {cells.map((c) => (
           <div key={c.label} className="tstats-cell flat-card">
@@ -132,7 +132,7 @@ export function TournamentStats({ model, team, played }: { model: Model; team: s
         ))}
       </div>
       <div className="tstats-boards">
-        <Leaders title="Golden Boot" unit="goal" rows={s.scorers} photoOf={photoOf} />
+        <Leaders title="Top scorers" unit="goal" rows={s.scorers} photoOf={photoOf} />
         <Leaders title="Top assists" unit="assist" rows={s.assisters} photoOf={photoOf} />
       </div>
     </div>
